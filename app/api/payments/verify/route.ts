@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         order.paymentStatus = 'paid';
         order.paymentId = paymentIntentId;
         await order.save();
-      } else if (paymentIntent.status === 'payment_failed') {
+      } else if (paymentIntent.status === 'canceled') {
         order.paymentStatus = 'failed';
         await order.save();
       }
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         if (paymentIntent.status === 'succeeded') {
           order.paymentStatus = 'paid';
           await order.save();
-        } else if (paymentIntent.status === 'payment_failed') {
+        } else if (paymentIntent.status === 'canceled') {
           order.paymentStatus = 'failed';
           await order.save();
         }

@@ -83,11 +83,11 @@ export default function AddressForm({
 
     // Helper function to get component by type
     const getComponent = (type: string) => {
-      return addressComponents.find(comp => comp.types.includes(type));
+      return addressComponents.find((comp: google.maps.places.AddressComponent) => comp.types.includes(type));
     };
 
     // Parse address components - check all types for each component
-    addressComponents.forEach((component) => {
+    addressComponents.forEach((component: google.maps.places.AddressComponent) => {
       const types = component.types;
       console.log(`Component: ${component.long_name}, Types:`, types);
 

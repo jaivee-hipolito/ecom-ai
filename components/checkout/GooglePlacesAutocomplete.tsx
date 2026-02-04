@@ -141,7 +141,7 @@ export default function GooglePlacesAutocomplete({
         // Log address components for debugging
         if (place.address_components) {
           console.log('Address components received:', place.address_components);
-          place.address_components.forEach((comp, index) => {
+          place.address_components.forEach((comp: google.maps.places.AddressComponent, index: number) => {
             console.log(`Component ${index}:`, {
               long_name: comp.long_name,
               short_name: comp.short_name,
@@ -175,7 +175,7 @@ export default function GooglePlacesAutocomplete({
     return () => {
       // Cleanup autocomplete listeners
       if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        (window.google.maps as any).event.clearInstanceListeners(autocompleteRef.current);
       }
     };
   }, [isScriptLoaded]); // Only depend on script loading, callbacks are accessed via refs

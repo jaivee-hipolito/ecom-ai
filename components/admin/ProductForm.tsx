@@ -181,7 +181,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price as string),
-          stock: parseInt(formData.stock as string),
+          stock: typeof formData.stock === 'string' ? parseInt(formData.stock) : formData.stock,
           images,
           coverImage: finalCoverImage,
           attributes: Object.keys(attributes).length > 0 ? attributes : undefined,

@@ -61,7 +61,7 @@ export async function GET(
       ...product,
       _id: product._id.toString(),
       category: categoryName, // Replace ObjectId with category name
-      categoryId: typeof product.category === 'object' ? product.category.toString() : product.category, // Keep original ID if needed
+      categoryId: typeof product.category === 'object' && product.category !== null ? String(product.category) : String(product.category || ''), // Keep original ID if needed
       categoryAttributes, // Include category attributes for rendering
       variants: variants.map((v: any) => ({
         _id: v._id.toString(),

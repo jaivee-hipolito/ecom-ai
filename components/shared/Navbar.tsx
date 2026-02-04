@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { signOut } from 'next-auth/react';
@@ -54,7 +55,7 @@ const getCategoryIcon = (categoryName: string) => {
   return FiPackage;
 };
 
-export default function Navbar() {
+function NavbarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -855,5 +856,21 @@ export default function Navbar() {
       </div>
     </nav>
     </>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex-shrink-0">Loading...</div>
+          </div>
+        </div>
+      </nav>
+    }>
+      <NavbarContent />
+    </Suspense>
   );
 }

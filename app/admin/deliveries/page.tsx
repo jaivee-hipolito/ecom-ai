@@ -51,6 +51,7 @@ interface DeliveriesResponse {
   deliveries: Delivery[];
   total: number;
   totalOrders: number;
+  error?: string;
 }
 
 export default function AdminDeliveriesPage() {

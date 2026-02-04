@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiFilter, FiX, FiGrid, FiList, FiSearch } from 'react-icons/fi';
@@ -19,7 +19,7 @@ interface Category {
   slug?: string;
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -501,6 +501,22 @@ export default function ProductsPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loading size="lg" text="Loading products..." />
+        </div>
+        <Footer />
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }
 

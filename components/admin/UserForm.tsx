@@ -26,7 +26,9 @@ interface UserFormProps {
 
 export default function UserForm({ onSuccess }: UserFormProps) {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
+    contactNumber: '',
     email: '',
     password: '',
     role: 'customer',

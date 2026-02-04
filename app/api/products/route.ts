@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch all categories at once for better performance
     const categories = await Category.find({
-      _id: { $in: categoryIds.map((id) => new mongoose.Types.ObjectId(id)) },
+      _id: { $in: categoryIds.map((id) => new mongoose.Types.ObjectId(id)) } as any,
     })
       .select('_id name')
       .lean();

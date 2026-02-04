@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiZap, FiClock, FiSearch, FiArrowLeft, FiEye } from 'react-icons/fi';
@@ -15,7 +15,7 @@ import ProductImage from '@/components/products/ProductImage';
 import ProductRating from '@/components/products/ProductRating';
 import QuickView from '@/components/products/QuickView';
 
-export default function FlashSalesPage() {
+function FlashSalesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -523,6 +523,22 @@ export default function FlashSalesPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function FlashSalesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loading size="lg" text="Loading flash sales..." />
+        </div>
+        <Footer />
+      </div>
+    }>
+      <FlashSalesContent />
+    </Suspense>
   );
 }
 

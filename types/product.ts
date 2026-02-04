@@ -52,4 +52,5 @@ export interface ProductListResponse {
   page: number;
   limit: number;
   totalPages: number;
+  error?: string;
 }

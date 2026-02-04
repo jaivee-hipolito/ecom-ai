@@ -35,6 +35,7 @@ interface UserListResponse {
   page: number;
   limit: number;
   totalPages: number;
+  error?: string;
 }
 
 interface UserTableProps {

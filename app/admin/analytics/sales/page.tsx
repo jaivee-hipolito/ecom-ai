@@ -572,7 +572,7 @@ export default function SalesAnalyticsPage() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => {
-                      if (percent < 0.05) return ''; // Hide labels for slices smaller than 5%
+                      if (!percent || percent < 0.05) return ''; // Hide labels for slices smaller than 5%
                       return `${name}: ${(percent * 100).toFixed(0)}%`;
                     }}
                     outerRadius={90}

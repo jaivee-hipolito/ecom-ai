@@ -10,7 +10,7 @@ export function getStripe(): Stripe {
 
   if (!stripeInstance) {
     stripeInstance = new Stripe(STRIPE_CONFIG.secretKey, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2025-11-17.clover' as any,
       typescript: true,
     });
   }

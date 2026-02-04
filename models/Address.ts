@@ -7,7 +7,7 @@ const AddressSchema = new Schema<IAddress>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
+    } as any,
     fullName: {
       type: String,
       required: [true, 'Full name is required'],

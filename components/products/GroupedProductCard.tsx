@@ -90,6 +90,10 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
   const mockProduct: IProduct = {
     _id: selectedVariant?.productId,
     name: groupedProduct.name,
+    description: '',
+    price: displayPrice,
+    category: '',
+    stock: displayStock,
     coverImage: displayImage,
     images: selectedVariant?.images || [],
   };
@@ -276,7 +280,7 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
                         }
                         return attrValue === value;
                       });
-                      const isAvailable = variantWithValue?.stock > 0;
+                      const isAvailable = (variantWithValue?.stock ?? 0) > 0;
 
                       if (isColor && typeof value === 'string') {
                         return (

@@ -101,7 +101,7 @@ export default function WishlistItem({ product }: WishlistItemProps) {
       (product.images && product.images.length > 0
         ? typeof product.images[0] === 'string'
           ? product.images[0]
-          : product.images[0].url
+          : (product.images[0] as any)?.url || product.images[0]
         : undefined);
 
     // Trigger animation

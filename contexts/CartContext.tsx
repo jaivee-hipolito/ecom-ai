@@ -169,8 +169,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, cart, fetchCart]);
 
-  const refreshCart = useCallback(() => {
-    fetchCart();
+  const refreshCart = useCallback(async () => {
+    await fetchCart();
   }, [fetchCart]);
 
   const getCartSummary = useCallback(() => {

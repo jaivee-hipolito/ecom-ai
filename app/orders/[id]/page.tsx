@@ -8,7 +8,8 @@ import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock } fr
 import Loading from '@/components/ui/Loading';
 import Badge from '@/components/ui/Badge';
 import ProductImage from '@/components/products/ProductImage';
-import { IOrder, IProduct } from '@/types/order';
+import { IOrder } from '@/types/order';
+import { IProduct } from '@/types/product';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import OrderTracking from '@/components/orders/OrderTracking';

@@ -45,7 +45,7 @@ export async function GET(
               name: (order.user as any).name,
               email: (order.user as any).email,
             }
-          : order.user.toString(),
+          : String(order.user || ''),
         createdAt: order.createdAt?.toISOString(),
         updatedAt: order.updatedAt?.toISOString(),
         items: order.items.map((item: any) => ({
@@ -154,7 +154,7 @@ export async function PUT(
               name: (order.user as any).name,
               email: (order.user as any).email,
             }
-          : order.user.toString(),
+          : String(order.user || ''),
         createdAt: order.createdAt?.toISOString(),
         updatedAt: order.updatedAt?.toISOString(),
         items: order.items.map((item: any) => ({

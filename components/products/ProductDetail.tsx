@@ -313,7 +313,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       displayProduct.images && displayProduct.images.length > 0
         ? typeof displayProduct.images[0] === 'string'
           ? displayProduct.images[0]
-          : displayProduct.images[0].url
+          : (displayProduct.images[0] as any)?.url || displayProduct.images[0]
         : undefined;
 
     // Trigger animation
@@ -583,7 +583,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                               }
                               return attrValue === value;
                             });
-                            const isAvailable = variantWithValue?.stock > 0;
+                            const isAvailable = (variantWithValue?.stock ?? 0) > 0;
 
                             if (isColor && typeof value === 'string') {
                               return (

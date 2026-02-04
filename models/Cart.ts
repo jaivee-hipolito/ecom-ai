@@ -25,7 +25,7 @@ const CartSchema = new Schema<ICart>(
       ref: 'User',
       required: true,
       unique: true,
-    },
+    } as any,
     items: {
       type: [CartItemSchema],
       default: [],
