@@ -12,6 +12,7 @@ import ProductImage from '@/components/products/ProductImage';
 import { IProduct } from '@/types/product';
 import { motion } from 'framer-motion';
 import { FiPackage, FiShoppingBag, FiArrowLeft } from 'react-icons/fi';
+import { formatCurrency } from '@/utils/currency';
 
 export default function OrdersPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -307,7 +308,7 @@ export default function OrdersPage() {
                           <h4 className="text-base font-semibold text-[#050b2c]">{item.name}</h4>
                           <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                           <p className="text-base font-bold bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent mt-1">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {formatCurrency(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -330,7 +331,7 @@ export default function OrdersPage() {
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Total Amount</p>
                       <p className="text-2xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent">
-                        ${order.totalAmount.toFixed(2)}
+                        {formatCurrency(order.totalAmount)}
                       </p>
                     </div>
                     <Link href={`/orders/${order._id}`}>

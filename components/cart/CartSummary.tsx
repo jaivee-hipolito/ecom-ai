@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
@@ -7,38 +8,75 @@ import { useRouter } from 'next/navigation';
 import { ShippingAddress } from '@/types/address';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiShoppingBag, FiShield, FiTruck } from 'react-icons/fi';
+import { formatCurrency } from '@/utils/currency';
 
 interface CartSummaryProps {
   selectedAddress?: ShippingAddress | null;
+  selectedItemIds?: Set<string>;
 }
 
-// Format currency with commas
-const formatCurrency = (amount: number): string => {
-  return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
-
-export default function CartSummary({ selectedAddress }: CartSummaryProps) {
-  const { getCartSummary } = useCart();
+export default function CartSummary({ selectedAddress, selectedItemIds }: CartSummaryProps) {
+  const { cart, getCartSummary } = useCart();
   const router = useRouter();
-  const summary = getCartSummary();
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  
+  // Calculate summary based on selected items only
+  const calculateSelectedSummary = () => {
+    if (!cart || !cart.items) {
+      return { totalItems: 0, totalPrice: 0 };
+    }
+
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    cart.items.forEach((item) => {
+      const productId = typeof item.product === 'string' ? item.product : item.product?._id || '';
+      
+      // Only include selected items
+      if (selectedItemIds && !selectedItemIds.has(productId)) {
+        return;
+      }
+
+      const product = typeof item.product === 'object' ? item.product : ({} as any);
+      const price = product.price || 0;
+      const quantity = item.quantity || 0;
+
+      totalItems += quantity;
+      totalPrice += price * quantity;
+    });
+
+    return { totalItems, totalPrice };
+  };
+
+  // Use selected items summary if selectedItemIds is provided, otherwise use full cart summary
+  const summary = selectedItemIds !== undefined 
+    ? calculateSelectedSummary() 
+    : getCartSummary();
 
   const handleProceedToCheckout = () => {
+    const params = new URLSearchParams();
+    
+    // Add selected item IDs to URL params
+    if (selectedItemIds && selectedItemIds.size > 0) {
+      selectedItemIds.forEach((id) => {
+        params.append('items', id);
+      });
+    }
+    
     if (selectedAddress) {
       // Encode address as URL params
-      const params = new URLSearchParams({
-        addressId: 'selected',
-        fullName: selectedAddress.fullName,
-        address: selectedAddress.address,
-        city: selectedAddress.city,
-        state: selectedAddress.state,
-        zipCode: selectedAddress.zipCode,
-        country: selectedAddress.country,
-        phone: selectedAddress.phone,
-      });
-      router.push(`/checkout?${params.toString()}`);
-    } else {
-      router.push('/checkout');
+      params.set('addressId', 'selected');
+      params.set('fullName', selectedAddress.fullName);
+      params.set('address', selectedAddress.address);
+      params.set('city', selectedAddress.city);
+      params.set('state', selectedAddress.state);
+      params.set('zipCode', selectedAddress.zipCode);
+      params.set('country', selectedAddress.country);
+      params.set('phone', selectedAddress.phone);
     }
+    
+    const queryString = params.toString();
+    router.push(queryString ? `/checkout?${queryString}` : '/checkout');
   };
 
   return (
@@ -60,15 +98,21 @@ export default function CartSummary({ selectedAddress }: CartSummaryProps) {
       <div className="space-y-4 mb-6">
         <div className="flex justify-between items-center text-white/90">
           <span className="text-sm sm:text-base">Subtotal ({summary.totalItems} {summary.totalItems === 1 ? 'item' : 'items'})</span>
-          <span className="font-semibold text-lg">${formatCurrency(summary.totalPrice)}</span>
+          <span className="font-semibold text-lg">{formatCurrency(summary.totalPrice)}</span>
         </div>
         
-        <div className="flex justify-between items-center text-white/70">
-          <span className="text-sm sm:text-base flex items-center gap-2">
-            <FiTruck className="w-4 h-4" />
-            Shipping
+        <div className="text-sm sm:text-base text-white/70 italic">
+          * Tax included
+        </div>
+        
+        <div className="flex flex-col gap-1 text-white/70">
+          <div className="flex items-center gap-2">
+            <FiTruck className="w-4 h-4 flex-shrink-0 text-[#ffa509]" />
+            <span className="text-sm sm:text-base font-medium">Shipping</span>
+          </div>
+          <span className="text-xs sm:text-sm text-white/60 pl-6">
+            Calculated at checkout
           </span>
-          <span className="text-sm">Calculated at checkout</span>
         </div>
         
         <div className="border-t border-white/20 pt-4 mt-4">
@@ -79,7 +123,7 @@ export default function CartSummary({ selectedAddress }: CartSummaryProps) {
               animate={{ scale: 1 }}
               className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent"
             >
-              ${formatCurrency(summary.totalPrice)}
+              {formatCurrency(summary.totalPrice)}
             </motion.span>
           </div>
         </div>
@@ -93,8 +137,33 @@ export default function CartSummary({ selectedAddress }: CartSummaryProps) {
         </div>
         <div className="flex items-center gap-2 text-white/70 text-xs">
           <FiTruck className="w-4 h-4 text-[#ffa509]" />
-          <span>Free Shipping</span>
+          <span>Free Shipping around Victoria</span>
         </div>
+      </div>
+
+      {/* Terms & Conditions Checkbox */}
+      <div className="mb-6">
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="mt-1 w-5 h-5 rounded border-2 border-white/30 bg-transparent text-[#ffa509] focus:ring-2 focus:ring-[#ffa509] focus:ring-offset-2 focus:ring-offset-[#050b2c] cursor-pointer accent-[#ffa509]"
+            required
+          />
+          <span className="text-sm sm:text-base text-white/80 group-hover:text-white transition-colors">
+            I have read and agree to the{' '}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="text-[#ffa509] hover:text-[#ff8c00] underline font-medium transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Terms & Conditions
+            </Link>
+            {' '}of Teezee
+          </span>
+        </label>
       </div>
 
       {/* Checkout Button */}
@@ -104,7 +173,7 @@ export default function CartSummary({ selectedAddress }: CartSummaryProps) {
       >
         <button
           onClick={handleProceedToCheckout}
-          disabled={summary.totalItems === 0 || !selectedAddress}
+          disabled={summary.totalItems === 0 || !selectedAddress || (selectedItemIds !== undefined && selectedItemIds.size === 0) || !termsAccepted}
           className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <span>Proceed to Checkout</span>
@@ -112,13 +181,15 @@ export default function CartSummary({ selectedAddress }: CartSummaryProps) {
         </button>
       </motion.div>
       
-      {!selectedAddress && (
+      {(!selectedAddress || !termsAccepted) && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-xs text-[#ffa509] mt-3 text-center font-medium"
         >
-          ⚠️ Please select a shipping address above
+          {!selectedAddress && '⚠️ Please select a shipping address above'}
+          {!selectedAddress && !termsAccepted && ' • '}
+          {!termsAccepted && '⚠️ Please accept the Terms & Conditions'}
         </motion.p>
       )}
 

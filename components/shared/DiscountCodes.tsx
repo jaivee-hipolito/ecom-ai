@@ -16,29 +16,29 @@ interface DiscountCode {
 
 const discountCodes: DiscountCode[] = [
   {
-    code: 'SAVE20',
+    code: 'SAVE10',
     discount: 10,
     description: 'Get $10 off on all products',
-    validUntil: '2025-12-31',
+    validUntil: '2026-12-30',
     minPurchase: 50,
     icon: 'tag',
     isFixedAmount: true,
   },
   {
-    code: 'FLASH30',
+    code: 'FLASH10',
     discount: 10,
     description: 'Flash sale! $10 off selected items',
-    validUntil: '2025-12-25',
+    validUntil: '2026-12-30',
     minPurchase: 100,
     icon: 'zap',
     isFixedAmount: true,
   },
   {
-    code: 'NEWUSER15',
-    discount: 15,
-    description: 'New customers get $15 off',
-    validUntil: '2025-12-31',
-    minPurchase: 30,
+    code: 'NEWUSER10',
+    discount: 10,
+    description: 'New customers get $10 off',
+    validUntil: '2026-12-30',
+    minPurchase: 50,
     icon: 'gift',
     isFixedAmount: true,
   },
@@ -238,13 +238,6 @@ export default function DiscountCodes() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-8 sm:mt-12"
         >
-          <motion.p
-            className="text-white/80 text-sm sm:text-base mb-4"
-            animate={{ opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            💡 Tip: Use multiple codes for maximum savings!
-          </motion.p>
           <motion.a
             href="/products"
             whileHover={{ scale: 1.05 }}

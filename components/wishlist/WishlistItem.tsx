@@ -9,8 +9,8 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCartAnimation } from '@/contexts/CartAnimationContext';
 import Button from '@/components/ui/Button';
-import ProductRating from '@/components/products/ProductRating';
 import ColorSwatch from '@/components/products/ColorSwatch';
+import { formatCurrency } from '@/utils/currency';
 
 interface WishlistItemProps {
   product: IProduct;
@@ -279,13 +279,9 @@ export default function WishlistItem({ product }: WishlistItemProps) {
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-3">
-              <ProductRating
-                rating={product.rating || 0}
-                numReviews={product.numReviews || 0}
-              />
+            <div className="flex items-center justify-end mb-3">
               <span className="text-xl font-bold text-blue-600">
-                ${product.price.toFixed(2)}
+                {formatCurrency(product.price)}
               </span>
             </div>
 

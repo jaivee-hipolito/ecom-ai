@@ -69,12 +69,30 @@ export async function POST(request: NextRequest) {
           order.paymentStatus = 'failed';
           await order.save();
         }
+      } else {
+        // Order not found - log for debugging
+        console.warn(`Order not found for payment intent ${paymentIntentId} and user ${userId}`);
+        // Try to find by paymentIntentId in metadata or other fields
+        order = await Order.findOne({
+          'paymentId': paymentIntentId,
+        }).populate('items.product');
+        
+        if (!order) {
+          console.error(`No order found for payment intent ${paymentIntentId}. Order should have been created before redirect.`);
+        }
       }
     }
 
     return NextResponse.json({
       success: paymentIntent.status === 'succeeded',
       paymentStatus: paymentIntent.status,
+      paymentIntent: {
+        id: paymentIntent.id,
+        amount: paymentIntent.amount, // Amount in cents
+        currency: paymentIntent.currency,
+        status: paymentIntent.status,
+        payment_method_types: paymentIntent.payment_method_types,
+      },
       order: order
         ? {
             ...order.toObject(),

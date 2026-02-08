@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiHome,
@@ -25,6 +26,7 @@ import {
   FiDownload,
   FiEye,
   FiTruck,
+  FiLogOut,
 } from 'react-icons/fi';
 
 interface NavItem {
@@ -49,6 +51,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
   const { user } = useAuth();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  // Orders section is collapsed by default - only Overview, Products, and Analytics are expanded
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(['Overview', 'Products', 'Analytics'])
   );
@@ -116,6 +119,11 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
       newExpanded.add(sectionTitle);
     }
     setExpandedSections(newExpanded);
+  };
+
+  const handleSignOut = () => {
+    setIsMobileOpen(false);
+    signOut({ callbackUrl: '/' });
   };
 
   const navSections: NavSection[] = [
@@ -268,7 +276,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
           animate={{ y: 0, opacity: 1 }}
           className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#050b2c] to-[#0a1a4a] border-b border-[#ffa509]/20 px-4 py-3 flex items-center justify-between shadow-lg"
         >
-          <Link href="/admin/dashboard" className="text-xl font-bold text-white flex items-center gap-2">
+          <Link href="/admin/dashboard" className="text-xl font-bold text-white flex items-center gap-2 cursor-pointer">
             <svg className="w-5 h-5 text-[#ffa509]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
@@ -278,7 +286,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="p-2 rounded-lg text-white hover:bg-[#ffa509]/20 transition-colors"
+            className="p-2 rounded-lg text-white hover:bg-[#ffa509]/20 transition-colors cursor-pointer"
           >
             {isMobileOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
           </motion.button>
@@ -310,7 +318,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Link href="/admin/dashboard" className="text-xl font-bold text-white flex items-center gap-2 group">
+                  <Link href="/admin/dashboard" className="text-xl font-bold text-white flex items-center gap-2 group cursor-pointer">
                     <svg className="w-6 h-6 text-[#ffa509] group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
@@ -339,7 +347,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 rounded-lg text-[#ffa509] hover:bg-[#ffa509]/20 transition-colors relative z-10"
+              className="p-2 rounded-lg text-[#ffa509] hover:bg-[#ffa509]/20 transition-colors relative z-10 cursor-pointer"
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? <FiChevronRight className="w-5 h-5" /> : <FiChevronDown className="w-5 h-5 rotate-90" />}
@@ -413,7 +421,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                         whileHover={{ x: 5 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => toggleSection(section.title)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-[#ffa509] uppercase tracking-wider hover:text-[#ffb833] transition-colors"
+                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-[#ffa509] uppercase tracking-wider hover:text-[#ffb833] transition-colors cursor-pointer"
                       >
                         <span>{section.title}</span>
                         <motion.div
@@ -434,7 +442,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                 <Link
                                   href={item.href}
                                   onClick={() => setIsMobileOpen(false)}
-                                  className={`flex items-center justify-center px-3 py-3 text-sm font-medium rounded-xl transition-all ${
+                                  className={`flex items-center justify-center px-3 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                     active
                                       ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
                                       : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
@@ -465,7 +473,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                     <Link
                                       href={item.href}
                                       onClick={() => setIsMobileOpen(false)}
-                                      className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                                      className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                         active
                                           ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
                                           : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
@@ -520,7 +528,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                     e.preventDefault();
                                     toggleSection(item.name);
                                   }}
-                                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                     active
                                       ? 'bg-[#ffa509]/20 text-white border border-[#ffa509]/30'
                                       : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
@@ -553,7 +561,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                               <Link
                                                 href={subItem.href}
                                                 onClick={() => setIsMobileOpen(false)}
-                                                className={`flex items-center px-4 py-2 text-sm font-medium rounded-xl transition-all ${
+                                                className={`flex items-center px-4 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                                   subActive
                                                     ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
                                                     : 'text-white/60 hover:bg-[#ffa509]/10 hover:text-white'
@@ -579,7 +587,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                       <Link
                                         href={subItem.href}
                                         onClick={() => setIsMobileOpen(false)}
-                                        className={`flex items-center justify-center px-3 py-3 text-sm font-medium rounded-xl transition-all ${
+                                        className={`flex items-center justify-center px-3 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                           subActive
                                             ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
                                             : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
@@ -610,7 +618,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                             <Link
                               href={item.href}
                               onClick={() => setIsMobileOpen(false)}
-                              className={`flex items-center ${
+                              className={`flex items-center cursor-pointer ${
                                 isCollapsed
                                   ? 'justify-center px-3 py-3'
                                   : 'px-4 py-2.5'
@@ -632,6 +640,26 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                 </motion.div>
               );
             })}
+
+            {/* Sign Out Button - Mobile/iPad Only */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: navSections.length * 0.05 }}
+              className="lg:hidden mt-4 pt-4 border-t border-[#ffa509]/20"
+            >
+              <motion.button
+                whileHover={{ x: 5, scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSignOut}
+                className="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all bg-gradient-to-r from-[#ffa509]/20 to-[#ffb833]/20 text-white/90 hover:text-white hover:from-[#ffa509]/30 hover:to-[#ffb833]/30 border border-[#ffa509]/30 hover:border-[#ffa509]/50 shadow-lg shadow-[#ffa509]/10 hover:shadow-[#ffa509]/20 cursor-pointer"
+              >
+                <span className="mr-3">
+                  <FiLogOut className="w-5 h-5 text-[#ffa509]" />
+                </span>
+                <span>Sign Out</span>
+              </motion.button>
+            </motion.div>
           </nav>
 
           {/* Footer */}
@@ -639,7 +667,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
             <motion.div whileHover={{ x: -5 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/"
-                className={`flex items-center text-sm text-white/70 hover:text-[#ffa509] transition-colors ${
+                className={`flex items-center text-sm text-white/70 hover:text-[#ffa509] transition-colors cursor-pointer ${
                   isCollapsed ? 'justify-center' : ''
                 }`}
                 title={isCollapsed ? 'Back to Store' : undefined}

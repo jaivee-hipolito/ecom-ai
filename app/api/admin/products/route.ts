@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
       ? parseInt(searchParams.get('maxStock')!)
       : undefined;
     const stockStatus = searchParams.get('stockStatus') || undefined;
-    const featured = searchParams.get('featured') === 'true' ? true : undefined;
+    const featured = searchParams.get('featured') === 'true' ? true : searchParams.get('featured') === 'false' ? false : undefined;
+    const isFlashSale = searchParams.get('isFlashSale') === 'true' ? true : searchParams.get('isFlashSale') === 'false' ? false : undefined;
     const search = searchParams.get('search') || undefined;
 
     // Build filter query
@@ -57,6 +58,15 @@ export async function GET(request: NextRequest) {
       if (maxStock !== undefined) filter.stock.$lte = maxStock;
     }
     if (featured !== undefined) filter.featured = featured;
+    if (isFlashSale !== undefined) {
+      if (isFlashSale === true) {
+        // Flash Sale: must be explicitly true
+        filter.isFlashSale = true;
+      } else {
+        // Not Flash Sale: match anything that's not true (false, null, undefined, or doesn't exist)
+        filter.isFlashSale = { $ne: true };
+      }
+    }
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -109,7 +119,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { name, description, price, category, images, coverImage, stock, featured, attributes } = body;
+    const { name, description, price, category, images, coverImage, stock, featured, attributes, isFlashSale, flashSaleDiscount, flashSaleDiscountType } = body;
 
     // Validation
     if (!name || !description || !price || !category) {
@@ -141,6 +151,9 @@ export async function POST(request: NextRequest) {
           coverImage: finalCoverImage,
           stock: parseInt(stock) || 0,
           featured: featured || false,
+          isFlashSale: isFlashSale || false,
+          flashSaleDiscount: isFlashSale ? (flashSaleDiscount || 0) : 0,
+          flashSaleDiscountType: isFlashSale ? (flashSaleDiscountType || 'percentage') : 'percentage',
           attributes: attributes || {},
         });
 

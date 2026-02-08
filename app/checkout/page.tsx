@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import Loading from '@/components/ui/Loading';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -29,4 +29,16 @@ export default function CheckoutPage() {
   }
 
   return <CheckoutForm />;
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <Loading />
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
+  );
 }

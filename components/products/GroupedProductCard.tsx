@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { GroupedProduct, findMatchingVariant } from '@/utils/productGrouping';
 import ProductImage from './ProductImage';
-import ProductRating from './ProductRating';
 import ColorSwatch from './ColorSwatch';
 import Button from '@/components/ui/Button';
 import { useCart } from '@/hooks/useCart';
@@ -13,6 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCartAnimation } from '@/contexts/CartAnimationContext';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { IProduct } from '@/types/product';
+import { FiZap } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { formatCurrency } from '@/utils/currency';
 
 interface GroupedProductCardProps {
   groupedProduct: GroupedProduct;
@@ -44,6 +46,73 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
   const displayStock = selectedVariant?.stock || 0;
   const [availableStock, setAvailableStock] = useState<number>(displayStock);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(true);
+  const [productData, setProductData] = useState<IProduct | null>(null);
+
+  // Fetch product data to check for flash sale
+  useEffect(() => {
+    const fetchProductData = async () => {
+      if (!selectedVariant?.productId) {
+        setProductData(null);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/products/${selectedVariant.productId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setProductData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch product data:', error);
+        setProductData(null);
+      }
+    };
+
+    fetchProductData();
+  }, [selectedVariant?.productId]);
+
+  // Calculate flash sale discount and prices from product data
+  // New logic: Displayed price = basePrice, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: IProduct | null, basePrice: number) => {
+    if (!product || !product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discountPercentage: 0,
+        displayedPrice: basePrice,
+        crossedOutPrice: basePrice,
+        hasDiscount: false,
+      };
+    }
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
+    
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the basePrice
+    displayedPrice = basePrice;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
+    }
+
+    return {
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
+  };
+
+  const flashSaleData = calculateFlashSaleData(productData, displayPrice);
+  const hasFlashSaleDiscount = flashSaleData.hasDiscount;
 
   // Fetch product availability considering paid orders
   useEffect(() => {
@@ -189,8 +258,9 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
 
   // Get link to selected variant's detail page (or first variant if none selected)
   const productLink = useMemo(() => {
-    return `/products/${selectedVariant?.productId || groupedProduct.variants[0].productId}`;
-  }, [selectedVariant?.productId, groupedProduct.variants]);
+    const baseLink = `/products/${selectedVariant?.productId || groupedProduct.variants[0].productId}`;
+    return hasFlashSaleDiscount ? `${baseLink}?flashSale=true` : baseLink;
+  }, [selectedVariant?.productId, groupedProduct.variants, hasFlashSaleDiscount]);
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // Allow attribute selection buttons to work without navigating
@@ -219,10 +289,48 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
               </span>
             </div>
           )}
+          
+          {/* Flash Sale Badge */}
+          {hasFlashSaleDiscount && (
+            <div className="absolute top-2 left-2 z-30">
+              <motion.div
+                initial={{ scale: 0, rotate: -45 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-1"
+              >
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                >
+                  <FiZap className="w-3 h-3" />
+                </motion.div>
+                <span className="text-[9px] font-black tracking-wide">FLASH</span>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Discount Badge */}
+          {hasFlashSaleDiscount && (
+            <div className="absolute top-2 right-2 z-30">
+              <motion.div
+                initial={{ scale: 0, rotate: 180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.3, type: 'spring' }}
+                className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white"
+              >
+                <div className="text-center">
+                  <div className="text-[10px] font-black leading-tight">-{flashSaleData.discountPercentage}%</div>
+                  <div className="text-[6px] font-bold">OFF</div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
           <button
             onClick={handleToggleWishlist}
             disabled={isTogglingWishlist}
-            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors z-10 cursor-pointer disabled:cursor-not-allowed"
+            className={`absolute ${hasFlashSaleDiscount ? 'top-14' : 'top-2'} right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors z-10 cursor-pointer disabled:cursor-not-allowed`}
             aria-label={selectedVariantInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
             title={selectedVariantInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
@@ -326,20 +434,29 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-3">
-          <ProductRating
-            rating={groupedProduct.rating || 0}
-            numReviews={groupedProduct.numReviews}
-          />
+        <div className="flex items-center justify-end mb-3">
           <div className="text-right">
-            {groupedProduct.variants.length > 1 && displayPrice !== groupedProduct.basePrice && (
-              <div className="text-xs text-gray-500 line-through">
-                ${groupedProduct.basePrice.toFixed(2)}
-              </div>
+            {hasFlashSaleDiscount ? (
+              <>
+                <span className="text-lg font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                  {formatCurrency(flashSaleData.displayedPrice)}
+                </span>
+                <div className="text-xs text-gray-500 line-through">
+                  {formatCurrency(flashSaleData.crossedOutPrice)}
+                </div>
+              </>
+            ) : (
+              <>
+                {groupedProduct.variants.length > 1 && displayPrice !== groupedProduct.basePrice && (
+                  <div className="text-xs text-gray-500 line-through">
+                    {formatCurrency(groupedProduct.basePrice)}
+                  </div>
+                )}
+                <span className="text-lg font-bold text-blue-600">
+                  {formatCurrency(displayPrice)}
+                </span>
+              </>
             )}
-            <span className="text-lg font-bold text-blue-600">
-              ${displayPrice.toFixed(2)}
-            </span>
           </div>
         </div>
 

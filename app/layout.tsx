@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Suspense } from 'react';
 import SessionProvider from '@/components/providers/SessionProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 import { CartAnimationProvider } from '@/contexts/CartAnimationContext';
+import SessionSecurity from '@/components/security/SessionSecurity';
+import BrowserCloseDetector from '@/components/security/BrowserCloseDetector';
 import './globals.css';
 
 const geistSans = Geist({
@@ -41,6 +44,10 @@ export default function RootLayout({
       >
         <SessionProvider>
           <AuthProvider>
+            <Suspense fallback={null}>
+              <BrowserCloseDetector />
+            </Suspense>
+            <SessionSecurity />
             <CartProvider>
               <WishlistProvider>
                 <CartAnimationProvider>{children}</CartAnimationProvider>

@@ -38,7 +38,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#050b2c] transition-all duration-300 shadow-sm hover:shadow-md"
+        className="px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#050b2c] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
       >
         Previous
       </button>
@@ -59,7 +59,7 @@ export default function Pagination({
           <button
             key={page}
             onClick={() => onPageChange(page as number)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow-md ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer ${
               currentPage === page
                 ? 'bg-[#ffa509] text-white border-2 border-[#ffa509] shadow-lg'
                 : 'border-2 border-gray-200 text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509]'
@@ -73,7 +73,7 @@ export default function Pagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#050b2c] transition-all duration-300 shadow-sm hover:shadow-md"
+        className="px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#050b2c] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
       >
         Next
       </button>

@@ -18,7 +18,8 @@ import {
   FiTrendingUp,
   FiStar,
   FiRefreshCw,
-  FiMaximize2
+  FiMaximize2,
+  FiZap
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -27,6 +28,7 @@ import Alert from '@/components/ui/Alert';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { Product, ProductListResponse } from '@/types/product';
 import { Category } from '@/types/category';
+import { formatCurrency } from '@/utils/currency';
 
 interface ProductTableProps {
   onEdit?: (product: Product) => void;
@@ -40,6 +42,7 @@ interface ProductTableProps {
     maxStock?: string;
     stockStatus?: string;
     featured?: string;
+    isFlashSale?: string;
   };
   hideFilters?: boolean;
   preserveFiltersOnReset?: boolean;
@@ -95,6 +98,7 @@ export default function ProductTable({
     maxStock: initialFilters?.maxStock || '',
     stockStatus: initialFilters?.stockStatus || '',
     featured: initialFilters?.featured || '',
+    isFlashSale: '',
   });
 
   // Separate state for search input (for immediate UI updates)
@@ -154,6 +158,7 @@ export default function ProductTable({
       if (filters.maxStock) params.append('maxStock', filters.maxStock);
       if (filters.stockStatus) params.append('stockStatus', filters.stockStatus);
       if (filters.featured) params.append('featured', filters.featured);
+      if (filters.isFlashSale) params.append('isFlashSale', filters.isFlashSale);
 
       const response = await fetch(`/api/admin/products?${params}`);
       const data: ProductListResponse = await response.json();
@@ -252,6 +257,7 @@ export default function ProductTable({
         maxStock: initialFilters.maxStock || '',
         stockStatus: initialFilters.stockStatus || '',
         featured: initialFilters.featured || '',
+        isFlashSale: '',
       });
     } else {
       setFilters({
@@ -263,6 +269,7 @@ export default function ProductTable({
         maxStock: '',
         stockStatus: '',
         featured: '',
+        isFlashSale: '',
       });
     }
     setPage(1);
@@ -274,6 +281,46 @@ export default function ProductTable({
       (cat) => cat._id === categoryId || cat.name === categoryId
     );
     return category?.name || categoryId;
+  };
+
+  // Calculate flash sale data for a product
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: Product) => {
+    if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discountPercentage: 0,
+        displayedPrice: product.price,
+        crossedOutPrice: product.price,
+        hasDiscount: false,
+      };
+    }
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
+    
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the product.price
+    displayedPrice = product.price;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
+    }
+
+    return {
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
   };
 
   const activeFiltersCount = Object.values(filters).filter(v => v !== '').length;
@@ -316,7 +363,7 @@ export default function ProductTable({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleResetFilters}
-                  className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
+                  className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer"
                 >
                   <FiRefreshCw className="w-4 h-4" />
                   Reset
@@ -326,7 +373,7 @@ export default function ProductTable({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg hover:shadow-lg transition-all flex items-center gap-2 text-sm font-bold"
+                className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg hover:shadow-lg transition-all flex items-center gap-2 text-sm font-bold cursor-pointer"
               >
                 {showFilters ? <FiX className="w-4 h-4" /> : <FiFilter className="w-4 h-4" />}
                 {showFilters ? 'Hide' : 'Show'} Filters
@@ -440,6 +487,16 @@ export default function ProductTable({
                     <option value="true">Featured Only</option>
                     <option value="false">Not Featured</option>
                   </select>
+
+                  <select
+                    value={filters.isFlashSale}
+                    onChange={(e) => handleFilterChange('isFlashSale', e.target.value)}
+                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                  >
+                    <option value="">All Products</option>
+                    <option value="true">Flash Sale</option>
+                    <option value="false">Not Flash Sale</option>
+                  </select>
                 </div>
               </motion.div>
             )}
@@ -494,11 +551,11 @@ export default function ProductTable({
               </p>
             </div>
           </div>
-          <Link href="/admin/products/create">
+          <Link href="/admin/products/create" className="cursor-pointer">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg transition-all flex items-center gap-2 text-sm"
+              className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg transition-all flex items-center gap-2 text-sm cursor-pointer"
             >
               <FiPackage className="w-4 h-4" />
               Add Product
@@ -517,11 +574,11 @@ export default function ProductTable({
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
             <p className="text-gray-500 mb-6">Try adjusting your filters or add a new product</p>
-            <Link href="/admin/products/create">
+            <Link href="/admin/products/create" className="cursor-pointer">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg transition-all"
+                className="px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg transition-all cursor-pointer"
               >
                 Add Your First Product
               </motion.button>
@@ -531,7 +588,11 @@ export default function ProductTable({
           <>
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {products.map((product, index) => (
+              {products.map((product, index) => {
+                const flashSaleData = calculateFlashSaleData(product);
+                const { discountPercentage, displayedPrice, crossedOutPrice, hasDiscount } = flashSaleData;
+
+                return (
                 <motion.div
                   key={product._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -588,8 +649,47 @@ export default function ProductTable({
                         <FiPackage className="w-16 h-16 text-gray-300" />
                       </div>
                     )}
+                    
+                    {/* Flash Sale Badge - Top Left */}
+                    {product.isFlashSale && hasDiscount && (
+                      <div className="absolute top-2 left-2 z-30">
+                        <motion.div
+                          initial={{ scale: 0, rotate: -45 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                          className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5"
+                        >
+                          <motion.div
+                            animate={{ rotate: [0, 10, -10, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                          >
+                            <FiZap className="w-3 h-3" />
+                          </motion.div>
+                          <span className="text-[10px] font-black tracking-wide">FLASH</span>
+                        </motion.div>
+                      </div>
+                    )}
+
+                    {/* Discount Badge - Top Right */}
+                    {product.isFlashSale && hasDiscount && (
+                      <div className="absolute top-2 right-2 z-30">
+                        <motion.div
+                          initial={{ scale: 0, rotate: 180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.3, type: 'spring' }}
+                          className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white"
+                        >
+                          <div className="text-center">
+                            <div className="text-[10px] font-black leading-tight">-{discountPercentage}%</div>
+                            <div className="text-[6px] font-bold">OFF</div>
+                          </div>
+                        </motion.div>
+                      </div>
+                    )}
+
+                    {/* Featured Badge */}
                     {product.featured && (
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10">
+                      <div className={`absolute ${product.isFlashSale && hasDiscount ? 'top-14' : 'top-3'} right-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10`}>
                         <FiStar className="w-3 h-3 fill-current" />
                         Featured
                       </div>
@@ -606,44 +706,51 @@ export default function ProductTable({
                       <span className="px-3 py-1 bg-[#ffa509]/10 text-[#ffa509] rounded-lg text-sm font-semibold">
                         {getCategoryName(product.category)}
                       </span>
-                      <span className="text-2xl font-bold text-[#050b2c]">
-                        ${product.price.toFixed(2)}
-                      </span>
+                          <div className="flex items-baseline gap-2">
+                            {product.isFlashSale && hasDiscount ? (
+                              <>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                                  {formatCurrency(displayedPrice)}
+                                </span>
+                                <span className="text-sm text-gray-400 line-through">
+                                  {formatCurrency(crossedOutPrice)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-2xl font-bold text-[#050b2c]">
+                                {formatCurrency(product.price)}
+                              </span>
+                            )}
+                          </div>
                     </div>
 
                     {/* Stock Info */}
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center mb-4">
                       <div className="flex items-center gap-2">
                         <div className={`w-3 h-3 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
                         <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                         </span>
                       </div>
-                      {product.rating && (
-                        <div className="flex items-center gap-1">
-                          <FiStar className="w-4 h-4 text-[#ffa509] fill-[#ffa509]" />
-                          <span className="text-sm font-semibold text-gray-700">{product.rating.toFixed(1)}</span>
-                        </div>
-                      )}
                     </div>
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Link href={`/products/${product._id}`} className="flex-1" target="_blank">
+                      <Link href={`/products/${product._id}`} className="flex-1 cursor-pointer" target="_blank">
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                          className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm font-medium cursor-pointer"
                         >
                           <FiEye className="w-4 h-4" />
                           View
                         </motion.button>
                       </Link>
-                      <Link href={`/admin/products/${product._id}/edit`} className="flex-1">
+                      <Link href={`/admin/products/${product._id}/edit`} className="flex-1 cursor-pointer">
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="w-full px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-bold"
+                          className="w-full px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-bold cursor-pointer"
                         >
                           <FiEdit className="w-4 h-4" />
                           Edit
@@ -653,14 +760,15 @@ export default function ProductTable({
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleDeleteClick(product._id!, product.name)}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center text-sm font-medium"
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center text-sm font-medium cursor-pointer"
                       >
                         <FiTrash2 className="w-4 h-4" />
                       </motion.button>
                     </div>
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Pagination */}
@@ -681,7 +789,7 @@ export default function ProductTable({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
-                    className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     <FiChevronLeft className="w-4 h-4" />
                     Previous
@@ -694,7 +802,7 @@ export default function ProductTable({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPages}
-                    className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     Next
                     <FiChevronRight className="w-4 h-4" />

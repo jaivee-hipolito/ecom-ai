@@ -8,24 +8,62 @@ import { useAuth } from '@/contexts/AuthContext';
 import Loading from '@/components/ui/Loading';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { ShippingAddress } from '@/types/address';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiShoppingCart, FiArrowRight } from 'react-icons/fi';
 
-export default function CartPage() {
+function CartPageContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { cart, isLoading, getCartSummary } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedAddress, setSelectedAddress] = useState<{ fullName: string; address: string; city: string; state: string; zipCode: string; country: string; phone: string } | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/login');
     }
   }, [isAuthenticated, authLoading, router]);
+
+  // Initialize selected items from URL params or all items when cart loads
+  useEffect(() => {
+    if (cart?.items && selectedItems.size === 0) {
+      // Check if items are specified in URL params (from checkout back button)
+      const itemsFromUrl = searchParams?.getAll('items') || [];
+      
+      if (itemsFromUrl.length > 0) {
+        // Restore selection from URL params
+        const urlItemIds = new Set<string>(itemsFromUrl);
+        setSelectedItems(urlItemIds);
+      } else {
+        // Initialize all items as selected
+        const allItemIds = new Set<string>();
+        cart.items.forEach((item) => {
+          const productId = typeof item.product === 'string' ? item.product : item.product?._id || '';
+          if (productId) {
+            allItemIds.add(productId);
+          }
+        });
+        setSelectedItems(allItemIds);
+      }
+    }
+  }, [cart?.items, selectedItems.size, searchParams]);
+
+  const toggleItemSelection = (productId: string) => {
+    setSelectedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -45,6 +83,29 @@ export default function CartPage() {
 
   const items = cart?.items || [];
   const cartSummary = getCartSummary();
+  
+  // Calculate selected items summary
+  const selectedItemsSummary = (() => {
+    if (!cart || !cart.items || selectedItems.size === 0) {
+      return { totalItems: 0, totalPrice: 0 };
+    }
+    
+    let totalItems = 0;
+    let totalPrice = 0;
+    
+    cart.items.forEach((item) => {
+      const productId = typeof item.product === 'string' ? item.product : item.product?._id || '';
+      if (selectedItems.has(productId)) {
+        const product = typeof item.product === 'object' ? item.product : ({} as any);
+        const price = product.price || 0;
+        const quantity = item.quantity || 0;
+        totalItems += quantity;
+        totalPrice += price * quantity;
+      }
+    });
+    
+    return { totalItems, totalPrice };
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -66,7 +127,18 @@ export default function CartPage() {
               </h1>
               {items.length > 0 && (
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  {cartSummary.totalItems} {cartSummary.totalItems === 1 ? 'item' : 'items'} in your cart
+                  {selectedItems.size > 0 ? (
+                    <>
+                      {selectedItemsSummary.totalItems} {selectedItemsSummary.totalItems === 1 ? 'item' : 'items'} selected
+                      {selectedItems.size < items.length && (
+                        <span className="text-gray-500"> • {items.length} total in cart</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {cartSummary.totalItems} {cartSummary.totalItems === 1 ? 'item' : 'items'} in your cart
+                    </>
+                  )}
                 </p>
               )}
             </div>
@@ -133,14 +205,18 @@ export default function CartPage() {
                     return null;
                   }
                   
-                  return (
+                      return (
                     <motion.div
                       key={`${productId}-${index}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
                     >
-                      <CartItem item={item} />
+                      <CartItem 
+                        item={item} 
+                        isSelected={selectedItems.has(productId)}
+                        onToggleSelect={() => toggleItemSelection(productId)}
+                      />
                     </motion.div>
                   );
                 })}
@@ -154,11 +230,30 @@ export default function CartPage() {
               className="lg:col-span-1 space-y-6"
             >
               <ShippingAddressDisplay onAddressSelect={setSelectedAddress} />
-              <CartSummary selectedAddress={selectedAddress} />
+              <CartSummary 
+                selectedAddress={selectedAddress} 
+                selectedItemIds={selectedItems}
+              />
             </motion.div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Loading size="lg" text="Loading cart..." />
+          </div>
+        </div>
+      </div>
+    }>
+      <CartPageContent />
+    </Suspense>
   );
 }

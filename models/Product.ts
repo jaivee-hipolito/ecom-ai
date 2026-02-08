@@ -58,6 +58,20 @@ const ProductSchema = new Schema<IProduct>(
       type: Boolean,
       default: false,
     },
+    isFlashSale: {
+      type: Boolean,
+      default: false,
+    },
+    flashSaleDiscount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    flashSaleDiscountType: {
+      type: String,
+      enum: ['percentage', 'fixed'],
+      default: 'percentage',
+    },
     views: {
       type: Number,
       default: 0,

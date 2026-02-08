@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShoppingBag, FiPackage } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShoppingBag, FiPackage, FiAlertCircle, FiClock, FiX } from 'react-icons/fi';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
@@ -13,14 +13,51 @@ import { LoginCredentials } from '@/types/auth';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, update: updateSession } = useSession();
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check for timeout, browser close, or reset success query parameters
+  useEffect(() => {
+    const timeout = searchParams?.get('timeout');
+    const closed = searchParams?.get('closed');
+    const reset = searchParams?.get('reset');
+
+    console.log('LoginForm - Checking query params:', { timeout, closed, reset });
+
+    if (timeout === 'true') {
+      console.log('Setting timeout message');
+      setInfoMessage('Your session expired due to inactivity. Please sign in again.');
+      // Clear the query parameter after message is displayed
+      const timer = setTimeout(() => {
+        router.replace('/login', { scroll: false });
+      }, 10000); // Keep message visible for 10 seconds
+      return () => clearTimeout(timer);
+    } else if (closed === 'true') {
+      console.log('Setting browser close message');
+      setInfoMessage('You were logged out because the browser was closed. Please sign in again.');
+      // Clear the query parameter after message is displayed
+      const timer = setTimeout(() => {
+        router.replace('/login', { scroll: false });
+      }, 10000); // Keep message visible for 10 seconds
+      return () => clearTimeout(timer);
+    } else if (reset === 'success') {
+      console.log('Setting reset success message');
+      setInfoMessage('Password reset successful! Please sign in with your new password.');
+      // Clear the query parameter after message is displayed
+      const timer = setTimeout(() => {
+        router.replace('/login', { scroll: false });
+      }, 10000); // Keep message visible for 10 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +72,21 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        // Map NextAuth error codes to user-friendly messages
+        let errorMessage = result.error;
+        
+        // Handle NextAuth error codes
+        if (result.error === 'Configuration' || result.error === 'CredentialsSignin') {
+          errorMessage = 'Incorrect email or password';
+        } else if (result.error === 'AccessDenied') {
+          errorMessage = 'Access denied. Please contact support.';
+        } else if (result.error === 'Verification') {
+          errorMessage = 'Verification failed. Please try again.';
+        } else if (result.error.toLowerCase().includes('invalid') || result.error.toLowerCase().includes('incorrect')) {
+          errorMessage = 'Incorrect email or password';
+        }
+        
+        setError(errorMessage);
         setIsLoading(false);
       } else {
         // Update session first
@@ -161,6 +212,26 @@ export default function LoginForm() {
                 <Alert variant="error" className="bg-red-500/20 border-red-500/50 text-red-100">
                   {error}
                 </Alert>
+              </motion.div>
+            )}
+            {infoMessage && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="w-full"
+              >
+                <div className="bg-[#ffa509]/20 backdrop-blur-sm border-2 border-[#ffa509]/50 rounded-xl p-4 text-white flex items-start gap-3 shadow-lg shadow-[#ffa509]/20 relative">
+                  <FiAlertCircle className="w-5 h-5 text-[#ffa509] flex-shrink-0 mt-0.5" />
+                  <span className="font-medium flex-1">{infoMessage}</span>
+                  <button
+                    onClick={() => setInfoMessage('')}
+                    className="text-white/70 hover:text-white transition-colors flex-shrink-0"
+                    aria-label="Close message"
+                  >
+                    <FiX className="w-5 h-5" />
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -325,6 +396,12 @@ export default function LoginForm() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="button"
+            onClick={() => {
+              signIn('google', { 
+                callbackUrl: '/dashboard/products',
+                redirect: true 
+              });
+            }}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#ffa509]/50 transition-all backdrop-blur-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -351,6 +428,9 @@ export default function LoginForm() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="button"
+            onClick={() => {
+              router.push('/');
+            }}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#ffa509]/50 transition-all backdrop-blur-sm"
           >
             <FiPackage className="w-5 h-5" />
@@ -384,14 +464,10 @@ export default function LoginForm() {
           transition={{ delay: 1.1 }}
           className="mt-8 pt-8 border-t border-white/10 lg:hidden"
         >
-          <div className="grid grid-cols-2 gap-4 text-center">
+          <div className="text-center">
             <div>
               <div className="text-2xl font-bold text-[#ffa509] mb-1">Free</div>
-              <div className="text-xs text-white/60">Shipping</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-[#ffa509] mb-1">Easy</div>
-              <div className="text-xs text-white/60">Returns</div>
+              <div className="text-xs text-white/60">Shipping - Victoria BC area only</div>
             </div>
           </div>
         </motion.div>

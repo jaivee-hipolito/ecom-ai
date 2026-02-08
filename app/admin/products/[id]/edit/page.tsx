@@ -7,6 +7,7 @@ import { FiEdit, FiArrowLeft, FiPackage, FiSave } from 'react-icons/fi';
 import ProductForm from '@/components/admin/ProductForm';
 import Alert from '@/components/ui/Alert';
 import { Product } from '@/types/product';
+import { formatCurrency } from '@/utils/currency';
 
 export default function EditProductPage() {
   const params = useParams();
@@ -188,7 +189,7 @@ export default function EditProductPage() {
               <div>
                 <p className="text-sm font-semibold text-gray-600 mb-1">Current Price</p>
                 <p className="text-2xl font-bold text-[#050b2c]">
-                  ${parseFloat(product.price as any).toFixed(2)}
+                  {formatCurrency(parseFloat(product.price as any))}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-xl flex items-center justify-center">

@@ -9,18 +9,16 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import ColorSwatch from '@/components/products/ColorSwatch';
 import { motion } from 'framer-motion';
-import { FiMinus, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
+import { FiMinus, FiPlus, FiTrash2, FiX, FiCheck } from 'react-icons/fi';
+import { formatCurrency } from '@/utils/currency';
 
 interface CartItemProps {
   item: ICartItem;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
-// Format currency with commas
-const formatCurrency = (amount: number): string => {
-  return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
-
-export default function CartItem({ item }: CartItemProps) {
+export default function CartItem({ item, isSelected = true, onToggleSelect }: CartItemProps) {
   const { updateCartItem, removeFromCart, isLoading } = useCart();
   const [quantity, setQuantity] = useState(item.quantity);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -84,13 +82,58 @@ export default function CartItem({ item }: CartItemProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ opacity: isSelected ? 1 : 0.6, scale: 1 }}
       whileHover={{ scale: 1.01 }}
-      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-visible group"
+      className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border overflow-visible group ${
+        isSelected ? 'border-gray-100' : 'border-gray-300 border-dashed opacity-75'
+      }`}
     >
       <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6">
+        {/* Selection Checkbox */}
+        {onToggleSelect && (
+          <div className="flex items-start pt-1">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onToggleSelect}
+              className={`relative w-6 h-6 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${
+                isSelected
+                  ? 'bg-gradient-to-br from-[#ffa509] to-[#ff8c00] border-[#ffa509] shadow-lg'
+                  : 'bg-white border-gray-300 hover:border-[#ffa509]'
+              }`}
+              aria-label={isSelected ? 'Deselect item' : 'Select item'}
+            >
+              {isSelected && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                >
+                  <FiCheck className="w-4 h-4 text-white" />
+                </motion.div>
+              )}
+            </motion.button>
+          </div>
+        )}
+        
         {/* Product Image */}
-        <Link href={`/products/${productId}`} className="flex-shrink-0 self-center sm:self-auto">
+        <Link 
+          href={(() => {
+            const url = `/products/${productId}`;
+            if (product.attributes && Object.keys(product.attributes).length > 0) {
+              const params = new URLSearchParams();
+              Object.entries(product.attributes).forEach(([key, value]) => {
+                if (value !== null && value !== undefined && value !== '') {
+                  params.append(key, String(value));
+                }
+              });
+              const queryString = params.toString();
+              return queryString ? `${url}?${queryString}` : url;
+            }
+            return url;
+          })()}
+          className="flex-shrink-0 self-center sm:self-auto"
+        >
           <div className="relative w-20 h-20 xs:w-24 xs:h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden border-2 border-gray-200 group-hover:border-[#ffa509] transition-colors">
             {imageUrl && !isPlaceholder ? (
               <Image
@@ -127,7 +170,22 @@ export default function CartItem({ item }: CartItemProps) {
         {/* Product Info */}
         <div className="flex-1 flex flex-col gap-4 min-w-0">
           <div className="flex-1 min-w-0">
-            <Link href={`/products/${productId}`}>
+            <Link 
+              href={(() => {
+                const url = `/products/${productId}`;
+                if (product.attributes && Object.keys(product.attributes).length > 0) {
+                  const params = new URLSearchParams();
+                  Object.entries(product.attributes).forEach(([key, value]) => {
+                    if (value !== null && value !== undefined && value !== '') {
+                      params.append(key, String(value));
+                    }
+                  });
+                  const queryString = params.toString();
+                  return queryString ? `${url}?${queryString}` : url;
+                }
+                return url;
+              })()}
+            >
               <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[#050b2c] hover:text-[#ffa509] transition-colors mb-2 line-clamp-2">
                 {product.name || 'Product'}
               </h3>
@@ -136,7 +194,7 @@ export default function CartItem({ item }: CartItemProps) {
             {/* Price */}
             <div className="flex flex-wrap items-baseline gap-2 mb-2">
               <span className="text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent whitespace-nowrap">
-                ${formatCurrency(product.price || 0)}
+                {formatCurrency(product.price || 0)}
               </span>
               {product.stock !== undefined && (
                 <span className="text-xs text-gray-500 whitespace-nowrap">
@@ -229,7 +287,7 @@ export default function CartItem({ item }: CartItemProps) {
             <div className="flex-1 xs:flex-none text-left xs:text-right min-w-[120px] xs:min-w-[140px]">
               <p className="text-xs text-gray-500 mb-1 whitespace-nowrap">Total</p>
               <p className="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent whitespace-nowrap overflow-visible">
-                ${formatCurrency(totalPrice)}
+                {formatCurrency(totalPrice)}
               </p>
             </div>
 

@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronLeft, FiChevronRight, FiArrowUpRight } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
+import { formatCurrency } from '@/utils/currency';
 
 interface HeroCarouselProps {
   products: IProduct[];
@@ -76,7 +77,7 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
   const currentProduct = carouselProducts[currentIndex];
 
   return (
-    <div className="relative w-full h-[500px] lg:h-[600px] overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="relative w-full min-h-[600px] sm:min-h-[650px] lg:h-[600px] overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -86,47 +87,37 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
           transition={{ duration: 0.5 }}
           className="absolute inset-0"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-0 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 h-full items-center">
               {/* Left Section - Text Content */}
               <motion.div
                 initial={{ x: -50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
-                className="flex flex-col justify-center space-y-6 z-10"
+                className="flex flex-col justify-center space-y-4 sm:space-y-6 z-10 order-2 lg:order-1"
               >
-                {/* Sale Banner */}
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.4 }}
-                  className="inline-block"
-                >
-                  <span className="inline-block px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-sm lg:text-base uppercase tracking-wider rounded-lg shadow-lg">
-                    Sale! Up to 50% Off!
-                  </span>
-                </motion.div>
-
                 {/* Product Name */}
-                <motion.h1
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  className="text-4xl lg:text-6xl font-bold text-[#050b2c] leading-tight"
-                >
-                  {currentProduct.name.split(' ').slice(0, -1).join(' ')}
-                  <br />
-                  <span className="text-[#ffa509]">
-                    {currentProduct.name.split(' ').slice(-1).join(' ')}
-                  </span>
-                </motion.h1>
+                <Link href={`/products/${currentProduct._id}`}>
+                  <motion.h1
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                    className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-[#050b2c] leading-tight cursor-pointer hover:text-[#0a1538] transition-colors duration-300"
+                  >
+                    {currentProduct.name.split(' ').slice(0, -1).join(' ')}
+                    <br />
+                    <span className="text-[#ffa509] hover:text-[#ff8c00] transition-colors duration-300">
+                      {currentProduct.name.split(' ').slice(-1).join(' ')}
+                    </span>
+                  </motion.h1>
+                </Link>
 
                 {/* Description */}
                 <motion.p
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  className="text-gray-600 text-base lg:text-lg max-w-md line-clamp-3"
+                  className="text-gray-600 text-sm sm:text-base lg:text-lg max-w-md line-clamp-3"
                 >
                   {currentProduct.description || 'Discover premium quality products designed for excellence.'}
                 </motion.p>
@@ -138,32 +129,14 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                   transition={{ delay: 0.6, duration: 0.6 }}
                   className="flex items-center gap-4"
                 >
-                  <span className="text-3xl lg:text-4xl font-bold text-[#050b2c]">
-                    ${currentProduct.price.toFixed(2)}
+                  <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#050b2c]">
+                    {formatCurrency(currentProduct.price)}
                   </span>
                   {currentProduct.stock === 0 && (
-                    <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm font-semibold">
+                    <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs sm:text-sm font-semibold">
                       Out of Stock
                     </span>
                   )}
-                </motion.div>
-
-                {/* Shop Now Button */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.7, duration: 0.6 }}
-                >
-                  <Link href={`/products/${currentProduct._id}`}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="group flex items-center gap-3 px-8 py-4 bg-[#050b2c] text-white rounded-lg font-bold text-base lg:text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:bg-[#0a1538]"
-                    >
-                      Shop Now
-                      <FiArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </motion.button>
-                  </Link>
                 </motion.div>
               </motion.div>
 
@@ -172,19 +145,26 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="relative h-full flex items-center justify-center"
+                className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-full flex items-center justify-center order-1 lg:order-2"
               >
-                <div className="relative w-full h-[400px] lg:h-[500px] flex items-center justify-center">
-                  <div className="relative w-full h-full max-w-lg">
+                <Link 
+                  href={`/products/${currentProduct._id}`}
+                  className="relative w-full h-full max-w-lg flex items-center justify-center px-4 group cursor-pointer"
+                >
+                  <motion.div 
+                    className="relative w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[500px]"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <ProductImage
                       product={currentProduct}
-                      className="w-full h-full"
+                      className="w-full h-full transition-opacity duration-300 group-hover:opacity-90"
                       priority={currentIndex === 0}
                     />
-                  </div>
+                  </motion.div>
                   {/* Decorative background circle */}
                   <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#ffa509]/20 to-[#ff8c00]/10 rounded-full blur-3xl transform scale-150"></div>
-                </div>
+                </Link>
               </motion.div>
             </div>
           </div>
@@ -196,32 +176,32 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
             aria-label="Previous slide"
           >
-            <FiChevronLeft className="w-6 h-6 text-[#050b2c] group-hover:text-[#ffa509] transition-colors" />
+            <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#050b2c] group-hover:text-[#ffa509] transition-colors" />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
             aria-label="Next slide"
           >
-            <FiChevronRight className="w-6 h-6 text-[#050b2c] group-hover:text-[#ffa509] transition-colors" />
+            <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-[#050b2c] group-hover:text-[#ffa509] transition-colors" />
           </button>
         </>
       )}
 
       {/* Carousel Indicators */}
       {carouselProducts.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+        <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
           {carouselProducts.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`transition-all duration-300 ${
                 index === currentIndex
-                  ? 'w-12 h-1.5 bg-[#050b2c] rounded-full'
-                  : 'w-8 h-1.5 bg-gray-300 hover:bg-gray-400 rounded-full'
+                  ? 'w-10 sm:w-12 h-1.5 bg-[#050b2c] rounded-full'
+                  : 'w-6 sm:w-8 h-1.5 bg-gray-300 hover:bg-gray-400 rounded-full'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

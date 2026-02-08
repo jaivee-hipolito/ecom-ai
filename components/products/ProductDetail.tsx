@@ -2,10 +2,9 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IProduct, IProductVariant } from '@/types/product';
 import ProductImage from './ProductImage';
-import ProductRating from './ProductRating';
 import ProductAttributes from './ProductAttributes';
 import ProductReviews from './ProductReviews';
 import Button from '@/components/ui/Button';
@@ -17,14 +16,19 @@ import Image from 'next/image';
 import ColorSwatch from './ColorSwatch';
 import { findMatchingVariant } from '@/utils/productGrouping';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiChevronLeft, FiChevronRight, FiMaximize2 } from 'react-icons/fi';
+import { FiX, FiChevronLeft, FiChevronRight, FiMaximize2, FiZap } from 'react-icons/fi';
+import BNPLInstallments from './BNPLInstallments';
+import { formatCurrency } from '@/utils/currency';
+import ProductRating from './ProductRating';
 
 interface ProductDetailProps {
   product: IProduct;
+  isFlashSale?: boolean;
 }
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+export default function ProductDetail({ product, isFlashSale: propFlashSale }: ProductDetailProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const { addToCart, isLoading: cartLoading, cart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -40,6 +44,53 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [availableStock, setAvailableStock] = useState<number>(0); // Start with 0 until availability is fetched
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(true);
   const addToCartButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Check if product is from flash sale (from prop, URL parameter, or product data)
+  const isFlashSale = propFlashSale !== undefined 
+    ? propFlashSale 
+    : (searchParams?.get('flashSale') === 'true' || product.isFlashSale === true);
+
+  // Calculate flash sale discount and prices from product data
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: IProduct) => {
+    if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discount: 0,
+        discountPercentage: 0,
+        displayedPrice: product.price,
+        crossedOutPrice: product.price,
+        hasDiscount: false,
+      };
+    }
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
+    
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the product.price
+    displayedPrice = product.price;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
+    }
+
+    return {
+      discount,
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
+  };
 
   // Check if product has multiple variants (2 or more)
   const hasVariants = product.variants && product.variants.length >= 2;
@@ -73,7 +124,52 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       // If no attributes selected, use current product as default
       return variantList.find((v) => v.productId === product._id) || variantList[0];
     }
-    return findMatchingVariant(variantList, selectedAttributes) || variantList[0];
+    
+    // First, try to find exact match
+    let match = findMatchingVariant(variantList, selectedAttributes);
+    
+    // If no exact match, try to find partial match prioritizing color attributes
+    if (!match && Object.keys(selectedAttributes).length > 0) {
+      // Prioritize color attributes first
+      const colorKeys = Object.keys(selectedAttributes).filter(key => 
+        key.toLowerCase().includes('color') || key.toLowerCase().includes('colour')
+      );
+      
+      // Use color attribute if available, otherwise use the first attribute
+      const priorityKey = colorKeys.length > 0 ? colorKeys[0] : Object.keys(selectedAttributes)[0];
+      const priorityValue = selectedAttributes[priorityKey];
+      
+      // Find variants that match the priority attribute (e.g., color)
+      const partialMatches = variantList.filter((v) => {
+        const attrValue = v.attributes[priorityKey];
+        if (attrValue === null || attrValue === undefined) return false;
+        
+        // Normalize for comparison
+        const normalizeValue = (val: any): string => {
+          if (val === null || val === undefined) return '';
+          return String(val).toLowerCase().trim();
+        };
+        
+        const normalizedSelected = normalizeValue(priorityValue);
+        
+        if (Array.isArray(attrValue)) {
+          return attrValue.some(v => normalizeValue(v) === normalizedSelected);
+        }
+        if (typeof attrValue === 'string' && attrValue.includes(',')) {
+          const values = attrValue.split(',').map(v => normalizeValue(v));
+          return values.includes(normalizedSelected);
+        }
+        return normalizeValue(attrValue) === normalizedSelected;
+      });
+      
+      // If we found partial matches, use the first one
+      if (partialMatches.length > 0) {
+        match = partialMatches[0];
+      }
+    }
+    
+    // Fallback to current product or first variant
+    return match || variantList.find((v) => v.productId === product._id) || variantList[0];
   }, [selectedAttributes, variantList, hasVariants, product._id]);
 
   // Get display values based on selected variant or current product
@@ -99,6 +195,40 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const images = displayProduct.images || [];
   const displayImage =
     images[selectedImageIndex] || displayProduct.coverImage || images[0] || '';
+
+  // Calculate flash sale prices (after displayProduct is initialized)
+  // Use actual flash sale data from product
+  const flashSaleData = calculateFlashSaleData(product);
+  const hasFlashSaleDiscount = isFlashSale && flashSaleData.hasDiscount && product.isFlashSale;
+  
+  // Calculate prices - new logic: displayed price = displayProduct.price, crossed out = price * (percentage/100) + price
+  let displayPrice: number;
+  let crossedOutPrice: number;
+  let flashSaleDiscount: number;
+  
+  if (hasFlashSaleDiscount && flashSaleData.hasDiscount) {
+    const basePrice = displayProduct.price; // Displayed price (variant or main product)
+    displayPrice = basePrice;
+    
+    // Calculate crossed out price based on discount type
+    if (product.flashSaleDiscountType === 'percentage' && product.flashSaleDiscount) {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = basePrice * (product.flashSaleDiscount / 100) + basePrice;
+      flashSaleDiscount = product.flashSaleDiscount;
+    } else if (product.flashSaleDiscountType === 'fixed' && product.flashSaleDiscount) {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = basePrice + product.flashSaleDiscount;
+      flashSaleDiscount = Math.round((product.flashSaleDiscount / basePrice) * 100);
+    } else {
+      displayPrice = basePrice;
+      crossedOutPrice = basePrice;
+      flashSaleDiscount = 0;
+    }
+  } else {
+    displayPrice = displayProduct.price;
+    crossedOutPrice = displayProduct.price;
+    flashSaleDiscount = 0;
+  }
 
   // Collect all unique attribute values from variants
   const allAttributes = useMemo(() => {
@@ -149,12 +279,40 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     setSelectedImageIndex(0);
   };
 
+  // Initialize selected attributes from URL parameters (e.g., from cart link)
+  useEffect(() => {
+    if (!hasVariants || !searchParams || variantList.length === 0) return;
+    
+    const urlAttributes: Record<string, any> = {};
+    let hasUrlAttributes = false;
+    
+    // Read all URL parameters that match product attributes
+    searchParams.forEach((value, key) => {
+      // Check if this key exists in any variant's attributes
+      const attributeExists = variantList.some(v => v.attributes && key in v.attributes);
+      if (attributeExists) {
+        urlAttributes[key] = value;
+        hasUrlAttributes = true;
+      }
+    });
+    
+    // Set attributes from URL if they exist (this takes precedence over auto-select)
+    if (hasUrlAttributes) {
+      setSelectedAttributes(urlAttributes);
+    }
+  }, [hasVariants, searchParams, variantList.length]); // Only run once when component mounts or URL changes
+
   // Auto-select first available attribute value for each attribute if product has variants
   useEffect(() => {
     if (!hasVariants || Object.keys(allAttributes).length === 0 || variantList.length === 0) return;
     
-    // Only auto-select if no attributes are currently selected
-    if (Object.keys(selectedAttributes).length === 0) {
+    // Check if URL has attribute parameters - if so, skip auto-select
+    const hasUrlAttributes = searchParams && Array.from(searchParams.keys()).some(key => 
+      variantList.some(v => v.attributes && key in v.attributes)
+    );
+    
+    // Only auto-select if no attributes are currently selected and no URL attributes
+    if (Object.keys(selectedAttributes).length === 0 && !hasUrlAttributes) {
       const initialAttributes: Record<string, any> = {};
       
       Object.entries(allAttributes).forEach(([key, values]) => {
@@ -522,25 +680,75 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           <div className="space-y-6">
             {/* Product Title & Rating */}
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                {product.name}
-              </h1>
-              <div className="flex items-center space-x-4">
-                <ProductRating
-                  rating={product.rating || 0}
-                  numReviews={product.numReviews}
-                />
-                <span className="text-sm text-gray-500">
-                  ({product.numReviews || 0} {product.numReviews === 1 ? 'review' : 'reviews'})
-                </span>
+              <div className="flex items-start gap-3 mb-3">
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 flex-1">
+                  {product.name}
+                </h1>
+                {/* Flash Sale Badge */}
+                {hasFlashSaleDiscount && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
+                    className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2 flex-shrink-0"
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                    >
+                      <FiZap className="w-4 h-4" />
+                    </motion.div>
+                    <span className="text-xs font-black tracking-wide">FLASH</span>
+                  </motion.div>
+                )}
               </div>
+              {/* Rating Display - Hidden for now, but kept for future use */}
+              {false && (
+                <div className="flex items-center space-x-4">
+                  <ProductRating
+                    rating={product.rating || 0}
+                    numReviews={product.numReviews}
+                  />
+                  <span className="text-sm text-gray-500">
+                    ({product.numReviews || 0} {product.numReviews === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Price */}
             <div className="border-b border-gray-200 pb-4">
-              <span className="text-4xl lg:text-5xl font-bold text-blue-600">
-                ${displayProduct.price.toFixed(2)}
-              </span>
+              <div className="flex items-center gap-4 mb-2">
+                {hasFlashSaleDiscount ? (
+                  <>
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-4xl lg:text-5xl font-bold text-[#ffa509]">
+                        {formatCurrency(displayPrice)}
+                      </span>
+                      <span className="text-2xl lg:text-3xl text-gray-400 line-through">
+                        {formatCurrency(crossedOutPrice)}
+                      </span>
+                    </div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', delay: 0.2 }}
+                      className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center shadow-xl border-2 border-white flex-shrink-0"
+                    >
+                      <div className="text-center">
+                        <div className="text-sm lg:text-base font-black leading-tight">-{flashSaleDiscount}%</div>
+                        <div className="text-[8px] lg:text-[10px] font-bold">OFF</div>
+                      </div>
+                    </motion.div>
+                  </>
+                ) : (
+                  <span className="text-4xl lg:text-5xl font-bold text-blue-600">
+                    {formatCurrency(displayPrice)}
+                  </span>
+                )}
+              </div>
+              {/* BNPL Installment Options */}
+              <BNPLInstallments price={displayPrice} />
             </div>
 
             {/* Description */}
@@ -873,14 +1081,16 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           )}
         </AnimatePresence>
 
-        {/* Reviews Section */}
-        <div className="mt-12">
-          <ProductReviews
-            productId={product._id || ''}
-            reviews={[]}
-            numReviews={product.numReviews || 0}
-          />
-        </div>
+        {/* Reviews Section - Hidden for now, but kept for future use */}
+        {false && (
+          <div className="mt-12">
+            <ProductReviews
+              productId={product._id || ''}
+              reviews={[]}
+              numReviews={product.numReviews || 0}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

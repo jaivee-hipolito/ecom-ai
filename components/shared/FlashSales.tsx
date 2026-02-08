@@ -5,11 +5,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
-import ProductRating from '@/components/products/ProductRating';
 import { useProducts } from '@/hooks/useProducts';
 import { FiZap, FiClock, FiEye, FiTrendingUp } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import QuickView from '@/components/products/QuickView';
+import { formatCurrency } from '@/utils/currency';
 
 interface FlashSalesProps {
   initialProducts?: IProduct[];
@@ -25,17 +25,17 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
     seconds: 0,
   });
 
-  // Fetch flash sale products - using featured products as flash sales
-  // You can modify the filter to match your flash sale API endpoint
+  // Fetch flash sale products - only products marked as flash sale
   const { products, isLoading } = useProducts({
-    filters: { featured: true }, // Adjust this filter based on your flash sale API
+    filters: { isFlashSale: true },
     page: 1,
     limit: 8, // Show more products for flash sales
     autoFetch: true,
   });
 
-  // Use fetched products or fallback to initial products
-  const displayProducts = products.length > 0 ? products : initialProducts.slice(0, 8);
+  // Only use fetched flash sale products - don't use initialProducts fallback
+  // This ensures we only show products that are actually marked as flash sale in the database
+  const displayProducts = products;
 
   // Timer countdown effect
   useEffect(() => {
@@ -66,28 +66,46 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate discount percentage - deterministic based on product ID
-  const calculateDiscount = (product: IProduct): number => {
-    if (!product._id) return 20; // Default discount
-    
-    // Create a deterministic hash from product ID
-    let hash = 0;
-    for (let i = 0; i < product._id.length; i++) {
-      const char = product._id.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
+  // Calculate flash sale discount and prices from product data
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: IProduct) => {
+    if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discount: 0,
+        discountPercentage: 0,
+        displayedPrice: product.price,
+        crossedOutPrice: product.price,
+        hasDiscount: false,
+      };
     }
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
     
-    // Use hash to generate consistent discount between 20-50%
-    const discount = Math.abs(hash % 31) + 20;
-    
-    // Adjust based on product name if needed
-    const name = product.name.toLowerCase();
-    if (name.includes('watch') || name.includes('jbl') || name.includes('phone')) {
-      return Math.min(discount + 5, 50); // Add 5% but cap at 50%
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the product.price
+    displayedPrice = product.price;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
     }
-    
-    return discount;
+
+    return {
+      discount,
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
   };
 
   // Calculate sold percentage for progress bar - deterministic based on product ID
@@ -236,10 +254,8 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
         ) : displayProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {displayProducts.map((product, index) => {
-              const discount = calculateDiscount(product);
-              const { percentage: soldPercentage, sold } = calculateSoldPercentage(product);
-              const hasDiscount = discount > 0;
-              const originalPrice = hasDiscount ? product.price / (1 - discount / 100) : product.price;
+              const flashSaleData = calculateFlashSaleData(product);
+              const { discountPercentage, displayedPrice, crossedOutPrice, hasDiscount } = flashSaleData;
 
               return (
                 <motion.div
@@ -251,7 +267,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                   whileHover={{ y: -5, scale: 1.02 }}
                   className="group relative"
                 >
-                  <Link href={`/products/${product._id}`} className="block">
+                  <Link href={`/products/${product._id}?flashSale=true`} className="block">
                     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-[#ffa509]/50 relative">
                       {/* Flash Sale Badge - Top Left */}
                       <div className="absolute top-2 left-2 z-30">
@@ -272,19 +288,21 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                       </div>
 
                       {/* Discount Badge - Top Right */}
-                      <div className="absolute top-2 right-2 z-30">
-                        <motion.div
-                          initial={{ scale: 0, rotate: 180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{ delay: 0.3, type: 'spring' }}
-                          className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white"
-                        >
-                          <div className="text-center">
-                            <div className="text-xs font-black leading-tight">-{discount}%</div>
-                            <div className="text-[7px] font-bold">OFF</div>
-                          </div>
-                        </motion.div>
-                      </div>
+                      {hasDiscount && (
+                        <div className="absolute top-2 right-2 z-30">
+                          <motion.div
+                            initial={{ scale: 0, rotate: 180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: 0.3, type: 'spring' }}
+                            className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white"
+                          >
+                            <div className="text-center">
+                              <div className="text-xs font-black leading-tight">-{discountPercentage}%</div>
+                              <div className="text-[7px] font-bold">OFF</div>
+                            </div>
+                          </motion.div>
+                        </div>
+                      )}
 
                       {/* Compact Product Layout */}
                       <div className="p-4 sm:p-5">
@@ -322,15 +340,6 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                             {product.name}
                           </h3>
 
-                          {/* Rating - Compact */}
-                          <div className="flex items-center gap-2">
-                            <ProductRating
-                              rating={product.rating || 0}
-                              numReviews={product.numReviews}
-                              showReviews={false}
-                            />
-                            <span className="text-xs text-gray-500">({product.numReviews || 0})</span>
-                          </div>
 
                           {/* Price - Prominent */}
                           <div className="flex items-baseline gap-2">
@@ -341,36 +350,13 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                               transition={{ delay: index * 0.1 + 0.2, type: 'spring' }}
                               className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent"
                             >
-                              ${product.price.toFixed(2)}
+                              {formatCurrency(displayedPrice)}
                             </motion.span>
                             {hasDiscount && (
                               <span className="text-sm text-gray-400 line-through">
-                                ${originalPrice.toFixed(2)}
+                                {formatCurrency(crossedOutPrice)}
                               </span>
                             )}
-                          </div>
-
-                          {/* Stock Progress Bar - Enhanced */}
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-gray-600 font-medium">Available: <span className="text-[#050b2c] font-bold">{product.stock}</span></span>
-                              <span className="text-[#ffa509] font-bold">Sold: {sold}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden shadow-inner">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                whileInView={{ width: `${soldPercentage}%` }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 1.2, delay: index * 0.1 + 0.3, ease: 'easeOut' }}
-                                className="h-full bg-gradient-to-r from-[#ffa509] via-orange-500 to-[#ff8c00] rounded-full shadow-lg relative overflow-hidden"
-                              >
-                                <motion.div
-                                  animate={{ x: ['-100%', '100%'] }}
-                                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                                />
-                              </motion.div>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -426,6 +412,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
           productId={quickViewProductId}
           isOpen={isQuickViewOpen}
           onClose={handleCloseQuickView}
+          isFlashSale={true}
         />
       </div>
     </div>

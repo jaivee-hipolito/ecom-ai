@@ -15,6 +15,8 @@ interface UserProfile {
   email: string;
   role: string;
   image?: string;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
 }
 
 export default function ProfilePage() {
@@ -85,17 +87,45 @@ export default function ProfilePage() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Contact Number</p>
-              <p className="text-lg font-medium text-gray-900">{userProfile?.contactNumber || 'N/A'}</p>
+              <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                {userProfile?.contactNumber || 'N/A'}
+                {userProfile?.contactNumber && (
+                  userProfile?.phoneVerified ? (
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Verified</span>
+                  ) : (
+                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Not Verified</span>
+                  )
+                )}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Email</p>
-              <p className="text-lg font-medium text-gray-900">{userProfile?.email || 'N/A'}</p>
+              <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                {userProfile?.email || 'N/A'}
+                {userProfile?.emailVerified ? (
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Verified</span>
+                ) : (
+                  <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Not Verified</span>
+                )}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Role</p>
               <p className="text-lg font-medium text-gray-900 capitalize">{userProfile?.role || 'N/A'}</p>
             </div>
           </div>
+          
+          {/* Verification Link */}
+          {(!userProfile?.emailVerified || !userProfile?.phoneVerified) && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <Link
+                href="/dashboard/verify"
+                className="block w-full bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-3 px-6 rounded-xl text-center hover:shadow-lg transition-all"
+              >
+                Verify Email & Phone
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Addresses Card */}

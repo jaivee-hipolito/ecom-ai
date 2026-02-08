@@ -188,7 +188,7 @@ function NavbarContent() {
 
   return (
     <>
-      {/* Flash Sale Notification Banner */}
+      {/* Flash Sale Notification Banner - Hidden on mobile/tablet */}
       <AnimatePresence>
         {showFlashSaleBanner && (
           <motion.div
@@ -196,7 +196,7 @@ function NavbarContent() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-gradient-to-r from-[#ffa509] via-orange-500 to-[#ffa509] text-white sticky top-0 z-[60] shadow-lg"
+            className="hidden lg:block bg-gradient-to-r from-[#ffa509] via-orange-500 to-[#ffa509] text-white sticky top-0 z-[60] shadow-lg"
             style={{ margin: 0, padding: 0 }}
           >
             <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
@@ -256,14 +256,14 @@ function NavbarContent() {
       </AnimatePresence>
 
       <nav 
-        className={`bg-[#050b2c] shadow-xl sticky z-50 ${showFlashSaleBanner ? 'top-[56px] sm:top-[64px] lg:top-[72px]' : 'top-0'}`}
+        className={`bg-[#050b2c] shadow-xl sticky z-50 ${showFlashSaleBanner ? 'top-0 lg:top-[72px]' : 'top-0'}`}
         style={{ margin: 0, padding: 0, marginTop: '-5px', width: '100%', maxWidth: '100%' }}
       >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Bar Row */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 lg:gap-4 py-2 sm:py-3">
           {/* Left Section - Shop By Categories */}
-            <div className="relative w-full sm:w-auto" ref={shopDropdownRef}>
+            <div className="hidden lg:block relative w-full sm:w-auto" ref={shopDropdownRef}>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -316,7 +316,7 @@ function NavbarContent() {
             </div>
 
             {/* Search Bar with Category Dropdown */}
-            <div className="flex-1 w-full sm:max-w-2xl" ref={searchRef}>
+            <div className="hidden lg:flex flex-1 w-full sm:max-w-2xl" ref={searchRef}>
               <form onSubmit={handleSearch} className="relative">
                 <div className="flex items-stretch">
                   {/* Category Dropdown */}
@@ -511,7 +511,28 @@ function NavbarContent() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+                {/* Brand Logo */}
+                <Link href="/" className="flex items-center gap-2 group">
+                  {/* Shopping Bag Icon - Hidden on mobile/tablet, shown on desktop */}
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.3 }}
+                    className="hidden lg:flex w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-lg items-center justify-center shadow-lg group-hover:shadow-xl transition-all"
+                  >
+                    <FiShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#050b2c]" />
+                  </motion.div>
+                  {/* Teezee Text - Shown on mobile/tablet, also shown on desktop */}
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    className="text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-white via-[#ffa509] to-white bg-clip-text text-transparent"
+                  >
+                    Teezee
+                  </motion.span>
+                </Link>
+                
+                <div className="h-6 w-px bg-white/20"></div>
+                
                 <Button
                   variant="outline"
                   size="sm"
@@ -576,7 +597,7 @@ function NavbarContent() {
               </motion.div>
             </Link>
 
-            {/* Flash Sales Link */}
+            {/* Flash Sales Link - Hidden on mobile/tablet (already hidden by parent container) */}
             <Link href="/flash-sales">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -748,19 +769,21 @@ function NavbarContent() {
                   <span className="font-medium">Home</span>
                 </Link>
 
-                  {/* Flash Sales Link */}
-                  <Link
-                    href="/flash-sales"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive('/flash-sales')
-                        ? 'bg-[#ffa509] text-white'
-                        : 'text-white hover:bg-white/10'
-                    }`}
-                  >
-                    <FiZap className="w-5 h-5" />
-                    <span className="font-medium">Flash Sales</span>
-                  </Link>
+                  {/* Flash Sales Link - Hidden on mobile/tablet */}
+                  <div className="hidden">
+                    <Link
+                      href="/flash-sales"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        isActive('/flash-sales')
+                          ? 'bg-[#ffa509] text-white'
+                          : 'text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <FiZap className="w-5 h-5" />
+                      <span className="font-medium">Flash Sales</span>
+                    </Link>
+                  </div>
 
                 {/* All Categories Link */}
                 <Link

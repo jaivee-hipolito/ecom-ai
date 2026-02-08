@@ -6,7 +6,7 @@ import ProductImage from '@/components/products/ProductImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiShoppingBag, FiPackage, FiTag, FiX, FiCheck } from 'react-icons/fi';
 import { useState } from 'react';
-import { calculateBCTax } from '@/utils/tax';
+import { formatCurrency } from '@/utils/currency';
 
 interface OrderSummaryProps {
   items: ICartItem[];
@@ -14,21 +14,18 @@ interface OrderSummaryProps {
   shipping?: number;
   tax?: number;
   total: number;
-  onCouponApplied?: (discount: number) => void;
+  bnplFee?: number;
+  paymentMethod?: 'card' | 'afterpay' | 'klarna' | 'affirm';
+  onCouponApplied?: (discount: number, couponCode?: string, couponType?: 'percentage' | 'fixed') => void;
 }
-
-// Format currency with commas
-const formatCurrency = (amount: number): string => {
-  return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
 
 // Mock coupon codes - In production, this would come from an API
 const COUPON_CODES: Record<string, { discount: number; type: 'percentage' | 'fixed' }> = {
-  'SAVE20': { discount: 20, type: 'percentage' },
-  'FLASH30': { discount: 30, type: 'percentage' },
-  'NEWUSER15': { discount: 15, type: 'percentage' },
+  'SAVE10': { discount: 10, type: 'fixed' },
+  'FLASH10': { discount: 10, type: 'fixed' },
+  'NEWUSER10': { discount: 10, type: 'fixed' },
   'SAVE50': { discount: 50, type: 'fixed' },
-  'WELCOME10': { discount: 10, type: 'percentage' },
+  'WELCOME10': { discount: 10, type: 'fixed' },
 };
 
 export default function OrderSummary({
@@ -37,6 +34,8 @@ export default function OrderSummary({
   shipping = 0,
   tax = 0,
   total,
+  bnplFee = 0,
+  paymentMethod = 'card',
   onCouponApplied,
 }: OrderSummaryProps) {
   const [couponCode, setCouponCode] = useState('');
@@ -55,6 +54,12 @@ export default function OrderSummary({
   };
 
   const handleApplyCoupon = async () => {
+    // Prevent applying a coupon if one is already applied
+    if (appliedCoupon) {
+      setCouponError('A coupon has already been applied. Please remove it first to apply another.');
+      return;
+    }
+
     if (!couponCode.trim()) {
       setCouponError('Please enter a coupon code');
       return;
@@ -63,24 +68,47 @@ export default function OrderSummary({
     setIsApplying(true);
     setCouponError(null);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
       const code = couponCode.trim().toUpperCase();
-      const coupon = COUPON_CODES[code];
+      
+      // Validate coupon with API
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ couponCode: code }),
+      });
 
-      if (coupon) {
-        const newCoupon = { code, ...coupon };
+      const data = await response.json();
+
+      if (!response.ok) {
+        setCouponError(data.error || 'Failed to validate coupon');
+        setIsApplying(false);
+        return;
+      }
+
+      if (data.valid && data.coupon) {
+        const newCoupon = {
+          code: data.coupon.code,
+          discount: data.coupon.discount,
+          type: data.coupon.type,
+        };
         setAppliedCoupon(newCoupon);
         setCouponCode('');
         const discount = calculateDiscount(newCoupon);
         if (onCouponApplied) {
-          onCouponApplied(discount);
+          onCouponApplied(discount, newCoupon.code, newCoupon.type);
         }
       } else {
         setCouponError('Invalid coupon code');
       }
+    } catch (error: any) {
+      console.error('Error applying coupon:', error);
+      setCouponError('Failed to apply coupon. Please try again.');
+    } finally {
       setIsApplying(false);
-    }, 500);
+    }
   };
 
   const handleRemoveCoupon = () => {
@@ -88,13 +116,27 @@ export default function OrderSummary({
     setCouponCode('');
     setCouponError(null);
     if (onCouponApplied) {
-      onCouponApplied(0);
+      onCouponApplied(0, undefined, undefined);
     }
   };
 
   const discount = calculateDiscount(appliedCoupon);
   const subtotalAfterDiscount = subtotal - discount;
-  const taxBreakdown = calculateBCTax(subtotalAfterDiscount);
+  
+  // IMPORTANT: For BNPL payments, the payment intent includes the 6% fee, but we DON'T show it in the UI
+  // Users should only see the product total, not the BNPL fee
+  // The fee is included in the payment intent sent to Stripe, but hidden from the user display
+  const effectiveBnplFee = 0; // Always 0 for UI display - fee is included in payment intent but not shown
+  
+  // Tax is shouldered by owner/admin, so set to 0 for customers
+  const taxBreakdown = {
+    subtotal: subtotalAfterDiscount,
+    gst: 0,
+    pst: 0,
+    totalTax: 0,
+    total: subtotalAfterDiscount,
+  };
+  // Final total for display - does NOT include BNPL fee (even though payment intent does)
   const finalTotal = Math.max(0, subtotalAfterDiscount + shipping + taxBreakdown.totalTax);
   
   return (
@@ -152,7 +194,7 @@ export default function OrderSummary({
                   Qty: <span className="font-semibold text-white">{item.quantity}</span>
                 </p>
                 <p className="text-sm sm:text-base font-bold bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent">
-                  ${formatCurrency(itemTotal)}
+                  {formatCurrency(itemTotal)}
                 </p>
               </div>
             </motion.div>
@@ -168,7 +210,7 @@ export default function OrderSummary({
               <FiTag className="w-4 h-4 text-[#ffa509]" />
               <label className="text-sm font-semibold text-white">Have a coupon code?</label>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 min-w-0">
               <input
                 type="text"
                 value={couponCode}
@@ -183,14 +225,14 @@ export default function OrderSummary({
                   }
                 }}
                 placeholder="Enter code"
-                className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] text-sm sm:text-base"
+                className="flex-1 min-w-0 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] text-sm sm:text-base"
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleApplyCoupon}
                 disabled={isApplying || !couponCode.trim()}
-                className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                className="flex-shrink-0 px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
               >
                 {isApplying ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -247,7 +289,7 @@ export default function OrderSummary({
       <div className="border-t border-white/20 pt-4 space-y-3">
         <div className="flex justify-between items-center text-white/90">
           <span className="text-sm sm:text-base">Subtotal</span>
-          <span className="font-semibold text-lg">${formatCurrency(subtotal)}</span>
+          <span className="font-semibold text-lg">{formatCurrency(subtotal)}</span>
         </div>
         
         {discount > 0 && (
@@ -260,33 +302,19 @@ export default function OrderSummary({
               <FiTag className="w-4 h-4" />
               Discount ({appliedCoupon?.code})
             </span>
-            <span className="font-bold text-lg">-${formatCurrency(discount)}</span>
+            <span className="font-bold text-lg">-{formatCurrency(discount)}</span>
           </motion.div>
         )}
+        
+        {/* BNPL fee is NOT shown in UI - it's included in payment intent but hidden from users */}
         
         {shipping > 0 && (
           <div className="flex justify-between items-center text-white/70">
             <span className="text-sm sm:text-base">Shipping</span>
-            <span className="text-sm">${formatCurrency(shipping)}</span>
+            <span className="text-sm">{formatCurrency(shipping)}</span>
           </div>
         )}
         
-        {taxBreakdown.totalTax > 0 && (
-          <>
-            <div className="flex justify-between items-center text-white/70">
-              <span className="text-sm sm:text-base">GST (5%)</span>
-              <span className="text-sm">${formatCurrency(taxBreakdown.gst)}</span>
-            </div>
-          <div className="flex justify-between items-center text-white/70">
-              <span className="text-sm sm:text-base">PST (7%)</span>
-              <span className="text-sm">${formatCurrency(taxBreakdown.pst)}</span>
-            </div>
-            <div className="flex justify-between items-center text-white/90 font-semibold border-t border-white/10 pt-2">
-              <span className="text-sm sm:text-base">Total Tax</span>
-              <span className="text-base">${formatCurrency(taxBreakdown.totalTax)}</span>
-          </div>
-          </>
-        )}
         
         <div className="border-t border-white/20 pt-4 mt-4">
           <div className="flex justify-between items-center">
@@ -297,7 +325,7 @@ export default function OrderSummary({
               animate={{ scale: 1 }}
               className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent"
             >
-              ${formatCurrency(finalTotal)}
+              {formatCurrency(finalTotal)}
             </motion.span>
           </div>
         </div>

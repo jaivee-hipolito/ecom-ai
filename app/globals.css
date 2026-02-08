@@ -127,6 +127,22 @@ body {
   line-height: 2.25rem;
 }
 
+/* Hide view count icons/badges in quick view - dark buttons with eye icons and numbers */
+/* Target: Dark gray/blue rounded buttons with orange eye icons and white numbers */
+.quick-view-container button:has(svg[class*="FiEye"]):has(span),
+.quick-view-container div:has(svg[class*="FiEye"]):has(span),
+.quick-view-container button:has(svg[fill*="#ffa509"]):has(span[class*="text-white"]),
+.quick-view-container div:has(svg[fill*="#ffa509"]):has(span[class*="text-white"]),
+/* Hide any button/div with dark background containing eye icon and number */
+.quick-view-container button[class*="bg-\[#30303E\]"],
+.quick-view-container div[class*="bg-\[#30303E\]"],
+.quick-view-container button[class*="bg-gray-800"],
+.quick-view-container div[class*="bg-gray-800"],
+.quick-view-container button[class*="bg-gray-900"],
+.quick-view-container div[class*="bg-gray-900"] {
+  display: none !important;
+}
+
 /* Cart Icon Animation */
 @keyframes cartBounce {
   0%, 100% {
@@ -161,4 +177,131 @@ body {
 
 .cart-badge-pulse {
   animation: cartBadgePulse 0.6s ease-in-out;
+}
+
+/* Ensure Stripe PaymentElement BNPL buttons are fully visible on mobile */
+@media (max-width: 1024px) {
+  /* PaymentElement container */
+  [data-testid="payment-element"],
+  [id*="payment-element"],
+  .StripeElement {
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Payment method tabs container - allow horizontal scroll with extra padding */
+  [role="tablist"],
+  [class*="TabList"],
+  [class*="tab-list"],
+  div[class*="Tabs"],
+  div[class*="tabs"],
+  div[class*="PaymentMethodTabs"],
+  div[class*="payment-method-tabs"] {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 2rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Ensure tablist can scroll and show all buttons */
+  [role="tablist"] {
+    scroll-padding-right: 1rem !important;
+  }
+  
+  /* BNPL payment method buttons - ensure full visibility */
+  [role="tab"],
+  button[class*="Tab"],
+  button[class*="tab"],
+  [class*="TabButton"],
+  [class*="tab-button"],
+  button[class*="PaymentMethodButton"],
+  button[class*="payment-method-button"],
+  button[class*="PaymentMethod"],
+  button[class*="payment-method"] {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  /* Ensure buttons are not clipped */
+  [class*="PaymentElement"],
+  [class*="payment-element"],
+  [class*="PaymentMethodSelector"],
+  [class*="payment-method-selector"] {
+    overflow: visible !important;
+  }
+  
+  /* Affirm button specifically - ensure it's fully visible with extra margin */
+  button[aria-label*="Affirm"],
+  button[aria-label*="affirm"],
+  [class*="Affirm"],
+  [class*="affirm"],
+  button[title*="Affirm"],
+  button[title*="affirm"],
+  /* Target last button in tablist (likely Affirm) */
+  [role="tablist"] > [role="tab"]:last-child {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    z-index: 10 !important;
+    margin-right: 1rem !important;
+  }
+  
+  /* Klarna button */
+  button[aria-label*="Klarna"],
+  button[aria-label*="klarna"],
+  [class*="Klarna"],
+  [class*="klarna"] {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Afterpay button */
+  button[aria-label*="Afterpay"],
+  button[aria-label*="afterpay"],
+  [class*="Afterpay"],
+  [class*="afterpay"] {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Hide Stripe's default installment amounts - we show our own with 6% fee */
+  /* Target Stripe PaymentElement installment descriptions */
+  /* Note: Text content hiding is handled by JavaScript useEffect in PaymentForm.tsx */
+  [class*="PaymentMethod"] [class*="Description"],
+  [class*="payment-method"] [class*="description"],
+  [class*="PaymentMethod"] [class*="Installment"],
+  [class*="payment-method"] [class*="installment"] {
+    display: none !important;
+  }
+}
+
+/* Admin pages - ensure all interactive elements have pointer cursor */
+[id="admin-content"] button:not(:disabled),
+[id="admin-content"] a,
+[id="admin-content"] img[onClick],
+[id="admin-content"] [role="button"] {
+  cursor: pointer;
+}
+
+[id="admin-content"] button:disabled {
+  cursor: not-allowed;
 }

@@ -3,10 +3,12 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { FiZap } from 'react-icons/fi';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
+import { formatCurrency } from '@/utils/currency';
 import Alert from '@/components/ui/Alert';
 import ImageUpload from './ImageUpload';
 import DynamicAttributes from './DynamicAttributes';
@@ -30,6 +32,9 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
     category: product?.category || '',
     stock: product?.stock || 0,
     featured: product?.featured || false,
+    isFlashSale: product?.isFlashSale || false,
+    flashSaleDiscount: product?.flashSaleDiscount || 0,
+    flashSaleDiscountType: product?.flashSaleDiscountType || 'percentage',
   });
   const [attributes, setAttributes] = useState<Record<string, any>>(
     product?.attributes || {}
@@ -43,10 +48,38 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [attributeErrors, setAttributeErrors] = useState<Record<string, string>>({});
   const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [previewDiscountedPrice, setPreviewDiscountedPrice] = useState<number | null>(null);
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Calculate preview discounted price when discount or discount type changes
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  useEffect(() => {
+    if (formData.isFlashSale && formData.flashSaleDiscount > 0 && formData.price) {
+      const price = parseFloat(formData.price as string);
+      if (!isNaN(price) && price > 0) {
+        // Displayed price is always the product price
+        // For preview, we calculate what the crossed-out price would be
+        let crossedOutPrice: number;
+        if (formData.flashSaleDiscountType === 'percentage') {
+          // Crossed out price = price * percentage * price + price
+          // Example: price=100, percentage=20 => 100 * (20/100) * 100 + 100 = 100 * 0.2 * 100 + 100 = 2000 + 100 = 2100
+          // OR: price * (percentage/100) + price = price * (1 + percentage/100)
+          // Let's use: price * (percentage/100) + price for now
+          crossedOutPrice = price * (formData.flashSaleDiscount / 100) + price;
+        } else {
+          // For fixed amount, crossed out price = price + discount
+          crossedOutPrice = price + formData.flashSaleDiscount;
+        }
+        // Store the crossed out price for display (we'll show price as displayed, crossedOutPrice as crossed out)
+        setPreviewDiscountedPrice(crossedOutPrice);
+      }
+    } else if (!formData.isFlashSale || formData.flashSaleDiscount === 0) {
+      setPreviewDiscountedPrice(null);
+    }
+  }, [formData.isFlashSale, formData.flashSaleDiscount, formData.flashSaleDiscountType, formData.price]);
 
   useEffect(() => {
     // Load category details when category is selected or product has category
@@ -173,19 +206,36 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
       // Clear attribute errors if validation passes
       setAttributeErrors({});
 
+      const requestBody: any = {
+        ...formData,
+        price: parseFloat(formData.price as string),
+        stock: typeof formData.stock === 'string' ? parseInt(formData.stock) : formData.stock,
+        images,
+        coverImage: finalCoverImage,
+        attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
+        isFlashSale: formData.isFlashSale || false,
+      };
+
+      // Only include flash sale discount fields if flash sale is enabled
+      if (formData.isFlashSale) {
+        // Always send the actual discount value (even if 0) when flash sale is enabled
+        const discountValue = typeof formData.flashSaleDiscount === 'number' 
+          ? formData.flashSaleDiscount 
+          : parseFloat(String(formData.flashSaleDiscount || 0));
+        requestBody.flashSaleDiscount = discountValue;
+        requestBody.flashSaleDiscountType = formData.flashSaleDiscountType || 'percentage';
+      } else {
+        // If disabling flash sale, clear the discount fields
+        requestBody.flashSaleDiscount = 0;
+        requestBody.flashSaleDiscountType = 'percentage';
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price as string),
-          stock: typeof formData.stock === 'string' ? parseInt(formData.stock) : formData.stock,
-          images,
-          coverImage: finalCoverImage,
-          attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -222,7 +272,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    setFormData({
+    const updatedFormData = {
       ...formData,
       [name]:
         type === 'checkbox'
@@ -230,7 +280,25 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
           : type === 'number'
           ? value
           : value,
-    });
+    };
+    
+    setFormData(updatedFormData);
+    
+    // Recalculate preview when price is directly edited
+    if (name === 'price' && updatedFormData.isFlashSale && updatedFormData.flashSaleDiscount > 0) {
+      const price = parseFloat(value);
+      if (!isNaN(price) && price > 0) {
+        let crossedOutPrice: number;
+        if (updatedFormData.flashSaleDiscountType === 'percentage') {
+          // Crossed out price = price * (percentage/100) + price
+          crossedOutPrice = price * (updatedFormData.flashSaleDiscount / 100) + price;
+        } else {
+          // For fixed amount, crossed out price = price + discount
+          crossedOutPrice = price + updatedFormData.flashSaleDiscount;
+        }
+        setPreviewDiscountedPrice(crossedOutPrice);
+      }
+    }
   };
 
   const handleGenerateDescription = async () => {
@@ -451,7 +519,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-4 gap-6"
       >
         <div className="space-y-2">
           <Input
@@ -499,7 +567,119 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             </span>
           </label>
         </div>
+
+        <div className="flex items-center pt-8">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              id="isFlashSale"
+              name="isFlashSale"
+              checked={formData.isFlashSale}
+              onChange={(e) =>
+                setFormData({ ...formData, isFlashSale: e.target.checked })
+              }
+              className="h-5 w-5 text-[#ffa509] focus:ring-[#ffa509] border-2 border-gray-300 rounded transition-all cursor-pointer group-hover:border-[#ffa509]"
+            />
+            <span className="block text-sm font-semibold text-[#050b2c] group-hover:text-[#ffa509] transition-colors">
+              Enable Flash Sale
+            </span>
+          </label>
+        </div>
       </motion.div>
+
+      {/* Flash Sale Section */}
+      {formData.isFlashSale && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border-2 border-red-200"
+        >
+          <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-[#050b2c]">
+                  Discount Type
+                </label>
+                <select
+                  name="flashSaleDiscountType"
+                  value={formData.flashSaleDiscountType}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      flashSaleDiscountType: e.target.value as 'percentage' | 'fixed',
+                    })
+                  }
+                  className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-[#050b2c]"
+                >
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount ($)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Input
+                  label={
+                    formData.flashSaleDiscountType === 'percentage'
+                      ? 'Discount Percentage'
+                      : 'Discount Amount ($)'
+                  }
+                  name="flashSaleDiscount"
+                  type="number"
+                  step={formData.flashSaleDiscountType === 'percentage' ? '1' : '0.01'}
+                  min="0"
+                  max={formData.flashSaleDiscountType === 'percentage' ? '100' : undefined}
+                  value={formData.flashSaleDiscount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      flashSaleDiscount: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  placeholder={
+                    formData.flashSaleDiscountType === 'percentage'
+                      ? 'e.g., 20'
+                      : 'e.g., 10.00'
+                  }
+                  className="bg-white border-2 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-[#050b2c] placeholder:text-gray-400"
+                />
+                {formData.flashSaleDiscount > 0 && formData.price && previewDiscountedPrice !== null && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mt-2 p-3 bg-white rounded-lg border border-red-200"
+                  >
+                    <p className="text-xs text-gray-600 mb-2 font-semibold">Preview:</p>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className="text-lg font-bold text-red-500">
+                        {formatCurrency(parseFloat(formData.price as string))}
+                      </span>
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatCurrency(previewDiscountedPrice)}
+                      </span>
+                      {formData.flashSaleDiscountType === 'fixed' && parseFloat(formData.price as string) > 0 && (
+                        <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                          ({((formData.flashSaleDiscount / parseFloat(formData.price as string)) * 100).toFixed(1)}% off)
+                        </span>
+                      )}
+                      {formData.flashSaleDiscountType === 'percentage' && (
+                        <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                          ({formData.flashSaleDiscount}% off)
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
 
       <ImageUpload
         images={images}

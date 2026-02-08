@@ -5,11 +5,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
-import ProductRating from '@/components/products/ProductRating';
 import { useProducts } from '@/hooks/useProducts';
 import { FiZap, FiClock, FiEye } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import QuickView from '@/components/products/QuickView';
+import { formatCurrency } from '@/utils/currency';
 
 interface Category {
   _id: string;
@@ -132,13 +132,44 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate discount percentage (mock calculation - you can add actual discount field to product)
-  const calculateDiscount = (product: IProduct): number => {
-    // Mock discount calculation - in real app, this would come from product data
-    if (product.name.toLowerCase().includes('watch') || product.name.toLowerCase().includes('jbl')) {
-      return 25;
+  // Calculate flash sale discount and prices from product data
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: IProduct) => {
+    if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discountPercentage: 0,
+        displayedPrice: product.price,
+        crossedOutPrice: product.price,
+        hasDiscount: false,
+      };
     }
-    return 0;
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
+    
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the product.price
+    displayedPrice = product.price;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
+    }
+
+    return {
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
   };
 
   // Calculate sold percentage for progress bar
@@ -224,10 +255,11 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
         ) : displayProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayProducts.map((product, index) => {
-              const discount = calculateDiscount(product);
-              const soldPercentage = calculateSoldPercentage(product);
-              const hasDiscount = discount > 0;
-              const originalPrice = hasDiscount ? product.price / (1 - discount / 100) : product.price;
+              const flashSaleData = calculateFlashSaleData(product);
+              const hasDiscount = flashSaleData.hasDiscount;
+              const discount = flashSaleData.discountPercentage;
+              const displayedPrice = flashSaleData.displayedPrice;
+              const crossedOutPrice = flashSaleData.crossedOutPrice;
 
               return (
                 <motion.div
@@ -239,7 +271,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                   whileHover={{ y: -8 }}
                   className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group"
                 >
-                  <Link href={`/products/${product._id}`} className="block">
+                  <Link href={`/products/${product._id}${hasDiscount ? '?flashSale=true' : ''}`} className="block">
                     {/* Product Image Container */}
                     <div className="relative aspect-square bg-gray-100 overflow-hidden">
                       <ProductImage 
@@ -264,28 +296,36 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                         </motion.button>
                       </motion.div>
                       
-                      {/* Discount Badge */}
+                      {/* Flash Sale Badge */}
                       {hasDiscount && (
                         <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="absolute top-3 right-3 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full px-3 py-1.5 font-bold text-sm shadow-lg z-30"
+                          initial={{ scale: 0, rotate: -45 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                          className="absolute top-3 left-3 bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5 z-30"
                         >
-                          -{discount}%
+                          <motion.div
+                            animate={{ rotate: [0, 10, -10, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                          >
+                            <FiZap className="w-3 h-3" />
+                          </motion.div>
+                          <span className="text-[10px] font-black tracking-wide">FLASH</span>
                         </motion.div>
                       )}
 
-                      {/* Hot Sale Badge */}
+                      {/* Discount Badge */}
                       {hasDiscount && (
                         <motion.div
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.3 }}
-                          className="absolute bottom-3 left-3 right-3 flex items-center gap-2 bg-gradient-to-r from-[#ffa509] to-orange-500 text-white px-3 py-2 rounded-lg shadow-lg z-30"
+                          initial={{ scale: 0, rotate: 180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.3, type: 'spring' }}
+                          className="absolute top-3 right-3 bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white z-30"
                         >
-                          <FiZap className="w-4 h-4" />
-                          <span className="text-xs font-semibold">HOT SALE {discount}% OFF</span>
+                          <div className="text-center">
+                            <div className="text-xs font-black leading-tight">-{discount}%</div>
+                            <div className="text-[7px] font-bold">OFF</div>
+                          </div>
                         </motion.div>
                       )}
 
@@ -312,48 +352,23 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                         {product.name}
                       </h3>
 
-                      {/* Rating */}
-                      <div className="mb-3">
-                        <ProductRating
-                          rating={product.rating || 0}
-                          numReviews={product.numReviews}
-                          showReviews={true}
-                        />
-                      </div>
 
                       {/* Price */}
                       <div className="flex items-center gap-2 mb-4">
                         {hasDiscount ? (
                           <>
-                            <span className="text-2xl font-bold text-[#ffa509]">
-                              ${product.price.toFixed(2)}
+                            <span className="text-2xl font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                              {formatCurrency(displayedPrice)}
                             </span>
                             <span className="text-lg text-gray-400 line-through">
-                              ${originalPrice.toFixed(2)}
+                              {formatCurrency(crossedOutPrice)}
                             </span>
                           </>
                         ) : (
                           <span className="text-2xl font-bold text-[#050b2c]">
-                            ${product.price.toFixed(2)}
+                            {formatCurrency(product.price)}
                           </span>
                         )}
-                      </div>
-
-                      {/* Stock Progress Bar */}
-                      <div className="mb-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                          <span>Available: {product.stock}</span>
-                          <span>Sold: 50</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            whileInView={{ width: `${soldPercentage}%` }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1, delay: index * 0.1 }}
-                            className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full"
-                          />
-                        </div>
                       </div>
                     </div>
                   </Link>
@@ -378,6 +393,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
           productId={quickViewProductId}
           isOpen={isQuickViewOpen}
           onClose={handleCloseQuickView}
+          isFlashSale={displayProducts.find(p => p._id === quickViewProductId)?.isFlashSale || false}
         />
       </div>
     </div>

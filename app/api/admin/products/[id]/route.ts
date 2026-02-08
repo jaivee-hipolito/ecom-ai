@@ -71,7 +71,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description, price, category, images, coverImage, stock, featured, attributes } = body;
+    const { name, description, price, category, images, coverImage, stock, featured, attributes, isFlashSale, flashSaleDiscount, flashSaleDiscountType } = body;
 
     const product = await Product.findById(id);
 
@@ -118,6 +118,21 @@ export async function PUT(
     
     if (stock !== undefined) product.stock = parseInt(stock);
     if (featured !== undefined) product.featured = featured;
+    if (isFlashSale !== undefined) {
+      product.isFlashSale = isFlashSale;
+      // If disabling flash sale, clear discount fields
+      if (!isFlashSale) {
+        product.flashSaleDiscount = 0;
+        product.flashSaleDiscountType = 'percentage';
+      }
+    }
+    // Update flash sale discount fields if provided in request body
+    if (flashSaleDiscount !== undefined) {
+      product.flashSaleDiscount = parseFloat(flashSaleDiscount) || 0;
+    }
+    if (flashSaleDiscountType !== undefined) {
+      product.flashSaleDiscountType = flashSaleDiscountType;
+    }
     if (attributes !== undefined) product.attributes = attributes;
 
     await product.save();

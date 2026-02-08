@@ -5,15 +5,17 @@ const UserSchema = new Schema<IUser>(
   {
     firstName: {
       type: String,
-      required: [true, 'Please provide a first name'],
+      required: false, // Make optional for OAuth users
       trim: true,
       maxlength: [50, 'First name cannot be more than 50 characters'],
+      default: '', // Allow empty first name for OAuth users
     },
     lastName: {
       type: String,
-      required: [true, 'Please provide a last name'],
+      required: false, // Make optional for OAuth users
       trim: true,
       maxlength: [50, 'Last name cannot be more than 50 characters'],
+      default: '', // Allow empty last name for OAuth users
     },
     name: {
       type: String,
@@ -24,12 +26,13 @@ const UserSchema = new Schema<IUser>(
     },
     contactNumber: {
       type: String,
-      required: [true, 'Please provide a contact number'],
+      required: false, // Make optional for OAuth users
       trim: true,
       match: [
-        /^[\d\s\-\+\(\)]+$/,
+        /^[\d\s\-\+\(\)]*$/, // Allow empty string for OAuth users
         'Please provide a valid contact number',
       ],
+      default: '', // Allow empty contact number for OAuth users
     },
     email: {
       type: String,
@@ -44,10 +47,17 @@ const UserSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
-      minlength: [6, 'Password must be at least 6 characters'],
+      required: false, // Make optional for OAuth users
+      validate: {
+        validator: function(this: IUser, value?: string) {
+          // If password is provided, it must be at least 6 characters
+          // OAuth users can have empty password
+          return !value || value.length >= 6;
+        },
+        message: 'Password must be at least 6 characters',
+      },
       select: false, // Don't return password by default
-    },
+    } as any,
     role: {
       type: String,
       enum: ['admin', 'customer'],
@@ -56,6 +66,38 @@ const UserSchema = new Schema<IUser>(
     image: {
       type: String,
       default: '',
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationCode: {
+      type: String,
+      select: false,
+    },
+    phoneVerificationCode: {
+      type: String,
+      select: false,
+    },
+    emailVerificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
+    phoneVerificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordTokenExpires: {
+      type: Date,
+      select: false,
     },
   },
   {

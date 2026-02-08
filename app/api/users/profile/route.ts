@@ -52,6 +52,8 @@ export async function GET(request: NextRequest) {
         firstName: firstName || '',
         lastName: lastName || '',
         contactNumber: contactNumber || '',
+        emailVerified: (user as any).emailVerified || false,
+        phoneVerified: (user as any).phoneVerified || false,
         _id: user._id.toString(),
         createdAt: user.createdAt?.toISOString(),
         updatedAt: user.updatedAt?.toISOString(),
@@ -147,6 +149,12 @@ export async function PUT(request: NextRequest) {
       }
 
       // Verify current password
+      if (!user.password) {
+        return NextResponse.json(
+          { error: 'User does not have a password set' },
+          { status: 400 }
+        );
+      }
       const isPasswordValid = await bcrypt.compare(
         currentPassword,
         user.password

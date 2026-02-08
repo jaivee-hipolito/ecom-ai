@@ -22,6 +22,7 @@ export function useProducts(options: UseProductsOptions = {}) {
       filtersOption.minPrice,
       filtersOption.maxPrice,
       filtersOption.featured,
+      filtersOption.isFlashSale,
       filtersOption.search,
     ]
   );
@@ -70,6 +71,8 @@ export function useProducts(options: UseProductsOptions = {}) {
           params.append('maxPrice', filters.maxPrice.toString());
         if (filters.featured !== undefined)
           params.append('featured', filters.featured.toString());
+        if (filters.isFlashSale !== undefined)
+          params.append('isFlashSale', filters.isFlashSale.toString());
         if (filters.search) params.append('search', filters.search);
 
         const response = await fetch(`/api/products?${params.toString()}`);
@@ -112,6 +115,8 @@ export function useProducts(options: UseProductsOptions = {}) {
       params.append('maxPrice', filters.maxPrice.toString());
     if (filters.featured !== undefined)
       params.append('featured', filters.featured.toString());
+    if (filters.isFlashSale !== undefined)
+      params.append('isFlashSale', filters.isFlashSale.toString());
     if (filters.search) params.append('search', filters.search);
 
     try {

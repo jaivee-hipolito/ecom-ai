@@ -5,11 +5,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
-import ProductRating from '@/components/products/ProductRating';
 import { useProducts } from '@/hooks/useProducts';
-import { FiEye, FiTrendingUp, FiArrowRight } from 'react-icons/fi';
+import { FiEye, FiTrendingUp, FiArrowRight, FiZap } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import QuickView from '@/components/products/QuickView';
+import { formatCurrency } from '@/utils/currency';
 
 interface MostViewedProductsProps {
   initialProducts?: IProduct[];
@@ -67,6 +67,46 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
     setTimeout(() => setQuickViewProductId(null), 300);
   };
 
+  // Calculate flash sale discount and prices from product data
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: IProduct) => {
+    if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discountPercentage: 0,
+        displayedPrice: product.price,
+        crossedOutPrice: product.price,
+        hasDiscount: false,
+      };
+    }
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
+    
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the product.price
+    displayedPrice = product.price;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
+    }
+
+    return {
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
+  };
+
   const displayProducts = products.length > 0 ? products : initialProducts.slice(0, 8);
 
   if (displayProducts.length === 0 && !isLoading) {
@@ -121,6 +161,8 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayProducts.map((product, index) => {
               const viewCount = product.views || 0;
+              const flashSaleData = calculateFlashSaleData(product);
+              const hasFlashSaleDiscount = flashSaleData.hasDiscount;
 
               return (
                 <motion.div
@@ -132,7 +174,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                   whileHover={{ y: -8 }}
                   className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
                 >
-                  <Link href={`/products/${product._id}`} className="block">
+                  <Link href={`/products/${product._id}${hasFlashSaleDiscount ? '?flashSale=true' : ''}`} className="block">
                     {/* Product Image Container */}
                     <div className="relative aspect-square bg-gray-100 overflow-hidden">
                       <ProductImage 
@@ -157,8 +199,45 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                         </motion.button>
                       </motion.div>
 
+                      {/* Flash Sale Badge */}
+                      {hasFlashSaleDiscount && (
+                        <div className="absolute top-3 left-3 z-30">
+                          <motion.div
+                            initial={{ scale: 0, rotate: -45 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                            className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1"
+                          >
+                            <motion.div
+                              animate={{ rotate: [0, 10, -10, 0] }}
+                              transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                            >
+                              <FiZap className="w-3 h-3" />
+                            </motion.div>
+                            <span className="text-[9px] font-black tracking-wide">FLASH</span>
+                          </motion.div>
+                        </div>
+                      )}
+
+                      {/* Discount Badge */}
+                      {hasFlashSaleDiscount && (
+                        <div className="absolute top-3 right-3 z-30">
+                          <motion.div
+                            initial={{ scale: 0, rotate: 180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: 0.3, type: 'spring' }}
+                            className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white"
+                          >
+                            <div className="text-center">
+                              <div className="text-xs font-black leading-tight">-{flashSaleData.discountPercentage}%</div>
+                              <div className="text-[7px] font-bold">OFF</div>
+                            </div>
+                          </motion.div>
+                        </div>
+                      )}
+
                       {/* Views Badge */}
-                      <div className="absolute top-3 right-3 z-30">
+                      <div className={`absolute ${hasFlashSaleDiscount ? 'bottom-3' : 'top-3'} right-3 z-30`}>
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
@@ -178,20 +257,23 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                         {product.name}
                       </h3>
 
-                      {/* Rating */}
-                      <div className="mb-3">
-                        <ProductRating
-                          rating={product.rating || 0}
-                          numReviews={product.numReviews}
-                          showReviews={true}
-                        />
-                      </div>
 
                       {/* Price */}
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-[#050b2c]">
-                          ${product.price.toFixed(2)}
-                        </span>
+                      <div className="mb-2 flex items-baseline gap-2">
+                        {hasFlashSaleDiscount ? (
+                          <>
+                            <span className="text-2xl font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                              {formatCurrency(flashSaleData.displayedPrice)}
+                            </span>
+                            <span className="text-sm text-gray-400 line-through">
+                              {formatCurrency(flashSaleData.crossedOutPrice)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-2xl font-bold text-[#050b2c]">
+                            {formatCurrency(product.price)}
+                          </span>
+                        )}
                       </div>
 
                       {/* View Count Info */}
@@ -222,6 +304,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
           productId={quickViewProductId}
           isOpen={isQuickViewOpen}
           onClose={handleCloseQuickView}
+          isFlashSale={displayProducts.find(p => p._id === quickViewProductId)?.isFlashSale || false}
         />
       </div>
     </div>

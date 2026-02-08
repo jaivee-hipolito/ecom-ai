@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
+import Loading from '@/components/ui/Loading';
 
 export const metadata = {
   title: 'Login | Teezee',
@@ -114,7 +116,15 @@ export default function LoginPage() {
         </div>
 
         <div className="max-w-md w-full relative z-10">
-          <LoginForm />
+          <Suspense fallback={
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 sm:p-10">
+              <div className="flex items-center justify-center py-12">
+                <Loading />
+              </div>
+            </div>
+          }>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </div>

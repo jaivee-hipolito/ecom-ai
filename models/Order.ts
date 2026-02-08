@@ -23,6 +23,14 @@ export interface IOrder extends Document {
     country: string;
     phone: string;
   };
+  billingAddress?: {
+    fullName: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
   paymentMethod: string;
   paymentId?: string;
   createdAt: Date;
@@ -89,6 +97,14 @@ const OrderSchema = new Schema<IOrder>(
       zipCode: { type: String, required: true },
       country: { type: String, required: true },
       phone: { type: String, required: true },
+    },
+    billingAddress: {
+      fullName: { type: String, required: false },
+      address: { type: String, required: false },
+      city: { type: String, required: false },
+      state: { type: String, required: false },
+      zipCode: { type: String, required: false },
+      country: { type: String, required: false },
     },
     paymentMethod: {
       type: String,

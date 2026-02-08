@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const userId = (session.user as any).id;
-    const { amount, currency = 'usd' } = await request.json();
+    const { amount, currency = 'usd', shippingAddress, paymentMethod, billingAddress, itemIds, couponCode, couponDiscount, couponType } = await request.json();
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
       return NextResponse.json(
@@ -35,17 +35,109 @@ export async function POST(request: NextRequest) {
     // Get Stripe instance (will throw if not configured)
     const stripe = getStripe();
 
-    // Create Payment Intent
-    const paymentIntent = await stripe.paymentIntents.create({
+    // Prepare payment intent data with BNPL support
+    const paymentIntentData: any = {
       amount: amountInCents,
       currency: currency.toLowerCase(),
       metadata: {
-        userId: userId,
+        userId: userId.toString(), // Ensure userId is a string
+        // Store order-related data in metadata for webhook to create order
+        ...(shippingAddress && {
+          shippingAddress: JSON.stringify(shippingAddress),
+        }),
+        ...(billingAddress && {
+          billingAddress: JSON.stringify(billingAddress),
+        }),
+        ...(paymentMethod && {
+          paymentMethod: paymentMethod,
+        }),
+        ...(itemIds && Array.isArray(itemIds) && itemIds.length > 0 && {
+          itemIds: JSON.stringify(itemIds),
+        }),
+        ...(couponCode && {
+          couponCode: couponCode,
+        }),
+        ...(couponDiscount && {
+          couponDiscount: couponDiscount.toString(),
+        }),
+        ...(couponType && {
+          couponType: couponType,
+        }),
       },
-      automatic_payment_methods: {
+    };
+
+    // Configure payment methods based on selected payment method
+    if (paymentMethod === 'afterpay') {
+      // Explicitly enable Afterpay when selected - only Afterpay, no card
+      // Note: Cannot use automatic_payment_methods with payment_method_types
+      // Afterpay requires specific configuration
+      paymentIntentData.payment_method_types = ['afterpay_clearpay'];
+      paymentIntentData.payment_method_options = {
+        afterpay_clearpay: {
+          capture_method: 'manual',
+        },
+      };
+      // Ensure currency is supported (CAD for Canada)
+      if (currency.toLowerCase() === 'cad') {
+        paymentIntentData.currency = 'cad';
+      }
+    } else {
+      // Use automatic payment methods for card and other methods
+      paymentIntentData.automatic_payment_methods = {
         enabled: true,
-      },
+        allow_redirects: 'always', // Required for BNPL redirects (Affirm, Klarna)
+      };
+    }
+
+    // Add shipping address for tax calculation if provided
+    if (shippingAddress) {
+      paymentIntentData.shipping = {
+        name: shippingAddress.fullName,
+        address: {
+          line1: shippingAddress.address,
+          city: shippingAddress.city,
+          state: shippingAddress.state,
+          postal_code: shippingAddress.zipCode,
+          country: shippingAddress.country,
+        },
+        phone: shippingAddress.phone,
+      };
+    }
+
+    // Log before creating payment intent
+    console.log('========================================');
+    console.log('[create-intent API] 🆕 CREATING PAYMENT INTENT');
+    console.log('========================================');
+    console.log('Create Request:', {
+      userId,
+      amountInDollars: (amountInCents / 100).toFixed(2),
+      amountInCents,
+      currency,
+      paymentMethod: paymentMethod || 'card',
+      hasShippingAddress: !!shippingAddress,
+      hasBillingAddress: !!billingAddress,
+      itemIds: itemIds || 'all items',
+      timestamp: new Date().toISOString(),
+      stackTrace: new Error().stack?.split('\n').slice(1, 4).join('\n'), // Show call stack
     });
+
+    // Create Payment Intent
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
+
+    // Log available payment methods for debugging BNPL options
+    console.log('[create-intent API] ✅ PAYMENT INTENT CREATED');
+    console.log('Payment Intent Details:', {
+      id: paymentIntent.id,
+      amount: paymentIntent.amount,
+      amountInDollars: (paymentIntent.amount / 100).toFixed(2),
+      currency: paymentIntent.currency,
+      payment_method_types: paymentIntent.payment_method_types,
+      payment_method_options: paymentIntent.payment_method_options,
+      paymentMethod: paymentMethod || 'card',
+      status: paymentIntent.status,
+      timestamp: new Date().toISOString(),
+    });
+    console.log('========================================\n');
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,

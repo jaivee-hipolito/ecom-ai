@@ -108,12 +108,12 @@ export default function ShippingAddressDisplay({
           <h3 className="text-lg font-bold text-[#050b2c]">Shipping Address</h3>
         </div>
         <p className="text-sm text-gray-600 mb-4">No shipping address saved</p>
-        <Link href="/profile/addresses">
+        <Link href="/dashboard/profile/addresses">
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="outline" size="sm" className="w-full border-[#ffa509] text-[#ffa509] hover:bg-[#ffa509] hover:text-white">
-              <FiPlus className="mr-2 w-4 h-4" />
+            <button className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-lg hover:shadow-xl py-3 px-4 text-sm sm:text-base font-semibold transition-all duration-300 rounded-lg flex items-center justify-center gap-2">
+              <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
               Add Shipping Address
-            </Button>
+            </button>
           </motion.div>
         </Link>
       </motion.div>
@@ -195,11 +195,11 @@ export default function ShippingAddressDisplay({
         </div>
       )}
 
-      <Link href="/profile/addresses" className="block mt-4">
+      <Link href="/dashboard/profile/addresses" className="block mt-4">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button variant="outline" size="sm" className="w-full border-[#ffa509] text-[#ffa509] hover:bg-[#ffa509] hover:text-white">
+          <button className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-lg hover:shadow-xl py-3 px-4 text-sm sm:text-base font-semibold transition-all duration-300 rounded-lg">
             {addresses.length > 1 ? 'Manage Addresses' : 'Change Address'}
-          </Button>
+          </button>
         </motion.div>
       </Link>
     </motion.div>

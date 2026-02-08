@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       ? parseFloat(searchParams.get('maxPrice')!)
       : undefined;
     const featured = searchParams.get('featured') === 'true' ? true : undefined;
+    const isFlashSale = searchParams.get('isFlashSale') === 'true' ? true : undefined;
     const search = searchParams.get('search') || undefined;
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
       if (maxPrice !== undefined) filter.price.$lte = maxPrice;
     }
     if (featured !== undefined) filter.featured = featured;
+    if (isFlashSale !== undefined) filter.isFlashSale = isFlashSale;
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },

@@ -222,16 +222,27 @@ export default function OrderDetailPage() {
               <div className="space-y-4">
                 {order.items.map((item, index) => {
                   const product = typeof item.product === 'object' ? item.product : null;
+                  // Use item.image first, then product coverImage/images, then empty string
+                  const imageUrl = item.image || 
+                    (product?.coverImage || (product?.images && product.images[0])) || 
+                    '';
+                  
                   const mockProduct: IProduct = product || {
                     _id: typeof item.product === 'string' ? item.product : '',
                     name: item.name,
-                    coverImage: item.image,
-                    images: item.image ? [item.image] : [],
+                    coverImage: imageUrl,
+                    images: imageUrl ? [imageUrl] : [],
                     price: item.price,
                     description: '',
                     category: '',
                     stock: 0,
                   };
+
+                  // If product exists, ensure it has the image
+                  if (product && !product.coverImage && !product.images?.length && imageUrl) {
+                    mockProduct.coverImage = imageUrl;
+                    mockProduct.images = [imageUrl];
+                  }
 
                   return (
                     <motion.div
@@ -242,8 +253,8 @@ export default function OrderDetailPage() {
                       className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-[#ffa509] transition-colors"
                     >
                       <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                        {item.image ? (
-                          <ProductImage product={mockProduct} className="w-full h-full object-cover" />
+                        {imageUrl ? (
+                          <ProductImage product={mockProduct} className="w-full h-full" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400">
                             <FiPackage className="w-8 h-8" />

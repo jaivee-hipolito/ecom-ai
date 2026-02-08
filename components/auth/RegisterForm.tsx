@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +13,7 @@ import { RegisterData } from '@/types/auth';
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { update: updateSession } = useSession();
   const [formData, setFormData] = useState<RegisterData>({
     firstName: '',
     lastName: '',
@@ -61,10 +63,46 @@ export default function RegisterForm() {
         return;
       }
 
+      // Registration successful - send verification codes in background
+      if (data.requiresVerification) {
+        // Send verification codes in background (don't wait for them)
+        sendEmailVerificationCode(formData.email).catch(console.error);
+        sendPhoneVerificationCode(formData.contactNumber).catch(console.error);
+      }
+      
+      // Automatically sign in the user after successful registration
       setSuccess(true);
-      setTimeout(() => {
-        router.push('/login');
-      }, 1500);
+      try {
+        const signInResult = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        });
+
+        if (signInResult?.error) {
+          // If sign-in fails, still redirect but show error
+          setError('Account created but sign-in failed. Please log in manually.');
+          setTimeout(() => {
+            router.push('/login');
+          }, 2000);
+          setIsLoading(false);
+          return;
+        }
+
+        // Update session and redirect to homepage
+        await updateSession();
+        setTimeout(() => {
+          router.push('/');
+          router.refresh();
+        }, 500);
+      } catch (signInError: any) {
+        // If sign-in fails, redirect to login page
+        setError('Account created successfully! Please sign in.');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      }
+      setIsLoading(false);
     } catch (err: any) {
       setError(err.message || 'An error occurred during registration');
       setIsLoading(false);
@@ -79,6 +117,32 @@ export default function RegisterForm() {
   };
 
   const passwordStrength = formData.password.length >= 6 && formData.password === confirmPassword;
+
+  // Send email verification code (background, no UI feedback)
+  const sendEmailVerificationCode = async (email: string) => {
+    try {
+      await fetch('/api/auth/send-verification-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, type: 'email' }),
+      });
+    } catch (err) {
+      console.error('Failed to send email verification code:', err);
+    }
+  };
+
+  // Send phone verification code (background, no UI feedback)
+  const sendPhoneVerificationCode = async (phoneNumber: string) => {
+    try {
+      await fetch('/api/auth/send-verification-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber, type: 'phone' }),
+      });
+    } catch (err) {
+      console.error('Failed to send phone verification code:', err);
+    }
+  };
 
   return (
     <motion.div
@@ -442,21 +506,6 @@ export default function RegisterForm() {
         </form>
 
         {/* Divider */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="relative my-8"
-        >
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/20"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white/10 backdrop-blur-sm text-white/70 rounded-full">
-              Or sign up with
-            </span>
-          </div>
-        </motion.div>
 
         {/* Social Sign Up Buttons */}
         <motion.div
@@ -469,6 +518,12 @@ export default function RegisterForm() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="button"
+            onClick={() => {
+              signIn('google', { 
+                callbackUrl: '/dashboard/products',
+                redirect: true 
+              });
+            }}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#ffa509]/50 transition-all backdrop-blur-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -495,6 +550,9 @@ export default function RegisterForm() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="button"
+            onClick={() => {
+              router.push('/');
+            }}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#ffa509]/50 transition-all backdrop-blur-sm"
           >
             <FiPackage className="w-5 h-5" />
@@ -528,14 +586,10 @@ export default function RegisterForm() {
           transition={{ delay: 1.3 }}
           className="mt-8 pt-8 border-t border-white/10 lg:hidden"
         >
-          <div className="grid grid-cols-2 gap-4 text-center">
+          <div className="text-center">
             <div>
               <div className="text-2xl font-bold text-[#ffa509] mb-1">Free</div>
-              <div className="text-xs text-white/60">Shipping</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-[#ffa509] mb-1">Easy</div>
-              <div className="text-xs text-white/60">Returns</div>
+              <div className="text-xs text-white/60">Shipping - Victoria BC area only</div>
             </div>
           </div>
         </motion.div>

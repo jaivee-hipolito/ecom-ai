@@ -21,6 +21,9 @@ export interface IProduct {
   rating?: number;
   numReviews?: number;
   featured?: boolean;
+  isFlashSale?: boolean;
+  flashSaleDiscount?: number;
+  flashSaleDiscountType?: 'percentage' | 'fixed';
   views?: number;
   lastViewed?: Date;
   attributes?: Record<string, any>; // Dynamic attributes based on category
@@ -38,6 +41,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   featured?: boolean;
+  isFlashSale?: boolean;
   search?: string;
 }
 

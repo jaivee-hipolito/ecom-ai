@@ -73,8 +73,8 @@ export default function AdminProductsPage() {
               </p>
             </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link href="/admin/products/create">
-                <button className="px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg shadow-[#ffa509]/30 transition-all flex items-center gap-2">
+              <Link href="/admin/products/create" className="cursor-pointer">
+                <button className="px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg shadow-[#ffa509]/30 transition-all flex items-center gap-2 cursor-pointer">
                   <FiPlus className="w-5 h-5" />
                   Add New Product
                 </button>

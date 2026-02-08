@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { RegisterData, AuthResponse } from '@/types/auth';
+import { normalizePhoneNumber } from '@/lib/phone';
 
 // Force Node.js runtime for MongoDB/Mongoose compatibility
 export const runtime = 'nodejs';
@@ -51,14 +52,19 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
+    // Normalize phone number before storing
+    const normalizedContactNumber = normalizePhoneNumber(contactNumber);
+
+    // Create user (unverified initially)
     const user = await User.create({
       firstName,
       lastName,
-      contactNumber,
+      contactNumber: normalizedContactNumber,
       email: email.toLowerCase(),
       password: hashedPassword,
       role: 'customer',
+      emailVerified: false,
+      phoneVerified: false,
     });
 
     // Remove password from response
@@ -74,11 +80,12 @@ export async function POST(request: NextRequest) {
       updatedAt: user.updatedAt,
     };
 
-    return NextResponse.json<AuthResponse>(
+    return NextResponse.json(
       {
         success: true,
-        message: 'User registered successfully',
+        message: 'User registered successfully. Please verify your email and phone number.',
         user: userResponse,
+        requiresVerification: true,
       },
       { status: 201 }
     );

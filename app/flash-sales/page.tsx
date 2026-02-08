@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FiZap, FiClock, FiSearch, FiArrowLeft, FiEye } from 'react-icons/fi';
 import Link from 'next/link';
 import Navbar from '@/components/shared/Navbar';
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import Footer from '@/components/shared/Footer';
 import Pagination from '@/components/ui/Pagination';
 import Loading from '@/components/ui/Loading';
@@ -14,8 +15,11 @@ import { ProductFilters as ProductFiltersType, IProduct } from '@/types/product'
 import ProductImage from '@/components/products/ProductImage';
 import ProductRating from '@/components/products/ProductRating';
 import QuickView from '@/components/products/QuickView';
+import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency } from '@/utils/currency';
 
 function FlashSalesContent() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -126,23 +130,44 @@ function FlashSalesContent() {
     setTimeout(() => setQuickViewProductId(null), 300);
   };
 
-  // Calculate discount percentage - deterministic based on product ID
-  const calculateDiscount = (product: IProduct): number => {
-    if (!product._id) return 20;
-    
-    let hash = 0;
-    for (let i = 0; i < product._id.length; i++) {
-      const char = product._id.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+  // Calculate flash sale discount and prices from product data
+  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
+  const calculateFlashSaleData = (product: IProduct) => {
+    if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
+      return {
+        discountPercentage: 0,
+        displayedPrice: product.price,
+        crossedOutPrice: product.price,
+        hasDiscount: false,
+      };
     }
+
+    const discount = product.flashSaleDiscount;
+    const discountType = product.flashSaleDiscountType || 'percentage';
     
-    const discount = Math.abs(hash % 31) + 20;
-    const name = product.name.toLowerCase();
-    if (name.includes('watch') || name.includes('jbl') || name.includes('phone')) {
-      return Math.min(discount + 5, 50);
+    let displayedPrice: number;
+    let crossedOutPrice: number;
+    let discountPercentage: number;
+
+    // Displayed price is always the product.price
+    displayedPrice = product.price;
+
+    if (discountType === 'percentage') {
+      // Crossed out price = price * (percentage/100) + price
+      crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
+      discountPercentage = discount;
+    } else {
+      // Fixed amount: crossed out price = price + discount
+      crossedOutPrice = displayedPrice + discount;
+      discountPercentage = (discount / displayedPrice) * 100;
     }
-    return discount;
+
+    return {
+      discountPercentage: Math.round(discountPercentage),
+      displayedPrice,
+      crossedOutPrice,
+      hasDiscount: true,
+    };
   };
 
   // Calculate sold percentage for progress bar - deterministic based on product ID
@@ -170,9 +195,25 @@ function FlashSalesContent() {
     return { percentage, sold };
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] w-full overflow-x-hidden">
+        {isAuthenticated && <DashboardSidebar />}
+        <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64 pt-16 lg:pt-0' : ''} overflow-x-hidden`}>
+          <Navbar />
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Loading size="lg" text="Loading..." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] w-full overflow-x-hidden">
-      <Navbar />
+      {isAuthenticated && <DashboardSidebar />}
+      <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64 pt-16 lg:pt-0' : ''} overflow-x-hidden`}>
+        <Navbar />
 
       {/* Hero Section */}
       <motion.div
@@ -347,10 +388,12 @@ function FlashSalesContent() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 w-full"
           >
             {products.map((product, index) => {
-              const discount = calculateDiscount(product);
+              const flashSaleData = calculateFlashSaleData(product);
               const { percentage: soldPercentage, sold } = calculateSoldPercentage(product);
-              const hasDiscount = discount > 0;
-              const originalPrice = hasDiscount ? product.price / (1 - discount / 100) : product.price;
+              const hasDiscount = flashSaleData.hasDiscount;
+              const discount = flashSaleData.discountPercentage;
+              const displayedPrice = flashSaleData.displayedPrice;
+              const crossedOutPrice = flashSaleData.crossedOutPrice;
 
               return (
                 <motion.div
@@ -435,11 +478,11 @@ function FlashSalesContent() {
                       {/* Price */}
                       <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
                         <span className="text-xl sm:text-2xl font-bold text-[#ffa509]">
-                          ${product.price.toFixed(2)}
+                          {formatCurrency(displayedPrice)}
                         </span>
                         {hasDiscount && (
                           <span className="text-sm sm:text-base md:text-lg text-gray-400 line-through">
-                            ${originalPrice.toFixed(2)}
+                            {formatCurrency(crossedOutPrice)}
                           </span>
                         )}
                       </div>
@@ -522,6 +565,7 @@ function FlashSalesContent() {
         )}
       </div>
       <Footer />
+      </div>
     </div>
   );
 }
@@ -529,7 +573,7 @@ function FlashSalesContent() {
 export default function FlashSalesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] w-full overflow-x-hidden">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loading size="lg" text="Loading flash sales..." />

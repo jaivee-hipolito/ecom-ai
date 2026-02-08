@@ -8,6 +8,7 @@ import { FiEye, FiTrendingUp, FiFilter, FiRefreshCw, FiArrowLeft, FiAward, FiBar
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import { Product } from '@/types/product';
+import { formatCurrency } from '@/utils/currency';
 
 export default function MostViewedProductsPage() {
   const router = useRouter();
@@ -348,7 +349,7 @@ export default function MostViewedProductsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-bold text-[#050b2c]">
-                        ${product.price?.toFixed(2)}
+                        {formatCurrency(product.price || 0)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

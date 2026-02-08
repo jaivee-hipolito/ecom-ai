@@ -235,12 +235,12 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-[#050b2c]">Filter Users</h2>
             </div>
-            <Link href="/admin/users/add" className="w-full sm:w-auto">
+            <Link href="/admin/users/add" className="w-full sm:w-auto cursor-pointer">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   variant="primary"
                   size="sm"
-                  className="w-full sm:w-auto bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] border-0 text-white font-semibold shadow-lg text-sm sm:text-base px-3 sm:px-4 py-2"
+                  className="w-full sm:w-auto bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] border-0 text-white font-semibold shadow-lg text-sm sm:text-base px-3 sm:px-4 py-2 cursor-pointer"
                 >
                   <FiPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 inline" />
                   <span className="hidden xs:inline">Add New User</span>
@@ -286,10 +286,10 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
           </div>
 
           <div className="mt-3 sm:mt-4">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <button
                 onClick={handleResetFilters}
-                className="w-full sm:w-auto px-4 py-2 text-xs sm:text-sm font-semibold text-[#050b2c] bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-[#ffa509] transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-4 py-2 text-xs sm:text-sm font-semibold text-[#050b2c] bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-[#ffa509] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <FiRefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
                 Reset Filters
@@ -434,7 +434,7 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
 
                           {/* Actions */}
                           <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t-2 border-gray-200 space-y-2">
-                            <Link href={`/admin/users/${user._id}`}>
+                            <Link href={`/admin/users/${user._id}`} className="cursor-pointer">
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
@@ -450,7 +450,7 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={(e) => handleDeleteClick(user, e)}
-                              className="w-full flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-red-50 to-pink-50 hover:from-red-100 hover:to-pink-100 rounded-lg border-2 border-red-200 hover:border-red-300 transition-all group"
+                              className="w-full flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-red-50 to-pink-50 hover:from-red-100 hover:to-pink-100 rounded-lg border-2 border-red-200 hover:border-red-300 transition-all group cursor-pointer"
                             >
                               <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 group-hover:scale-110 transition-transform flex-shrink-0" />
                               <span className="text-xs sm:text-sm font-semibold text-red-600">Delete User</span>
@@ -533,7 +533,7 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDeleteCancel}
                   disabled={deleting}
-                  className="flex-1 px-4 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-[#050b2c] font-semibold rounded-lg sm:rounded-xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex-1 px-4 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-[#050b2c] font-semibold rounded-lg sm:rounded-xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer disabled:cursor-not-allowed"
                 >
                   <FiX className="w-4 h-4" />
                   Cancel
@@ -543,7 +543,7 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDeleteConfirm}
                   disabled={deleting}
-                  className="flex-1 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  className="flex-1 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-lg sm:rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm sm:text-base"
                 >
                   {deleting ? (
                     <>

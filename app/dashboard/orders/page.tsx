@@ -8,6 +8,7 @@ import Loading from '@/components/ui/Loading';
 import { IOrder } from '@/types/order';
 import ProductImage from '@/components/products/ProductImage';
 import { IProduct } from '@/types/product';
+import { formatCurrency } from '@/utils/currency';
 
 export default function DashboardOrdersPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -250,9 +251,14 @@ export default function DashboardOrdersPage() {
                     stock: 0,
                   };
 
+                  const productId = typeof item.product === 'object' ? item.product._id : item.product;
+                  
                   return (
                     <div key={index} className="flex gap-4">
-                      <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                      <Link 
+                        href={`/products/${productId}`}
+                        className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         {item.image ? (
                           <ProductImage product={mockProduct} className="w-full h-full object-cover" />
                         ) : (
@@ -272,9 +278,11 @@ export default function DashboardOrdersPage() {
                             </svg>
                           </div>
                         )}
-                      </div>
+                      </Link>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                        <Link href={`/products/${productId}`}>
+                          <h4 className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors cursor-pointer">{item.name}</h4>
+                        </Link>
                         <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                         <p className="text-sm font-medium text-gray-900 mt-1">
                           ${(item.price * item.quantity).toFixed(2)}
@@ -300,7 +308,7 @@ export default function DashboardOrdersPage() {
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Total Amount</p>
                     <p className="text-lg font-bold text-gray-900">
-                      ${order.totalAmount.toFixed(2)}
+                      {formatCurrency(order.totalAmount)}
                     </p>
                   </div>
                   <Link href={`/orders/${order._id}`}>

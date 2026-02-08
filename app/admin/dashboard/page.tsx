@@ -350,7 +350,7 @@ export default function AdminDashboardPage() {
                   >
                     <Link
                       href={action.href}
-                      className="block p-4 border-2 border-gray-200 rounded-xl hover:border-[#ffa509] transition-all group"
+                      className="block p-4 border-2 border-gray-200 rounded-xl hover:border-[#ffa509] transition-all group cursor-pointer"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

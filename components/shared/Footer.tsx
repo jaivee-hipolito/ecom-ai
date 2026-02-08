@@ -8,9 +8,6 @@ import {
   FiShoppingBag,
   FiHeart,
   FiUser,
-  FiMail,
-  FiPhone,
-  FiMapPin,
   FiFacebook,
   FiTwitter,
   FiInstagram,
@@ -23,29 +20,13 @@ import {
   FiShield,
   FiTruck,
   FiArrowRight,
-  FiSend,
 } from 'react-icons/fi';
 import { useAuth } from '@/contexts/AuthContext';
+import ContactUsModal from './ContactUsModal';
 
 export default function Footer() {
   const { isAuthenticated } = useAuth();
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSubscribed(true);
-      setIsSubmitting(false);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 3000);
-    }, 1000);
-  };
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -57,7 +38,7 @@ export default function Footer() {
   ];
 
   const customerService = [
-    { name: 'Contact Us', href: '/contact' },
+    { name: 'Contact Us', href: '#', isModal: true },
     { name: 'FAQs', href: '/faq' },
     { name: 'Shipping Info', href: '/shipping' },
     { name: 'Returns', href: '/returns' },
@@ -88,7 +69,7 @@ export default function Footer() {
   ];
 
   const paymentMethods = [
-    'Visa', 'Mastercard', 'PayPal', 'Stripe', 'Apple Pay', 'Google Pay'
+    'Visa', 'Mastercard', 'Stripe', 'Klarna', 'Affirm', 'Afterpay'
   ];
 
   return (
@@ -151,26 +132,6 @@ export default function Footer() {
               <p className="text-white/70 text-sm mb-6 leading-relaxed">
                 Your trusted destination for quality products. Shop with confidence and enjoy amazing deals every day.
               </p>
-              
-              {/* Contact Info */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-white/80 text-sm">
-                  <FiPhone className="w-4 h-4 text-[#ffa509] flex-shrink-0" />
-                  <a href="tel:+1234567890" className="hover:text-[#ffa509] transition-colors">
-                    +1 (234) 567-890
-                  </a>
-                </div>
-                <div className="flex items-center gap-3 text-white/80 text-sm">
-                  <FiMail className="w-4 h-4 text-[#ffa509] flex-shrink-0" />
-                  <a href="mailto:support@teezee.com" className="hover:text-[#ffa509] transition-colors">
-                    support@teezee.com
-                  </a>
-                </div>
-                <div className="flex items-start gap-3 text-white/80 text-sm">
-                  <FiMapPin className="w-4 h-4 text-[#ffa509] flex-shrink-0 mt-0.5" />
-                  <span>123 Shopping Street, Commerce City, CC 12345</span>
-                </div>
-              </div>
             </motion.div>
 
             {/* Quick Links */}
@@ -222,13 +183,23 @@ export default function Footer() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
-                    <Link
-                      href={link.href}
-                      className="text-white/70 hover:text-[#ffa509] transition-colors text-sm flex items-center gap-2 group"
-                    >
-                      <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                      <span>{link.name}</span>
-                    </Link>
+                    {(link as any).isModal ? (
+                      <button
+                        onClick={() => setIsContactModalOpen(true)}
+                        className="text-white/70 hover:text-[#ffa509] transition-colors text-sm flex items-center gap-2 group w-full text-left"
+                      >
+                        <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        <span>{link.name}</span>
+                      </button>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-white/70 hover:text-[#ffa509] transition-colors text-sm flex items-center gap-2 group"
+                      >
+                        <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        <span>{link.name}</span>
+                      </Link>
+                    )}
                   </motion.li>
                 ))}
               </ul>
@@ -242,49 +213,6 @@ export default function Footer() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <h3 className="text-lg font-bold mb-6 text-[#ffa509]">Stay Connected</h3>
-              
-              {/* Newsletter */}
-              <div className="mb-8">
-                <p className="text-white/70 text-sm mb-4">
-                  Subscribe to get special offers and updates
-                </p>
-                <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Your email"
-                      className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] text-sm"
-                      required
-                    />
-                    <motion.button
-                      type="submit"
-                      disabled={isSubmitting}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] px-4 py-2.5 rounded-lg text-white font-semibold hover:shadow-lg transition-all disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : subscribed ? (
-                        <FiSend className="w-5 h-5" />
-                      ) : (
-                        <FiSend className="w-5 h-5" />
-                      )}
-                    </motion.button>
-                  </div>
-                  {subscribed && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-[#ffa509] text-xs font-medium"
-                    >
-                      ✓ Successfully subscribed!
-                    </motion.p>
-                  )}
-                </form>
-              </div>
 
               {/* Account Links (if authenticated) */}
               {isAuthenticated && (
@@ -421,6 +349,12 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Contact Us Modal */}
+      <ContactUsModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
     </footer>
   );
 }
