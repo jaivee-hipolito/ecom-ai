@@ -46,16 +46,29 @@ export default function ImageUpload({
       const filesToUpload = Array.from(files).slice(0, remainingSlots);
 
       for (const file of filesToUpload) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          setError('All files must be images');
+        // Enhanced validation for mobile compatibility
+        // Mobile browsers (especially iOS) sometimes don't set file.type correctly
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        const hasValidMimeType = file.type && file.type.startsWith('image/');
+
+        if (!hasValidMimeType && !hasValidExtension) {
+          setError(`Invalid file type. Please upload an image (JPG, PNG, GIF, WEBP, or HEIC)`);
           setUploading(false);
           return;
         }
 
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
-          setError('Image size must be less than 5MB');
+          setError(`Image "${file.name}" is too large. Maximum size is 5MB`);
+          setUploading(false);
+          return;
+        }
+
+        // Validate file is not empty
+        if (file.size === 0) {
+          setError(`Image "${file.name}" appears to be empty`);
           setUploading(false);
           return;
         }
@@ -64,24 +77,62 @@ export default function ImageUpload({
         const formData = new FormData();
         formData.append('image', file);
 
-        const response = await fetch('/api/products/upload-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Upload failed');
+        let response: Response;
+        try {
+          response = await fetch('/api/products/upload-image', {
+            method: 'POST',
+            body: formData,
+            // Don't set Content-Type header - browser will set it with boundary for FormData
+          });
+        } catch (networkError: any) {
+          console.error('Network error during upload:', networkError);
+          throw new Error('Network error. Please check your connection and try again.');
         }
 
-        const data = await response.json();
+        // Check if response is OK
+        if (!response.ok) {
+          // Try to parse as JSON first
+          let errorMessage = 'Upload failed';
+          try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              const errorData = await response.json();
+              errorMessage = errorData.error || `Upload failed with status ${response.status}`;
+            } else {
+              // If not JSON, read as text to see what we got
+              const textResponse = await response.text();
+              console.error('Non-JSON error response:', textResponse.substring(0, 200));
+              errorMessage = `Server error (${response.status}). Please try again.`;
+            }
+          } catch (parseError: any) {
+            console.error('Error parsing error response:', parseError);
+            errorMessage = `Upload failed with status ${response.status}. Please try again.`;
+          }
+          throw new Error(errorMessage);
+        }
+
+        // Parse successful response
+        let data: any;
+        try {
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const textResponse = await response.text();
+            console.error('Non-JSON success response:', textResponse.substring(0, 200));
+            throw new Error('Invalid response format from server');
+          }
+          data = await response.json();
+        } catch (parseError: any) {
+          console.error('Error parsing success response:', parseError);
+          throw new Error('Failed to parse server response. Please try again.');
+        }
+
         console.log('Upload response:', data);
         if (data.imageUrl) {
           newImages.push(data.imageUrl);
           console.log('Added image URL:', data.imageUrl);
         } else {
           console.error('No imageUrl in response:', data);
-          throw new Error('Invalid response from server');
+          throw new Error('Invalid response from server: missing image URL');
         }
       }
 
@@ -306,7 +357,7 @@ export default function ImageUpload({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             onChange={handleFileSelect}
             className="hidden"

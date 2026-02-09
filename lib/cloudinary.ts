@@ -23,44 +23,91 @@ export async function uploadImage(
     // Convert File to buffer if needed
     let buffer: Buffer;
     if (file instanceof File) {
-      const arrayBuffer = await file.arrayBuffer();
-      buffer = Buffer.from(arrayBuffer);
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+          throw new Error('File is empty or could not be read');
+        }
+        buffer = Buffer.from(arrayBuffer);
+        if (!buffer || buffer.length === 0) {
+          throw new Error('Failed to convert file to buffer');
+        }
+      } catch (conversionError: any) {
+        throw new Error(`Failed to process file: ${conversionError.message}`);
+      }
     } else {
       buffer = file;
+      if (!buffer || buffer.length === 0) {
+        throw new Error('Buffer is empty');
+      }
     }
 
-    // Upload to Cloudinary
+    // Detect file format for better handling (especially mobile formats like HEIC)
+    let format: string | undefined;
+    if (file instanceof File) {
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith('.heic') || fileName.endsWith('.heif')) {
+        format = 'heic';
+      } else if (fileName.endsWith('.webp')) {
+        format = 'webp';
+      } else if (fileName.endsWith('.png')) {
+        format = 'png';
+      } else if (fileName.endsWith('.gif')) {
+        format = 'gif';
+      }
+    }
+
+    // Upload to Cloudinary with format detection
     return new Promise((resolve, reject) => {
+      const uploadOptions: any = {
+        folder: folder,
+        resource_type: 'image',
+        transformation: [
+          { width: 800, height: 800, crop: 'limit' },
+          { quality: 'auto' },
+          { fetch_format: 'auto' },
+        ],
+      };
+
+      // Add format if detected (helps with HEIC/HEIF conversion)
+      if (format) {
+        uploadOptions.format = format;
+      }
+
       const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: folder,
-          resource_type: 'image',
-          transformation: [
-            { width: 800, height: 800, crop: 'limit' },
-            { quality: 'auto' },
-            { fetch_format: 'auto' },
-          ],
-        },
+        uploadOptions,
         (error, result) => {
           if (error) {
-            reject(error);
+            console.error('Cloudinary upload error:', error);
+            reject(new Error(`Cloudinary upload failed: ${error.message || 'Unknown error'}`));
           } else if (result) {
+            if (!result.secure_url) {
+              reject(new Error('Upload succeeded but no URL was returned'));
+              return;
+            }
             resolve({
-              secure_url: result.secure_url || '',
+              secure_url: result.secure_url,
               public_id: result.public_id || '',
               width: result.width || 0,
               height: result.height || 0,
             });
           } else {
-            reject(new Error('Upload failed'));
+            reject(new Error('Upload failed: No result returned'));
           }
         }
       );
 
+      // Handle stream errors
+      uploadStream.on('error', (streamError: any) => {
+        console.error('Upload stream error:', streamError);
+        reject(new Error(`Upload stream error: ${streamError.message || 'Unknown error'}`));
+      });
+
       uploadStream.end(buffer);
     });
   } catch (error: any) {
-    throw new Error(`Image upload failed: ${error.message}`);
+    console.error('Error in uploadImage function:', error);
+    throw new Error(`Image upload failed: ${error.message || 'Unknown error'}`);
   }
 }
 

@@ -7,10 +7,30 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    // Check admin access first
+    try {
+      await requireAdmin();
+    } catch (authError: any) {
+      console.error('Auth error:', authError);
+      return NextResponse.json(
+        { error: authError.message === 'Forbidden: Admin access required' ? 'Unauthorized' : 'Authentication failed' },
+        { status: 403 }
+      );
+    }
 
-    const formData = await request.formData();
-    const file = formData.get('image') as File;
+    // Parse form data with better error handling
+    let formData: FormData;
+    try {
+      formData = await request.formData();
+    } catch (parseError: any) {
+      console.error('FormData parse error:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid form data. Please try again.' },
+        { status: 400 }
+      );
+    }
+
+    const file = formData.get('image') as File | null;
 
     if (!file) {
       return NextResponse.json(
@@ -19,10 +39,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
+    // Enhanced file validation for mobile compatibility
+    // Mobile browsers sometimes don't set file.type correctly
+    const fileName = file.name.toLowerCase();
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'];
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    const hasValidMimeType = file.type && file.type.startsWith('image/');
+
+    if (!hasValidMimeType && !hasValidExtension) {
       return NextResponse.json(
-        { error: 'File must be an image' },
+        { error: 'File must be an image (JPG, PNG, GIF, WEBP, or HEIC)' },
         { status: 400 }
       );
     }
@@ -35,7 +61,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await uploadImage(file, 'products');
+    // Validate file is not empty
+    if (file.size === 0) {
+      return NextResponse.json(
+        { error: 'Image file is empty' },
+        { status: 400 }
+      );
+    }
+
+    // Upload to Cloudinary with better error handling
+    let result;
+    try {
+      result = await uploadImage(file, 'products');
+    } catch (uploadError: any) {
+      console.error('Cloudinary upload error:', uploadError);
+      return NextResponse.json(
+        { error: uploadError.message || 'Failed to upload image to storage. Please try again.' },
+        { status: 500 }
+      );
+    }
+
+    if (!result || !result.secure_url) {
+      return NextResponse.json(
+        { error: 'Upload succeeded but no image URL was returned' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -43,15 +94,16 @@ export async function POST(request: NextRequest) {
       publicId: result.public_id,
     });
   } catch (error: any) {
-    console.error('Error uploading image:', error);
-    if (error.message === 'Forbidden: Admin access required') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
-    }
+    // Catch-all error handler to ensure JSON is always returned
+    console.error('Unexpected error uploading image:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Always return JSON, never HTML
     return NextResponse.json(
-      { error: error.message || 'Failed to upload image' },
+      { 
+        error: error.message || 'An unexpected error occurred while uploading the image. Please try again.',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
