@@ -72,11 +72,46 @@ export async function POST(request: NextRequest) {
     // Upload to Cloudinary with better error handling
     let result;
     try {
+      // Validate Cloudinary config before attempting upload
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        console.error('Cloudinary configuration missing');
+        return NextResponse.json(
+          { error: 'Image upload service is not configured. Please contact administrator.' },
+          { status: 500 }
+        );
+      }
+
       result = await uploadImage(file, 'products');
     } catch (uploadError: any) {
       console.error('Cloudinary upload error:', uploadError);
+      console.error('Upload error stack:', uploadError.stack);
+      
+      // Sanitize error message to ensure it's JSON-safe
+      let errorMessage = 'Failed to upload image to storage. Please try again.';
+      
+      if (uploadError && uploadError.message) {
+        // Remove any HTML content from error message
+        const cleanMessage = uploadError.message
+          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/<!DOCTYPE[^>]*>/gi, '') // Remove DOCTYPE
+          .trim();
+        
+        if (cleanMessage && cleanMessage.length > 0) {
+          errorMessage = cleanMessage;
+        }
+      }
+      
+      // Check for specific error types
+      if (errorMessage.includes('timeout')) {
+        errorMessage = 'Upload timed out. Please try again with a smaller image.';
+      } else if (errorMessage.includes('configuration') || errorMessage.includes('not properly configured')) {
+        errorMessage = 'Image upload service configuration error. Please contact administrator.';
+      } else if (errorMessage.includes('HTTP')) {
+        errorMessage = 'Image upload service error. Please try again later.';
+      }
+      
       return NextResponse.json(
-        { error: uploadError.message || 'Failed to upload image to storage. Please try again.' },
+        { error: errorMessage },
         { status: 500 }
       );
     }
