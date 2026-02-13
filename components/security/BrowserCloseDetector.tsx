@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, Suspense } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
@@ -15,16 +15,29 @@ export default function BrowserCloseDetector() {
   const searchParams = useSearchParams();
   const isAuthenticated = !!session?.user;
   const hasCheckedRef = useRef(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ensure component only runs on client side to prevent hydration issues
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Check on page load if browser was closed
   useEffect(() => {
+    // Only run on client side
+    if (!isMounted) return;
+    
     // Prevent multiple checks
     if (hasCheckedRef.current) return;
     
     const SESSION_ACTIVE_KEY = 'session_active'; // sessionStorage - cleared when browser closes
     
+    // Safely access sessionStorage (only on client)
+    if (typeof window === 'undefined') return;
+    
     // If we're on login page with closed=true, don't do anything (already handled)
-    if (pathname === '/login' && searchParams?.get('closed') === 'true') {
+    const closedParam = searchParams?.get('closed');
+    if (pathname === '/login' && closedParam === 'true') {
       hasCheckedRef.current = true;
       return;
     }
@@ -37,7 +50,15 @@ export default function BrowserCloseDetector() {
     // Check if browser was closed
     // sessionStorage is cleared when browser closes, so if user is authenticated
     // but sessionStorage flag doesn't exist, browser was closed
-    const wasSessionActive = sessionStorage.getItem(SESSION_ACTIVE_KEY);
+    let wasSessionActive: string | null = null;
+    try {
+      wasSessionActive = sessionStorage.getItem(SESSION_ACTIVE_KEY);
+    } catch (e) {
+      // sessionStorage might not be available (private browsing, etc.)
+      console.warn('sessionStorage not available:', e);
+      hasCheckedRef.current = true;
+      return;
+    }
     
     console.log('BrowserCloseDetector - Check:', {
       isAuthenticated,
@@ -62,31 +83,47 @@ export default function BrowserCloseDetector() {
     
     // Set flag to indicate session is active (in sessionStorage - cleared on browser close)
     if (isAuthenticated && status === 'authenticated') {
-      sessionStorage.setItem(SESSION_ACTIVE_KEY, 'true');
+      try {
+        sessionStorage.setItem(SESSION_ACTIVE_KEY, 'true');
+      } catch (e) {
+        console.warn('Failed to set sessionStorage:', e);
+      }
       hasCheckedRef.current = true;
     } else {
       // Clear flag when not authenticated
-      sessionStorage.removeItem(SESSION_ACTIVE_KEY);
+      try {
+        sessionStorage.removeItem(SESSION_ACTIVE_KEY);
+      } catch (e) {
+        console.warn('Failed to remove sessionStorage:', e);
+      }
       hasCheckedRef.current = true;
     }
-  }, [isAuthenticated, status, pathname, searchParams, router, session]);
+  }, [isAuthenticated, status, pathname, searchParams, router, session, isMounted]);
 
   // Update sessionStorage flag periodically while authenticated
   // sessionStorage is automatically cleared when browser closes, so we just need to keep it updated
   useEffect(() => {
-    if (!isAuthenticated || status !== 'authenticated') {
+    if (!isMounted || !isAuthenticated || status !== 'authenticated') {
       return;
     }
 
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const HEARTBEAT_INTERVAL = 2000; // 2 seconds - keep sessionStorage flag updated
     const heartbeatInterval = setInterval(() => {
-      sessionStorage.setItem('session_active', 'true');
+      try {
+        sessionStorage.setItem('session_active', 'true');
+      } catch (e) {
+        console.warn('Failed to update sessionStorage heartbeat:', e);
+        clearInterval(heartbeatInterval);
+      }
     }, HEARTBEAT_INTERVAL);
 
     return () => {
       clearInterval(heartbeatInterval);
     };
-  }, [isAuthenticated, status]);
+  }, [isAuthenticated, status, isMounted]);
 
   return null;
 }

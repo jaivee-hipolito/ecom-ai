@@ -115,7 +115,7 @@ export default function LoginPage() {
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#ffa509]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
         </div>
 
-        <div className="max-w-md w-full relative z-10">
+        <div className="max-w-md w-full relative z-10" suppressHydrationWarning>
           <Suspense fallback={
             <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 sm:p-10">
               <div className="flex items-center justify-center py-12">

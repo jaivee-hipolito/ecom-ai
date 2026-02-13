@@ -23,9 +23,18 @@ export default function LoginForm() {
   const [infoMessage, setInfoMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ensure component only processes search params on client side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Check for timeout, browser close, or reset success query parameters
   useEffect(() => {
+    // Only process search params on client side to prevent hydration mismatch
+    if (!isMounted) return;
+
     const timeout = searchParams?.get('timeout');
     const closed = searchParams?.get('closed');
     const reset = searchParams?.get('reset');
@@ -57,7 +66,7 @@ export default function LoginForm() {
       }, 10000); // Keep message visible for 10 seconds
       return () => clearTimeout(timer);
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, isMounted]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,6 +144,7 @@ export default function LoginForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="w-full"
+      suppressHydrationWarning
     >
       {/* Logo and Header */}
       <motion.div
@@ -201,7 +211,7 @@ export default function LoginForm() {
           </div>
         </motion.div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
           <AnimatePresence>
             {error && (
               <motion.div
@@ -258,6 +268,7 @@ export default function LoginForm() {
                 required
                 placeholder="your.email@example.com"
                 className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                suppressHydrationWarning
               />
             </div>
           </motion.div>
@@ -284,6 +295,7 @@ export default function LoginForm() {
                 required
                 placeholder="Enter your password"
                 className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                suppressHydrationWarning
               />
               <button
                 type="button"
@@ -307,6 +319,7 @@ export default function LoginForm() {
                 type="checkbox"
                 id="remember"
                 className="w-4 h-4 rounded border-white/20 bg-white/10 text-[#ffa509] focus:ring-[#ffa509]"
+                suppressHydrationWarning
               />
               <label htmlFor="remember" className="text-sm text-white/70 cursor-pointer">
                 Remember me

@@ -1,20 +1,21 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { CLOUDINARY_CONFIG } from '@/config/cloudinary';
 
-// Configure Cloudinary with error handling
+// Validate Cloudinary configuration
+if (!CLOUDINARY_CONFIG.cloudName || !CLOUDINARY_CONFIG.apiKey || !CLOUDINARY_CONFIG.apiSecret) {
+  throw new Error('Cloudinary configuration is missing. Please check your environment variables.');
+}
+
+// Configure Cloudinary
 try {
-  if (CLOUDINARY_CONFIG.cloudName && CLOUDINARY_CONFIG.apiKey && CLOUDINARY_CONFIG.apiSecret) {
-    cloudinary.config({
-      cloud_name: CLOUDINARY_CONFIG.cloudName,
-      api_key: CLOUDINARY_CONFIG.apiKey,
-      api_secret: CLOUDINARY_CONFIG.apiSecret,
-      secure: true, // Always use HTTPS
-    });
-  } else {
-    console.warn('Cloudinary configuration is incomplete. Image uploads will fail.');
-  }
+  cloudinary.config({
+    cloud_name: CLOUDINARY_CONFIG.cloudName,
+    api_key: CLOUDINARY_CONFIG.apiKey,
+    api_secret: CLOUDINARY_CONFIG.apiSecret,
+  });
 } catch (configError: any) {
-  console.error('Error configuring Cloudinary:', configError);
+  console.error('Failed to configure Cloudinary:', configError);
+  throw new Error(`Cloudinary configuration failed: ${configError.message}`);
 }
 
 export interface UploadResult {
@@ -66,15 +67,10 @@ export async function uploadImage(
       }
     }
 
-    // Validate Cloudinary configuration before attempting upload
-    if (!CLOUDINARY_CONFIG.cloudName || !CLOUDINARY_CONFIG.apiKey || !CLOUDINARY_CONFIG.apiSecret) {
-      throw new Error('Cloudinary is not properly configured. Please check your environment variables.');
-    }
-
     // Upload to Cloudinary with format detection
     return new Promise((resolve, reject) => {
       // Set a timeout for the upload (30 seconds)
-      const timeout = setTimeout(() => {
+      const uploadTimeout = setTimeout(() => {
         reject(new Error('Upload timeout: The upload took too long. Please try again with a smaller image.'));
       }, 30000);
 
@@ -86,50 +82,43 @@ export async function uploadImage(
           { quality: 'auto' },
           { fetch_format: 'auto' },
         ],
-        // Add timeout to Cloudinary options
-        timeout: 30000,
+        // Add error handling options
+        invalidate: true,
+        overwrite: false,
       };
 
       // Add format if detected (helps with HEIC/HEIF conversion)
-      // Note: Don't set format for HEIC - let Cloudinary auto-detect and convert
-      if (format && format !== 'heic') {
-        uploadOptions.format = format;
-      }
-
+      // Note: Cloudinary doesn't support format parameter in upload_stream, it auto-detects
+      // But we can add it to transformation if needed
+      
       try {
         const uploadStream = cloudinary.uploader.upload_stream(
           uploadOptions,
           (error, result) => {
-            clearTimeout(timeout);
+            clearTimeout(uploadTimeout);
             
             if (error) {
-              console.error('Cloudinary upload error:', error);
-              console.error('Error details:', {
+              console.error('Cloudinary upload error details:', {
+                message: error.message,
                 http_code: (error as any).http_code,
-                message: (error as any).message,
-                name: (error as any).name,
+                name: error.name,
+                error: error,
               });
               
-              // Sanitize error message - remove HTML if present
+              // Provide more specific error messages
               let errorMessage = 'Failed to upload image';
-              if (error && typeof error === 'object') {
-                const errorObj = error as any;
-                if (errorObj.message) {
-                  // Check if message contains HTML
-                  if (errorObj.message.includes('<!DOCTYPE') || errorObj.message.includes('<html')) {
-                    errorMessage = 'Cloudinary service error. Please try again or contact support.';
-                  } else {
-                    errorMessage = errorObj.message;
-                  }
-                } else if (errorObj.http_code) {
-                  errorMessage = `Upload failed with HTTP ${errorObj.http_code}. Please check your Cloudinary configuration.`;
-                }
+              if ((error as any).http_code === 401) {
+                errorMessage = 'Cloudinary authentication failed. Please check your API credentials.';
+              } else if ((error as any).http_code === 400) {
+                errorMessage = 'Invalid image file. Please try a different image.';
+              } else if (error.message) {
+                errorMessage = `Upload failed: ${error.message}`;
               }
               
               reject(new Error(errorMessage));
             } else if (result) {
               if (!result.secure_url) {
-                reject(new Error('Upload succeeded but no URL was returned'));
+                reject(new Error('Upload succeeded but no image URL was returned'));
                 return;
               }
               resolve({
@@ -139,40 +128,38 @@ export async function uploadImage(
                 height: result.height || 0,
               });
             } else {
-              reject(new Error('Upload failed: No result returned'));
+              reject(new Error('Upload failed: No result returned from Cloudinary'));
             }
           }
         );
 
         // Handle stream errors
         uploadStream.on('error', (streamError: any) => {
-          clearTimeout(timeout);
+          clearTimeout(uploadTimeout);
           console.error('Upload stream error:', streamError);
-          
-          // Sanitize stream error message
-          let errorMessage = 'Upload stream error occurred';
-          if (streamError && streamError.message) {
-            if (streamError.message.includes('<!DOCTYPE') || streamError.message.includes('<html')) {
-              errorMessage = 'Cloudinary service error. Please try again.';
-            } else {
-              errorMessage = streamError.message;
-            }
-          }
-          
-          reject(new Error(errorMessage));
+          reject(new Error(`Upload stream error: ${streamError.message || 'Unknown stream error'}`));
         });
 
         // Write buffer to stream
         uploadStream.end(buffer);
       } catch (streamCreationError: any) {
-        clearTimeout(timeout);
-        console.error('Error creating upload stream:', streamCreationError);
-        reject(new Error(`Failed to initialize upload: ${streamCreationError.message || 'Unknown error'}`));
+        clearTimeout(uploadTimeout);
+        console.error('Failed to create upload stream:', streamCreationError);
+        reject(new Error(`Failed to start upload: ${streamCreationError.message || 'Unknown error'}`));
       }
     });
   } catch (error: any) {
     console.error('Error in uploadImage function:', error);
-    throw new Error(`Image upload failed: ${error.message || 'Unknown error'}`);
+    console.error('Error type:', typeof error);
+    console.error('Error name:', error?.name);
+    console.error('Error message:', error?.message);
+    
+    // Don't wrap errors that are already Error objects with messages
+    if (error instanceof Error && error.message) {
+      throw error;
+    }
+    
+    throw new Error(`Image upload failed: ${error?.message || 'Unknown error occurred'}`);
   }
 }
 
