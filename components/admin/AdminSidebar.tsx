@@ -27,6 +27,7 @@ import {
   FiEye,
   FiTruck,
   FiLogOut,
+  FiUser,
 } from 'react-icons/fi';
 
 interface NavItem {
@@ -146,6 +147,11 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
           name: 'Dashboard',
           href: '/admin/dashboard',
           icon: <FiHome className="w-5 h-5" />,
+        },
+        {
+          name: 'Profile',
+          href: '/dashboard/profile',
+          icon: <FiUser className="w-5 h-5" />,
         },
       ],
       collapsible: false,

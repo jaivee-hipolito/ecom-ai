@@ -123,7 +123,7 @@ export default function ContactUsModal({ isOpen, onClose }: ContactUsModalProps)
                   <p className="text-gray-700 text-sm lg:text-base">
                     Need help right away? Connect with our team through our official{' '}
                     <a
-                      href="https://www.facebook.com/"
+                      href="https://www.facebook.com/TeezeeFacebookPage/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#F9629F] hover:text-[#FC9BC2] font-semibold underline transition-colors"

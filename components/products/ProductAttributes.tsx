@@ -359,7 +359,7 @@ export default function ProductAttributes({
                               <a href="mailto:teezeejewelry.official@gmail.com" className="text-[#F9629F] hover:underline">teezeejewelry.official@gmail.com</a>
                             </li>
                             <li>
-                              <Link href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-[#F9629F] hover:underline">
+                              <Link href="https://www.facebook.com/TeezeeFacebookPage/" target="_blank" rel="noopener noreferrer" className="text-[#F9629F] hover:underline">
                                 Our Official Facebook Page
                               </Link>
                             </li>
