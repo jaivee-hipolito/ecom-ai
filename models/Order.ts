@@ -8,6 +8,14 @@ export interface IOrderItem {
   image?: string;
 }
 
+export interface IOrderHistoryEntry {
+  modifiedBy: mongoose.Types.ObjectId;
+  modifiedByName: string;
+  changes: { field: string; from: string; to: string }[];
+  note?: string;
+  changedAt: Date;
+}
+
 export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   items: IOrderItem[];
@@ -33,6 +41,7 @@ export interface IOrder extends Document {
   };
   paymentMethod: string;
   paymentId?: string;
+  history?: IOrderHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -113,6 +122,24 @@ const OrderSchema = new Schema<IOrder>(
     paymentId: {
       type: String,
       default: '',
+    },
+    history: {
+      type: [
+        {
+          modifiedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+          modifiedByName: { type: String, required: true },
+          changes: [
+            {
+              field: { type: String, required: true },
+              from: { type: String, required: true },
+              to: { type: String, required: true },
+            },
+          ],
+          note: { type: String, default: '' },
+          changedAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
     },
   },
   {

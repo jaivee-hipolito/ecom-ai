@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { CategoryAttribute } from '@/types/category';
 import ColorSwatch from './ColorSwatch';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -102,7 +103,7 @@ export default function ProductAttributes({
         return (
           <div className="flex items-center space-x-3">
             <ColorSwatch color={value} size="md" />
-            <span className="text-base font-medium text-[#050b2c] capitalize">{value}</span>
+            <span className="text-base font-medium text-[#000000] capitalize">{value}</span>
           </div>
         );
       }
@@ -115,7 +116,7 @@ export default function ProductAttributes({
               <ColorSwatch key={index} color={color} size="sm" />
             ))}
           </div>
-          <span className="text-base font-medium text-[#050b2c]">{colors.join(', ')}</span>
+          <span className="text-base font-medium text-[#000000]">{colors.join(', ')}</span>
         </div>
       );
     }
@@ -149,7 +150,7 @@ export default function ProductAttributes({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              className="px-3 py-1.5 bg-gradient-to-r from-[#ffa509]/10 to-[#ffa509]/5 border border-[#ffa509]/30 text-[#050b2c] rounded-lg text-sm font-medium hover:from-[#ffa509]/20 hover:to-[#ffa509]/10 transition-all"
+              className="px-3 py-1.5 bg-gradient-to-r from-[#F9629F]/10 to-[#F9629F]/5 border border-[#F9629F]/30 text-[#000000] rounded-lg text-sm font-medium hover:from-[#F9629F]/20 hover:to-[#F9629F]/10 transition-all"
             >
               {String(item)}
             </motion.span>
@@ -160,7 +161,7 @@ export default function ProductAttributes({
 
     // Default: display as string
     return (
-      <span className="text-base font-medium text-[#050b2c]">
+      <span className="text-base font-medium text-[#000000]">
         {String(value)}
       </span>
     );
@@ -181,10 +182,10 @@ export default function ProductAttributes({
           transition={{ delay: 0.1 }}
           className="flex items-center gap-3 mb-2"
         >
-          <div className="p-2 bg-gradient-to-br from-[#050b2c] to-[#0a1a4a] rounded-lg">
-            <FiInfo className="w-5 h-5 text-[#ffa509]" />
+          <div className="p-2 bg-gradient-to-br from-[#000000] to-[#1a1a1a] rounded-lg">
+            <FiInfo className="w-5 h-5 text-[#F9629F]" />
           </div>
-          <h3 className="text-2xl md:text-3xl font-bold text-[#050b2c]">
+          <h3 className="text-2xl md:text-3xl font-bold text-[#000000]">
             Product Specifications
           </h3>
         </motion.div>
@@ -213,8 +214,8 @@ export default function ProductAttributes({
               className="text-base leading-relaxed"
               style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
             >
-              <span className="font-bold text-[#333333]">{label}:</span>
-              <span className="text-[#333333] ml-1">{formatValueForSpec(key, value)}</span>
+              <span className="font-bold text-[#1a1a1a]">{label}:</span>
+              <span className="text-[#1a1a1a] ml-1">{formatValueForSpec(key, value)}</span>
             </motion.div>
           );
         })}
@@ -233,7 +234,7 @@ export default function ProductAttributes({
             <h4 className="text-base leading-tight font-sans">
               <span className="font-bold text-red-600 uppercase">IMPORTANT:</span>
               <br />
-              <span className="text-[#333333] uppercase font-bold">PLEASE REVIEW BEFORE COMPLETING YOUR PURCHASE.</span>
+              <span className="text-[#1a1a1a] uppercase font-bold">PLEASE REVIEW BEFORE COMPLETING YOUR PURCHASE.</span>
             </h4>
           </div>
 
@@ -246,7 +247,7 @@ export default function ProductAttributes({
                 className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left"
               >
                 <FiFileText className="w-5 h-5 text-gray-700 flex-shrink-0" />
-                <span className="flex-1 text-sm font-medium text-[#333333]">
+                <span className="flex-1 text-sm font-medium text-[#1a1a1a]">
                   Caution about Lightweight Gold Jewelry
                 </span>
                 <motion.div
@@ -280,7 +281,7 @@ export default function ProductAttributes({
                 className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left"
               >
                 <FiFileText className="w-5 h-5 text-gray-700 flex-shrink-0" />
-                <span className="flex-1 text-sm font-medium text-[#333333]">
+                <span className="flex-1 text-sm font-medium text-[#1a1a1a]">
                   Things to consider before making a purchase
                 </span>
                 <motion.div
@@ -306,6 +307,92 @@ export default function ProductAttributes({
                       <p>
                         All sales are final. We do not offer returns or exchanges, so we kindly ask that you confirm sizing prior to placing your order. If you are unsure, please consult our Jewelry Sizing Guide located in the resources section at the bottom of this page, or contact us directly for assistance before purchasing.
                       </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Pay with Interac e-Transfer */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <button
+                onClick={() => toggleSection('interac')}
+                className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left"
+              >
+                <FiFileText className="w-5 h-5 text-gray-700 flex-shrink-0" />
+                <span className="flex-1 text-sm font-medium text-[#1a1a1a]">
+                  Pay with Interac e-Transfer
+                </span>
+                <motion.div
+                  animate={{ rotate: expandedSections.has('interac') ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FiChevronDown className="w-5 h-5 text-gray-700 flex-shrink-0" />
+                </motion.div>
+              </button>
+              <AnimatePresence>
+                {expandedSections.has('interac') && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 pb-4 pl-12 text-sm text-gray-700 leading-relaxed space-y-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+                      <p>
+                        Prefer to pay via Interac? Follow these simple steps:
+                      </p>
+                      <h5 className="font-bold text-[#1a1a1a] uppercase text-xs tracking-wide mt-4">How to Order</h5>
+                      <ol className="list-decimal list-inside space-y-3 pl-1">
+                        <li>
+                          <strong>Check the Interac Price</strong>
+                          <br />
+                          <span className="text-gray-600">Find the price displayed next to the Interac logo on the product page.</span>
+                        </li>
+                        <li>
+                          <strong>Contact Us</strong>
+                          <br />
+                          <span className="text-gray-600">Reach out through:</span>
+                          <ul className="list-disc list-inside mt-1 ml-2 space-y-0.5">
+                            <li>
+                              <a href="mailto:teezeejewelry.official@gmail.com" className="text-[#F9629F] hover:underline">teezeejewelry.official@gmail.com</a>
+                            </li>
+                            <li>
+                              <Link href="https://www.facebook.com/share/1BvmTdkpWv/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-[#F9629F] hover:underline">
+                                Our Official Facebook Page
+                              </Link>
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>Send Your Order Information</strong>
+                          <br />
+                          <span className="text-gray-600">Include:</span>
+                          <ul className="list-disc list-inside mt-1 ml-2 space-y-0.5 text-gray-600">
+                            <li>Full Name</li>
+                            <li>Shipping Address</li>
+                            <li>Email</li>
+                            <li>Phone Number</li>
+                            <li>Product Number</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>Receive Your Invoice</strong>
+                          <br />
+                          <span className="text-gray-600">We&apos;ll email you an invoice with the total amount (product + shipping) and Interac payment instructions.</span>
+                        </li>
+                        <li>
+                          <strong>Send Payment</strong>
+                          <br />
+                          <span className="text-gray-600">Complete your Interac e-Transfer using the details provided.</span>
+                        </li>
+                        <li>
+                          <strong>We Ship Your Order</strong>
+                          <br />
+                          <span className="text-gray-600">Once payment is confirmed, your order will be processed and shipped promptly.</span>
+                        </li>
+                      </ol>
                     </div>
                   </motion.div>
                 )}

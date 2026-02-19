@@ -94,76 +94,82 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full max-w-full">
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#0a1a4a] to-[#050b2c] p-8"
+        className="relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#1a1a2e] to-[#050b2c] p-4 sm:p-5 md:p-6 lg:p-8"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.15),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.12),transparent_50%)]"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
-                  className="p-3 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-xl shadow-lg"
+                  className="p-2 sm:p-3 bg-gradient-to-br from-[#ffa509] to-[#F9629F] rounded-lg sm:rounded-xl shadow-lg flex-shrink-0"
                 >
-                  <FiShoppingBag className="w-8 h-8 text-white" />
+                  <FiShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
                 </motion.div>
-                Order Management
+                <span>Order Management</span>
               </h1>
-              <p className="text-white/80 text-lg">
+              <p className="text-white/80 text-xs sm:text-sm md:text-base lg:text-lg">
                 View and manage all customer orders
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                whileHover={{ scale: 1.02 }}
+                className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border border-white/20 min-w-0"
               >
-                <div className="flex items-center gap-2 text-white">
-                  <FiPackage className="w-5 h-5 text-[#ffa509]" />
-                  <div>
-                    <p className="text-xs text-white/70">Total Orders</p>
+                <div className="flex items-center gap-2 sm:gap-3 text-white">
+                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-[#ffa509]/20 flex items-center justify-center">
+                    <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#ffa509]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-wider">Total Orders</p>
                     {loadingStats ? (
-                      <div className="h-6 w-16 bg-white/20 rounded animate-pulse"></div>
+                      <div className="h-6 w-16 bg-white/20 rounded animate-pulse mt-1"></div>
                     ) : (
-                      <p className="text-xl font-bold">{stats.totalOrders.toLocaleString()}</p>
+                      <p className="text-base sm:text-lg md:text-xl font-bold truncate tabular-nums">{stats.totalOrders.toLocaleString()}</p>
                     )}
                   </div>
                 </div>
               </motion.div>
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                whileHover={{ scale: 1.02 }}
+                className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border border-white/20 min-w-0"
               >
-                <div className="flex items-center gap-2 text-white">
-                  <FiDollarSign className="w-5 h-5 text-[#ffa509]" />
-                  <div>
-                    <p className="text-xs text-white/70">Revenue</p>
+                <div className="flex items-center gap-2 sm:gap-3 text-white">
+                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-[#ffa509]/20 flex items-center justify-center">
+                    <FiDollarSign className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#ffa509]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-wider">Revenue</p>
                     {loadingStats ? (
-                      <div className="h-6 w-20 bg-white/20 rounded animate-pulse"></div>
+                      <div className="h-5 sm:h-6 w-14 sm:w-20 bg-white/20 rounded animate-pulse mt-1"></div>
                     ) : (
-                      <p className="text-xl font-bold">{formatCurrency(stats.totalRevenue)}</p>
+                      <p className="text-base sm:text-lg md:text-xl font-bold truncate tabular-nums">{formatCurrency(stats.totalRevenue)}</p>
                     )}
                   </div>
                 </div>
               </motion.div>
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                whileHover={{ scale: 1.02 }}
+                className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border border-white/20 min-w-0 col-span-2 lg:col-span-1"
               >
-                <div className="flex items-center gap-2 text-white">
-                  <FiTrendingUp className="w-5 h-5 text-[#ffa509]" />
-                  <div>
-                    <p className="text-xs text-white/70">Growth</p>
+                <div className="flex items-center gap-2 sm:gap-3 text-white">
+                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-[#ffa509]/20 flex items-center justify-center">
+                    <FiTrendingUp className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#ffa509]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] sm:text-xs text-white/70 uppercase tracking-wider">Growth (MoM)</p>
                     {loadingStats ? (
-                      <div className="h-6 w-16 bg-white/20 rounded animate-pulse"></div>
+                      <div className="h-5 sm:h-6 w-12 sm:w-16 bg-white/20 rounded animate-pulse mt-1"></div>
                     ) : (
-                      <p className={`text-xl font-bold ${stats.growth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <p className={`text-base sm:text-lg md:text-xl font-bold truncate tabular-nums ${stats.growth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {formatGrowth(stats.growth)}
                       </p>
                     )}

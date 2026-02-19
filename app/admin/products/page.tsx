@@ -53,30 +53,30 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full max-w-full">
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#0a1a4a] to-[#050b2c] p-8"
+        className="relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#1a1a2e] to-[#050b2c] p-4 sm:p-5 md:p-6 lg:p-8"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.15),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.12),transparent_50%)]"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 md:gap-6">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
                 <span className="text-[#ffa509]">📦</span>
-                Product Management
+                <span className="truncate">Product Management</span>
               </h1>
-              <p className="text-white/80 text-lg">
+              <p className="text-white/80 text-xs sm:text-sm md:text-base lg:text-lg">
                 Manage your product catalog, inventory, and pricing
               </p>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-shrink-0">
               <Link href="/admin/products/create" className="cursor-pointer">
-                <button className="px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg shadow-[#ffa509]/30 transition-all flex items-center gap-2 cursor-pointer">
-                  <FiPlus className="w-5 h-5" />
-                  Add New Product
+                <button className="w-full sm:w-auto px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#ffa509] to-[#F9629F] text-[#000000] font-bold rounded-lg sm:rounded-xl hover:shadow-lg shadow-[#F9629F]/30 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base cursor-pointer">
+                  <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Add Product
                 </button>
               </Link>
             </motion.div>
@@ -89,68 +89,68 @@ export default function AdminProductsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-6"
       >
         <motion.div
-          whileHover={{ scale: 1.02, y: -5 }}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6"
+          whileHover={{ scale: 1.02, y: -2 }}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-1">Total Products</p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0.5 sm:mb-1">Total Products</p>
               {loadingStats ? (
-                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-                <p className="text-3xl font-bold text-[#050b2c]">{stats.totalProducts.toLocaleString()}</p>
+                <p className="text-lg sm:text-xl md:text-3xl font-bold text-[#000000] tabular-nums">{stats.totalProducts.toLocaleString()}</p>
               )}
             </div>
-            <div className="w-14 h-14 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-xl flex items-center justify-center">
-              <FiPackage className="w-7 h-7 text-[#050b2c]" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-[#ffa509] to-[#F9629F] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+              <FiPackage className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-[#000000]" />
             </div>
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ scale: 1.02, y: -5 }}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6"
+          whileHover={{ scale: 1.02, y: -2 }}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-1">Featured Products</p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0.5 sm:mb-1">Featured</p>
               {loadingStats ? (
-                <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-                <p className="text-3xl font-bold text-[#050b2c]">{stats.featuredProducts.toLocaleString()}</p>
+                <p className="text-lg sm:text-xl md:text-3xl font-bold text-[#000000] tabular-nums">{stats.featuredProducts.toLocaleString()}</p>
               )}
             </div>
-            <div className="w-14 h-14 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-xl flex items-center justify-center">
-              <FiTrendingUp className="w-7 h-7 text-[#050b2c]" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-[#ffa509] to-[#F9629F] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+              <FiTrendingUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-[#000000]" />
             </div>
           </div>
         </motion.div>
 
         <motion.div
-          whileHover={{ scale: 1.02, y: -5 }}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6"
+          whileHover={{ scale: 1.02, y: -2 }}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6 col-span-2 md:col-span-1"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 mb-1">Total Revenue</p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0.5 sm:mb-1">Total Revenue</p>
               {loadingStats ? (
-                <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 sm:h-8 w-16 sm:w-24 bg-gray-200 rounded animate-pulse"></div>
               ) : (
-                <p className="text-3xl font-bold text-[#050b2c]">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-lg sm:text-xl md:text-3xl font-bold text-[#000000] tabular-nums truncate">{formatCurrency(stats.totalRevenue)}</p>
               )}
             </div>
-            <div className="w-14 h-14 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-xl flex items-center justify-center">
-              <FiDollarSign className="w-7 h-7 text-[#050b2c]" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-[#ffa509] to-[#F9629F] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+              <FiDollarSign className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-[#000000]" />
             </div>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Product Table */}
-      <ProductTable />
+      {/* Product Table - filters hidden by default per owner request */}
+      <ProductTable filtersDefaultHidden />
     </div>
   );
 }

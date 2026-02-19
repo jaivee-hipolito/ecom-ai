@@ -143,11 +143,11 @@ export default function OrderSummary({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-[#050b2c] to-[#0a1538] rounded-2xl shadow-2xl p-6 sm:p-8 sticky top-8 border border-white/10"
+      className="bg-gradient-to-br from-[#000000] to-[#1a1a1a] rounded-2xl shadow-2xl p-6 sm:p-8 sticky top-8 border border-white/10"
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-2 rounded-lg">
+        <div className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] p-2 rounded-lg">
           <FiShoppingBag className="w-5 h-5 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-white">Order Summary</h2>
@@ -193,7 +193,7 @@ export default function OrderSummary({
                 <p className="text-xs text-white/70 mb-1">
                   Qty: <span className="font-semibold text-white">{item.quantity}</span>
                 </p>
-                <p className="text-sm sm:text-base font-bold bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent">
+                <p className="text-sm sm:text-base font-bold bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent">
                   {formatCurrency(itemTotal)}
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default function OrderSummary({
         {!appliedCoupon ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
-              <FiTag className="w-4 h-4 text-[#ffa509]" />
+              <FiTag className="w-4 h-4 text-[#F9629F]" />
               <label className="text-sm font-semibold text-white">Have a coupon code?</label>
             </div>
             <div className="flex gap-2 min-w-0">
@@ -225,14 +225,14 @@ export default function OrderSummary({
                   }
                 }}
                 placeholder="Enter code"
-                className="flex-1 min-w-0 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] text-sm sm:text-base"
+                className="flex-1 min-w-0 px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] text-sm sm:text-base"
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleApplyCoupon}
                 disabled={isApplying || !couponCode.trim()}
-                className="flex-shrink-0 px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
+                className="flex-shrink-0 px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
               >
                 {isApplying ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -255,11 +255,11 @@ export default function OrderSummary({
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-r from-[#ffa509]/20 to-[#ff8c00]/20 border-2 border-[#ffa509]/50 rounded-xl p-4"
+            className="bg-gradient-to-r from-[#F9629F]/20 to-[#DB7093]/20 border-2 border-[#F9629F]/50 rounded-xl p-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-1.5 rounded-lg">
+                <div className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] p-1.5 rounded-lg">
                   <FiCheck className="w-4 h-4 text-white" />
                 </div>
                 <div>
@@ -296,7 +296,7 @@ export default function OrderSummary({
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex justify-between items-center text-[#ffa509]"
+            className="flex justify-between items-center text-[#F9629F]"
           >
             <span className="text-sm sm:text-base font-semibold flex items-center gap-1">
               <FiTag className="w-4 h-4" />
@@ -323,7 +323,7 @@ export default function OrderSummary({
               key={finalTotal}
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent"
+              className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent"
             >
               {formatCurrency(finalTotal)}
             </motion.span>

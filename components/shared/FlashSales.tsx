@@ -153,11 +153,11 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] py-12 lg:py-16 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] py-12 lg:py-16 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, #ffa509 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, #F9629F 1px, transparent 0)`,
           backgroundSize: '40px 40px'
         }}></div>
       </div>
@@ -178,8 +178,8 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
               className="relative"
             >
-              <div className="absolute inset-0 bg-[#ffa509] blur-xl opacity-50 rounded-full"></div>
-              <FiZap className="w-10 h-10 sm:w-12 sm:h-12 text-[#ffa509] relative z-10" />
+              <div className="absolute inset-0 bg-[#F9629F] blur-xl opacity-50 rounded-full"></div>
+              <FiZap className="w-10 h-10 sm:w-12 sm:h-12 text-[#F9629F] relative z-10" />
             </motion.div>
             <motion.h2
               initial={{ scale: 0.9 }}
@@ -188,7 +188,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
               transition={{ type: 'spring', stiffness: 200 }}
               className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight"
             >
-              <span className="bg-gradient-to-r from-white via-[#ffa509] to-white bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-white via-[#F9629F] to-white bg-clip-text text-transparent">
                 Flash Sales
               </span>
             </motion.h2>
@@ -197,8 +197,8 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
               transition={{ duration: 1.5, repeat: Infinity }}
               className="relative"
             >
-              <div className="absolute inset-0 bg-[#ffa509] blur-xl opacity-50 rounded-full"></div>
-              <FiTrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-[#ffa509] relative z-10" />
+              <div className="absolute inset-0 bg-[#F9629F] blur-xl opacity-50 rounded-full"></div>
+              <FiTrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-[#F9629F] relative z-10" />
             </motion.div>
           </div>
           
@@ -208,14 +208,14 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 bg-gradient-to-r from-white/15 via-white/20 to-white/15 backdrop-blur-md px-6 sm:px-8 py-4 sm:py-5 rounded-2xl border-2 border-[#ffa509]/40 shadow-2xl"
+            className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 bg-gradient-to-r from-white/15 via-white/20 to-white/15 backdrop-blur-md px-6 sm:px-8 py-4 sm:py-5 rounded-2xl border-2 border-[#F9629F]/40 shadow-2xl"
           >
             <div className="flex items-center gap-2">
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
               >
-                <FiClock className="w-5 h-5 sm:w-6 sm:h-6 text-[#ffa509]" />
+                <FiClock className="w-5 h-5 sm:w-6 sm:h-6 text-[#F9629F]" />
               </motion.div>
               <span className="text-white font-bold text-sm sm:text-base">Ends in:</span>
             </div>
@@ -232,13 +232,13 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                     initial={{ scale: 0.8, y: -10 }}
                     animate={{ scale: 1, y: 0 }}
                     transition={{ type: 'spring', stiffness: 300 }}
-                    className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] text-[#050b2c] px-3 sm:px-4 py-2 rounded-xl font-black text-sm sm:text-base shadow-lg min-w-[3rem] sm:min-w-[3.5rem] text-center"
+                    className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] text-[#000000] px-3 sm:px-4 py-2 rounded-xl font-black text-sm sm:text-base shadow-lg min-w-[3rem] sm:min-w-[3.5rem] text-center"
                   >
                     {String(item.value).padStart(2, '0')}
                     <div className="text-[8px] sm:text-[10px] font-bold opacity-80">{item.label}</div>
                   </motion.div>
                   {idx < 3 && (
-                    <span className="text-[#ffa509] font-bold text-lg sm:text-xl">:</span>
+                    <span className="text-[#F9629F] font-bold text-lg sm:text-xl">:</span>
                   )}
                 </div>
               ))}
@@ -268,7 +268,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                   className="group relative"
                 >
                   <Link href={`/products/${product._id}?flashSale=true`} className="block">
-                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-[#ffa509]/50 relative">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-[#F9629F]/50 relative">
                       {/* Flash Sale Badge - Top Left */}
                       <div className="absolute top-2 left-2 z-30">
                         <motion.div
@@ -294,7 +294,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                             initial={{ scale: 0, rotate: 180 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ delay: 0.3, type: 'spring' }}
-                            className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white"
+                            className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-xl"
                           >
                             <div className="text-center">
                               <div className="text-xs font-black leading-tight">-{discountPercentage}%</div>
@@ -325,7 +325,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                               onClick={(e) => handleQuickView(e, product._id!)}
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
-                              className="bg-white text-[#050b2c] px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5 shadow-lg hover:bg-[#ffa509] hover:text-white transition-all duration-300"
+                              className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5 shadow-lg hover:bg-[#FC9BC2] transition-all duration-300"
                             >
                               <FiEye className="w-4 h-4" />
                               <span>Quick View</span>
@@ -336,7 +336,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                         {/* Product Info - Compact */}
                         <div className="space-y-3">
                           {/* Product Name */}
-                          <h3 className="text-base sm:text-lg font-bold text-[#050b2c] line-clamp-2 group-hover:text-[#ffa509] transition-colors min-h-[3rem]">
+                          <h3 className="text-base sm:text-lg font-bold text-[#000000] line-clamp-2 group-hover:text-[#F9629F] transition-colors min-h-[3rem]">
                             {product.name}
                           </h3>
 
@@ -348,7 +348,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                               whileInView={{ scale: 1 }}
                               viewport={{ once: true }}
                               transition={{ delay: index * 0.1 + 0.2, type: 'spring' }}
-                              className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent"
+                              className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent"
                             >
                               {formatCurrency(displayedPrice)}
                             </motion.span>
@@ -363,7 +363,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
 
                       {/* Animated Border Glow */}
                       <motion.div
-                        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#ffa509]/0 via-[#ffa509]/20 to-[#ffa509]/0 opacity-0 group-hover:opacity-100"
+                        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#F9629F]/0 via-[#F9629F]/20 to-[#F9629F]/0 opacity-0 group-hover:opacity-100"
                         initial={{ x: '-100%' }}
                         whileHover={{ x: '100%' }}
                         transition={{ duration: 0.8 }}
@@ -399,7 +399,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-[#ffa509] text-[#050b2c] px-8 py-3 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-8 py-3 rounded-lg font-bold text-lg shadow-lg hover:bg-[#FC9BC2] hover:shadow-xl transition-all duration-300"
               >
                 View All Flash Sales
               </motion.button>

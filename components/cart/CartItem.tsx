@@ -98,8 +98,8 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
               onClick={onToggleSelect}
               className={`relative w-6 h-6 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${
                 isSelected
-                  ? 'bg-gradient-to-br from-[#ffa509] to-[#ff8c00] border-[#ffa509] shadow-lg'
-                  : 'bg-white border-gray-300 hover:border-[#ffa509]'
+                  ? 'bg-gradient-to-br from-[#F9629F] to-[#DB7093] border-[#F9629F] shadow-lg'
+                  : 'bg-white border-gray-300 hover:border-[#F9629F]'
               }`}
               aria-label={isSelected ? 'Deselect item' : 'Select item'}
             >
@@ -134,7 +134,7 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
           })()}
           className="flex-shrink-0 self-center sm:self-auto"
         >
-          <div className="relative w-20 h-20 xs:w-24 xs:h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden border-2 border-gray-200 group-hover:border-[#ffa509] transition-colors">
+          <div className="relative w-20 h-20 xs:w-24 xs:h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden border-2 border-gray-200 group-hover:border-[#F9629F] transition-colors">
             {imageUrl && !isPlaceholder ? (
               <Image
                 src={imageUrl}
@@ -186,14 +186,14 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
                 return url;
               })()}
             >
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[#050b2c] hover:text-[#ffa509] transition-colors mb-2 line-clamp-2">
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[#000000] hover:text-[#F9629F] transition-colors mb-2 line-clamp-2">
                 {product.name || 'Product'}
               </h3>
             </Link>
             
             {/* Price */}
             <div className="flex flex-wrap items-baseline gap-2 mb-2">
-              <span className="text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent whitespace-nowrap">
+              <span className="text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent whitespace-nowrap">
                 {formatCurrency(product.price || 0)}
               </span>
               {product.stock !== undefined && (
@@ -256,7 +256,7 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handleQuantityChange(quantity - 1)}
                 disabled={quantity <= 1 || isUpdating || isLoading}
-                className="p-2 rounded-lg bg-white hover:bg-[#ffa509] hover:text-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="p-2 rounded-lg bg-[#FDE8F0] border border-gray-300 hover:bg-[#FC9BC2] text-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               >
                 <FiMinus className="w-4 h-4" />
               </motion.button>
@@ -270,14 +270,14 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
                   handleQuantityChange(val);
                 }}
                 disabled={isUpdating || isLoading}
-                className="w-12 sm:w-16 px-2 py-2 text-center font-bold text-[#050b2c] bg-transparent border-none focus:outline-none disabled:opacity-50 text-sm sm:text-base"
+                className="w-12 sm:w-16 px-2 py-2 text-center font-bold text-[#000000] bg-transparent border-none focus:outline-none disabled:opacity-50 text-sm sm:text-base"
               />
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handleQuantityChange(quantity + 1)}
                 disabled={quantity >= (product.stock || 999) || isUpdating || isLoading}
-                className="p-2 rounded-lg bg-white hover:bg-[#ffa509] hover:text-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="p-2 rounded-lg bg-[#FDE8F0] border border-gray-300 hover:bg-[#FC9BC2] text-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               >
                 <FiPlus className="w-4 h-4" />
               </motion.button>
@@ -286,7 +286,7 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
             {/* Total Price */}
             <div className="flex-1 xs:flex-none text-left xs:text-right min-w-[120px] xs:min-w-[140px]">
               <p className="text-xs text-gray-500 mb-1 whitespace-nowrap">Total</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent whitespace-nowrap overflow-visible">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent whitespace-nowrap overflow-visible">
                 {formatCurrency(totalPrice)}
               </p>
             </div>

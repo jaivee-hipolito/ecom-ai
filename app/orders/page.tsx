@@ -115,17 +115,17 @@ export default function OrdersPage() {
         >
           <Link 
             href="/dashboard" 
-            className="inline-flex items-center gap-2 text-[#ffa509] hover:text-[#ff8c00] mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-[#F9629F] hover:text-[#DB7093] mb-4 transition-colors"
           >
             <FiArrowLeft className="w-4 h-4" />
             <span className="font-medium">Back to Dashboard</span>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-3 rounded-xl shadow-lg">
+            <div className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] p-3 rounded-xl shadow-lg">
               <FiShoppingBag className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-[#050b2c]">My Orders</h1>
+              <h1 className="text-3xl sm:text-4xl font-black text-[#000000]">My Orders</h1>
               <p className="mt-2 text-gray-600">View and track your order history</p>
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function OrdersPage() {
             onClick={() => setStatusFilter('all')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
               statusFilter === 'all'
-                ? 'bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-lg'
+                ? 'bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
             }`}
           >
@@ -162,7 +162,7 @@ export default function OrdersPage() {
             onClick={() => setStatusFilter('pending')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
               statusFilter === 'pending'
-                ? 'bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-lg'
+                ? 'bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
             }`}
           >
@@ -172,7 +172,7 @@ export default function OrdersPage() {
             onClick={() => setStatusFilter('processing')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
               statusFilter === 'processing'
-                ? 'bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-lg'
+                ? 'bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
             }`}
           >
@@ -182,7 +182,7 @@ export default function OrdersPage() {
             onClick={() => setStatusFilter('shipped')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
               statusFilter === 'shipped'
-                ? 'bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-lg'
+                ? 'bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
             }`}
           >
@@ -192,7 +192,7 @@ export default function OrdersPage() {
             onClick={() => setStatusFilter('delivered')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
               statusFilter === 'delivered'
-                ? 'bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-lg'
+                ? 'bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
             }`}
           >
@@ -202,7 +202,7 @@ export default function OrdersPage() {
             onClick={() => setStatusFilter('cancelled')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
               statusFilter === 'cancelled'
-                ? 'bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-lg'
+                ? 'bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md'
             }`}
           >
@@ -216,10 +216,10 @@ export default function OrdersPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100"
           >
-            <div className="bg-gradient-to-br from-[#ffa509]/10 to-[#ff8c00]/10 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-              <FiPackage className="w-12 h-12 text-[#ffa509]" />
+            <div className="bg-gradient-to-br from-[#F9629F]/10 to-[#DB7093]/10 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+              <FiPackage className="w-12 h-12 text-[#F9629F]" />
             </div>
-            <h3 className="mt-4 text-2xl font-bold text-[#050b2c]">No orders found</h3>
+            <h3 className="mt-4 text-2xl font-bold text-[#000000]">No orders found</h3>
             <p className="mt-2 text-gray-600 text-lg">
               {statusFilter === 'all'
                 ? "You haven't placed any orders yet."
@@ -229,7 +229,7 @@ export default function OrdersPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white rounded-xl hover:shadow-xl transition-all font-bold text-lg"
+                className="px-8 py-3 bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white rounded-xl hover:shadow-xl transition-all font-bold text-lg"
               >
                 Start Shopping
               </motion.button>
@@ -247,7 +247,7 @@ export default function OrdersPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-4 border-b border-gray-200">
                   <div>
-                    <h3 className="text-xl font-bold text-[#050b2c]">
+                    <h3 className="text-xl font-bold text-[#000000]">
                       Order #{order._id?.substring(0, 8).toUpperCase()}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
@@ -305,9 +305,9 @@ export default function OrdersPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-base font-semibold text-[#050b2c]">{item.name}</h4>
+                          <h4 className="text-base font-semibold text-[#000000]">{item.name}</h4>
                           <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                          <p className="text-base font-bold bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent mt-1">
+                          <p className="text-base font-bold bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent mt-1">
                             {formatCurrency(item.price * item.quantity)}
                           </p>
                         </div>
@@ -319,7 +319,7 @@ export default function OrdersPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-200">
                   <div className="mb-4 sm:mb-0">
                     <p className="text-sm font-medium text-gray-600">Shipping Address:</p>
-                    <p className="text-sm font-bold text-[#050b2c]">
+                    <p className="text-sm font-bold text-[#000000]">
                       {order.shippingAddress?.fullName}
                     </p>
                     <p className="text-sm text-gray-600">
@@ -330,7 +330,7 @@ export default function OrdersPage() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Total Amount</p>
-                      <p className="text-2xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent">
+                      <p className="text-2xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent">
                         {formatCurrency(order.totalAmount)}
                       </p>
                     </div>
@@ -338,7 +338,7 @@ export default function OrdersPage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-2 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white rounded-xl hover:shadow-lg transition-all font-bold"
+                        className="px-6 py-2 bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white rounded-xl hover:shadow-lg transition-all font-bold"
                       >
                         View Details
                       </motion.button>

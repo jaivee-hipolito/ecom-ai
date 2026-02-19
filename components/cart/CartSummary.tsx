@@ -84,12 +84,12 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-br from-[#050b2c] to-[#0a1538] rounded-2xl shadow-2xl p-6 sm:p-8 sticky top-8 border border-white/10"
+      className="bg-gradient-to-br from-[#000000] to-[#1a1a1a] rounded-2xl shadow-2xl p-6 sm:p-8 sticky top-8 border border-white/10"
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-2 rounded-lg">
-          <FiShoppingBag className="w-5 h-5 text-white" />
+        <div className="bg-[#FDE8F0] border border-gray-300 p-2 rounded-lg">
+          <FiShoppingBag className="w-5 h-5 text-[#1a1a1a]" />
         </div>
         <h2 className="text-2xl font-bold text-white">Order Summary</h2>
       </div>
@@ -107,7 +107,7 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
         
         <div className="flex flex-col gap-1 text-white/70">
           <div className="flex items-center gap-2">
-            <FiTruck className="w-4 h-4 flex-shrink-0 text-[#ffa509]" />
+            <FiTruck className="w-4 h-4 flex-shrink-0 text-[#F9629F]" />
             <span className="text-sm sm:text-base font-medium">Shipping</span>
           </div>
           <span className="text-xs sm:text-sm text-white/60 pl-6">
@@ -121,7 +121,7 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
             <motion.span
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-[#ffa509] to-[#ff8c00] bg-clip-text text-transparent"
+              className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent"
             >
               {formatCurrency(summary.totalPrice)}
             </motion.span>
@@ -132,11 +132,11 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
       {/* Trust Badges */}
       <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
         <div className="flex items-center gap-2 text-white/70 text-xs">
-          <FiShield className="w-4 h-4 text-[#ffa509]" />
+          <FiShield className="w-4 h-4 text-[#F9629F]" />
           <span>Secure</span>
         </div>
         <div className="flex items-center gap-2 text-white/70 text-xs">
-          <FiTruck className="w-4 h-4 text-[#ffa509]" />
+          <FiTruck className="w-4 h-4 text-[#F9629F]" />
           <span>Free Shipping around Victoria</span>
         </div>
       </div>
@@ -148,15 +148,14 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
             type="checkbox"
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            className="mt-1 w-5 h-5 rounded border-2 border-white/30 bg-transparent text-[#ffa509] focus:ring-2 focus:ring-[#ffa509] focus:ring-offset-2 focus:ring-offset-[#050b2c] cursor-pointer accent-[#ffa509]"
+            className="mt-1 w-5 h-5 rounded border-2 border-white/30 bg-transparent text-[#F9629F] focus:ring-2 focus:ring-[#F9629F] focus:ring-offset-2 focus:ring-offset-[#000000] cursor-pointer accent-[#F9629F]"
             required
           />
           <span className="text-sm sm:text-base text-white/80 group-hover:text-white transition-colors">
             I have read and agree to the{' '}
             <Link
               href="/terms"
-              target="_blank"
-              className="text-[#ffa509] hover:text-[#ff8c00] underline font-medium transition-colors"
+              className="text-[#F9629F] hover:text-[#DB7093] underline font-medium transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               Terms & Conditions
@@ -174,7 +173,7 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
         <button
           onClick={handleProceedToCheckout}
           disabled={summary.totalItems === 0 || !selectedAddress || (selectedItemIds !== undefined && selectedItemIds.size === 0) || !termsAccepted}
-          className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <span>Proceed to Checkout</span>
           <FiArrowRight className="w-5 h-5 flex-shrink-0" />
@@ -185,7 +184,7 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-xs text-[#ffa509] mt-3 text-center font-medium"
+          className="text-xs text-[#F9629F] mt-3 text-center font-medium"
         >
           {!selectedAddress && '⚠️ Please select a shipping address above'}
           {!selectedAddress && !termsAccepted && ' • '}
@@ -197,7 +196,7 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
       <Link href="/dashboard/products" className="block mt-4">
         <motion.div
           whileHover={{ x: 5 }}
-          className="text-center text-white/70 hover:text-[#ffa509] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+          className="text-center text-white/70 hover:text-[#F9629F] transition-colors text-sm font-medium flex items-center justify-center gap-2"
         >
           <span>Continue Shopping</span>
           <FiArrowRight className="w-4 h-4" />

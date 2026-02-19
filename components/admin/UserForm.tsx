@@ -114,7 +114,7 @@ export default function UserForm({ onSuccess }: UserFormProps) {
   const passwordStrength = passwordMatch && passwordLength;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 md:space-y-8">
       {/* Error Message */}
       <AnimatePresence>
         {error && (
@@ -135,20 +135,20 @@ export default function UserForm({ onSuccess }: UserFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gradient-to-br from-white to-blue-50/30 rounded-xl p-6 border-2 border-blue-100 relative overflow-hidden"
+        className="bg-gradient-to-br from-white to-blue-50/30 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 border-2 border-blue-100 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
-              <FiUser className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex-shrink-0">
+              <FiUser className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-[#050b2c]">Basic Information</h2>
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">Basic Information</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-2 flex items-center gap-2">
-                <FiUser className="w-4 h-4 text-[#ffa509]" />
+              <label className="block text-sm font-semibold text-[#000000] mb-2 flex items-center gap-2">
+                <FiUser className="w-4 h-4 text-[#F9629F]" />
                 First Name
               </label>
               <Input
@@ -158,13 +158,13 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                 onChange={handleChange}
                 required
                 placeholder="Enter first name"
-                className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+                className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
               />
             </motion.div>
 
             <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-2 flex items-center gap-2">
-                <FiUser className="w-4 h-4 text-[#ffa509]" />
+              <label className="block text-sm font-semibold text-[#000000] mb-2 flex items-center gap-2">
+                <FiUser className="w-4 h-4 text-[#F9629F]" />
                 Last Name
               </label>
               <Input
@@ -174,15 +174,15 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                 onChange={handleChange}
                 required
                 placeholder="Enter last name"
-                className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+                className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
               />
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mt-4 sm:mt-5 md:mt-6">
             <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-2 flex items-center gap-2">
-                <FiPhone className="w-4 h-4 text-[#ffa509]" />
+              <label className="block text-sm font-semibold text-[#000000] mb-2 flex items-center gap-2">
+                <FiPhone className="w-4 h-4 text-[#F9629F]" />
                 Contact Number
               </label>
               <Input
@@ -192,13 +192,13 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                 onChange={handleChange}
                 required
                 placeholder="Enter contact number"
-                className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+                className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
               />
             </motion.div>
 
             <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-2 flex items-center gap-2">
-                <FiMail className="w-4 h-4 text-[#ffa509]" />
+              <label className="block text-sm font-semibold text-[#000000] mb-2 flex items-center gap-2">
+                <FiMail className="w-4 h-4 text-[#F9629F]" />
                 Email
               </label>
               <Input
@@ -208,7 +208,7 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                 onChange={handleChange}
                 required
                 placeholder="Enter email address"
-                className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+                className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
               />
             </motion.div>
           </div>
@@ -220,20 +220,20 @@ export default function UserForm({ onSuccess }: UserFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-gradient-to-br from-white to-purple-50/30 rounded-xl p-6 border-2 border-purple-100 relative overflow-hidden"
+        className="bg-gradient-to-br from-white to-purple-50/30 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 border-2 border-purple-100 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-200/20 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-              <FiLock className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex-shrink-0">
+              <FiLock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-[#050b2c]">Password</h2>
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">Password</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-2 flex items-center gap-2">
-                <FiLock className="w-4 h-4 text-[#ffa509]" />
+              <label className="block text-sm font-semibold text-[#000000] mb-2 flex items-center gap-2">
+                <FiLock className="w-4 h-4 text-[#F9629F]" />
                 Password
               </label>
               <div className="relative">
@@ -244,12 +244,12 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                   onChange={handleChange}
                   required
                   placeholder="Enter password (min 6 characters)"
-                  className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white pr-10"
+                  className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#ffa509] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#F9629F] transition-colors"
                 >
                   {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                 </button>
@@ -276,8 +276,8 @@ export default function UserForm({ onSuccess }: UserFormProps) {
             </motion.div>
 
             <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-2 flex items-center gap-2">
-                <FiLock className="w-4 h-4 text-[#ffa509]" />
+              <label className="block text-sm font-semibold text-[#000000] mb-2 flex items-center gap-2">
+                <FiLock className="w-4 h-4 text-[#F9629F]" />
                 Confirm Password
               </label>
               <div className="relative">
@@ -293,13 +293,13 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                       ? passwordMatch
                         ? 'border-green-300 focus:border-green-500'
                         : 'border-red-300 focus:border-red-500'
-                      : 'border-gray-200 focus:border-[#ffa509]'
-                  } focus:ring-[#ffa509]/20 bg-white pr-10`}
+                      : 'border-gray-200 focus:border-[#F9629F]'
+                  } focus:ring-[#F9629F]/20 bg-white pr-10`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#ffa509] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#F9629F] transition-colors"
                 >
                   {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                 </button>
@@ -333,20 +333,20 @@ export default function UserForm({ onSuccess }: UserFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-gradient-to-br from-white to-orange-50/30 rounded-xl p-6 border-2 border-orange-100 relative overflow-hidden"
+        className="bg-gradient-to-br from-white to-orange-50/30 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 border-2 border-orange-100 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/20 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
-              <FiShield className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+            <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex-shrink-0">
+              <FiShield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-[#050b2c]">User Role</h2>
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">User Role</h2>
           </div>
           <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }}>
             <div className="flex items-center gap-2 mb-2">
-              <FiShield className="w-4 h-4 text-[#ffa509]" />
-              <label className="block text-sm font-semibold text-[#050b2c]">
+              <FiShield className="w-4 h-4 text-[#F9629F]" />
+              <label className="block text-sm font-semibold text-[#000000]">
                 Role
               </label>
             </div>
@@ -359,21 +359,21 @@ export default function UserForm({ onSuccess }: UserFormProps) {
                 { value: 'customer', label: 'Customer' },
                 { value: 'admin', label: 'Admin' },
               ]}
-              className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+              className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
             />
-            <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200">
-              <div className="flex items-center gap-2">
+            <div className="mt-3 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200">
+              <div className="flex items-start sm:items-center gap-2">
                 {formData.role === 'admin' ? (
                   <>
                     <FiShield className="w-4 h-4 text-purple-600" />
-                    <p className="text-sm font-semibold text-purple-700">
+                    <p className="text-xs sm:text-sm font-semibold text-purple-700">
                       Admin users have full access to the admin panel
                     </p>
                   </>
                 ) : (
                   <>
                     <FiUser className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm font-semibold text-blue-700">
+                    <p className="text-xs sm:text-sm font-semibold text-blue-700">
                       Customer users can browse and purchase products
                     </p>
                   </>
@@ -389,7 +389,7 @@ export default function UserForm({ onSuccess }: UserFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t-2 border-gray-200"
+        className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 pt-4 sm:pt-5 md:pt-6 border-t-2 border-gray-200"
       >
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button
@@ -409,7 +409,7 @@ export default function UserForm({ onSuccess }: UserFormProps) {
               setShowPassword(false);
               setShowConfirmPassword(false);
             }}
-            className="border-2 border-[#050b2c] text-[#050b2c] hover:bg-[#050b2c] hover:text-white font-semibold px-6 py-3"
+            className="border border-gray-300 text-[#1a1a1a] bg-[#FDE8F0] hover:bg-[#FC9BC2] font-semibold px-6 py-3"
           >
             <FiRefreshCw className="w-4 h-4 mr-2 inline" />
             Reset
@@ -421,7 +421,7 @@ export default function UserForm({ onSuccess }: UserFormProps) {
             variant="primary"
             isLoading={isLoading}
             disabled={!passwordStrength}
-            className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] border-0 text-white font-semibold shadow-lg px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] hover:from-[#DB7093] hover:to-[#F9629F] border-0 text-white font-semibold shadow-lg px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {!isLoading && <FiSave className="w-4 h-4 mr-2 inline" />}
             Create User

@@ -47,6 +47,8 @@ interface ProductTableProps {
   hideFilters?: boolean;
   preserveFiltersOnReset?: boolean;
   hiddenFilters?: string[];
+  /** When true, the filters panel is collapsed/hidden by default (e.g. on main admin products page). */
+  filtersDefaultHidden?: boolean;
 }
 
 export default function ProductTable({ 
@@ -55,7 +57,8 @@ export default function ProductTable({
   initialFilters,
   hideFilters = false,
   preserveFiltersOnReset = false,
-  hiddenFilters = []
+  hiddenFilters = [],
+  filtersDefaultHidden = false,
 }: ProductTableProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +79,7 @@ export default function ProductTable({
   });
   const [deleting, setDeleting] = useState(false);
   const [filterKey, setFilterKey] = useState(0);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(!filtersDefaultHidden);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const [imageGallery, setImageGallery] = useState<{
     isOpen: boolean;
@@ -327,56 +330,56 @@ export default function ProductTable({
 
   if (loading && products.length === 0) {
     return (
-      <div className="flex justify-center items-center py-20">
+      <div className="flex justify-center items-center py-8 sm:py-12 md:py-20">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#ffa509] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-[#F9629F] mx-auto mb-3 sm:mb-4"></div>
+          <p className="text-sm sm:text-base text-gray-600">Loading products...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full max-w-full">
       {/* Filters Section */}
       {!hideFilters && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6"
+          className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg sm:shadow-xl border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-xl flex items-center justify-center">
-                <FiFilter className="w-5 h-5 text-[#050b2c]" />
+          <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4 md:mb-6">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiFilter className="w-4 h-4 sm:w-5 sm:h-5 text-[#000000]" />
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#050b2c]">Filters</h3>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">Filters</h3>
                 {activeFiltersCount > 0 && (
-                  <p className="text-sm text-gray-600">{activeFiltersCount} active filter{activeFiltersCount !== 1 ? 's' : ''}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{activeFiltersCount} active</p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {activeFiltersCount > 0 && (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleResetFilters}
-                  className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium cursor-pointer"
                 >
-                  <FiRefreshCw className="w-4 h-4" />
+                  <FiRefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   Reset
                 </motion.button>
               )}
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg hover:shadow-lg transition-all flex items-center gap-2 text-sm font-bold cursor-pointer"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] rounded-lg hover:shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold cursor-pointer"
               >
-                {showFilters ? <FiX className="w-4 h-4" /> : <FiFilter className="w-4 h-4" />}
-                {showFilters ? 'Hide' : 'Show'} Filters
+                {showFilters ? <FiX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <FiFilter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                {showFilters ? 'Hide' : 'Show'}
               </motion.button>
             </div>
           </div>
@@ -390,24 +393,24 @@ export default function ProductTable({
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <FiSearch className="h-5 w-5 text-[#ffa509]" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+                  <div className="relative sm:col-span-2 lg:col-span-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                      <FiSearch className="h-4 w-4 sm:h-5 sm:w-5 text-[#F9629F]" />
                     </div>
                     <input
                       type="text"
                       placeholder="Search products..."
                       value={searchInput}
                       onChange={(e) => handleSearchChange(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                      className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     />
                   </div>
 
                   <select
                     value={filters.category}
                     onChange={(e) => handleFilterChange('category', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                   >
                     <option value="">All Categories</option>
                     {categories.map((cat) => (
@@ -418,28 +421,28 @@ export default function ProductTable({
                   </select>
 
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <FiDollarSign className="h-5 w-5 text-[#ffa509]" />
+                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                      <FiDollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-[#F9629F]" />
                     </div>
                     <input
                       type="number"
                       placeholder="Min Price"
                       value={filters.minPrice || ''}
                       onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                      className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     />
                   </div>
 
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <FiDollarSign className="h-5 w-5 text-[#ffa509]" />
+                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                      <FiDollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-[#F9629F]" />
                     </div>
                     <input
                       type="number"
                       placeholder="Max Price"
                       value={filters.maxPrice || ''}
                       onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                      className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     />
                   </div>
 
@@ -450,7 +453,7 @@ export default function ProductTable({
                       min="0"
                       value={filters.minStock || ''}
                       onChange={(e) => handleFilterChange('minStock', e.target.value)}
-                      className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     />
                   )}
 
@@ -461,7 +464,7 @@ export default function ProductTable({
                       min="0"
                       value={filters.maxStock || ''}
                       onChange={(e) => handleFilterChange('maxStock', e.target.value)}
-                      className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     />
                   )}
 
@@ -469,7 +472,7 @@ export default function ProductTable({
                     <select
                       value={filters.stockStatus}
                       onChange={(e) => handleFilterChange('stockStatus', e.target.value)}
-                      className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     >
                       <option value="">All Stock Status</option>
                       <option value="in-stock">In Stock</option>
@@ -481,7 +484,7 @@ export default function ProductTable({
                   <select
                     value={filters.featured}
                     onChange={(e) => handleFilterChange('featured', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                   >
                     <option value="">All Products</option>
                     <option value="true">Featured Only</option>
@@ -491,7 +494,7 @@ export default function ProductTable({
                   <select
                     value={filters.isFlashSale}
                     onChange={(e) => handleFilterChange('isFlashSale', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                   >
                     <option value="">All Products</option>
                     <option value="true">Flash Sale</option>
@@ -535,29 +538,29 @@ export default function ProductTable({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6"
+        className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg sm:shadow-xl border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6"
       >
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-xl flex items-center justify-center">
-              <FiPackage className="w-5 h-5 text-[#050b2c]" />
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4 md:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+              <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-[#000000]" />
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-[#050b2c]">
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">
                 Products
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {total} {total === 1 ? 'product' : 'products'} found
               </p>
             </div>
           </div>
-          <Link href="/admin/products/create" className="cursor-pointer">
+          <Link href="/admin/products/create" className="cursor-pointer flex-shrink-0">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg transition-all flex items-center gap-2 text-sm cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#F9629F] text-[#000000] font-bold rounded-lg sm:rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm cursor-pointer"
             >
-              <FiPackage className="w-4 h-4" />
+              <FiPackage className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Add Product
             </motion.button>
           </Link>
@@ -567,18 +570,18 @@ export default function ProductTable({
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16"
+            className="text-center py-10 sm:py-14 md:py-16"
           >
-            <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-              <FiPackage className="w-12 h-12 text-gray-400" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+              <FiPackage className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
-            <p className="text-gray-500 mb-6">Try adjusting your filters or add a new product</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No products found</h3>
+            <p className="text-sm sm:text-base text-gray-500 mb-4 sm:mb-6 px-2">Try adjusting your filters or add a new product</p>
             <Link href="/admin/products/create" className="cursor-pointer">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold rounded-xl hover:shadow-lg transition-all cursor-pointer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] font-bold rounded-lg sm:rounded-xl hover:shadow-lg transition-all text-sm sm:text-base cursor-pointer"
               >
                 Add Your First Product
               </motion.button>
@@ -587,7 +590,7 @@ export default function ProductTable({
         ) : (
           <>
             {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-5 md:mb-6">
               {products.map((product, index) => {
                 const flashSaleData = calculateFlashSaleData(product);
                 const { discountPercentage, displayedPrice, crossedOutPrice, hasDiscount } = flashSaleData;
@@ -597,13 +600,13 @@ export default function ProductTable({
                   key={product._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  className="bg-white rounded-xl shadow-lg border-2 border-gray-100 overflow-hidden hover:border-[#ffa509]/50 transition-all group"
+                  transition={{ delay: index * 0.03 }}
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-gray-100 overflow-hidden hover:border-[#F9629F]/50 transition-all group"
                 >
                   {/* Product Image */}
                   <div 
-                    className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer group/image"
+                    className="relative h-36 sm:h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer group/image"
                     onClick={() => {
                       const productImages = product.images && product.images.length > 0 
                         ? product.images 
@@ -635,8 +638,8 @@ export default function ProductTable({
                             whileHover={{ scale: 1.1 }}
                             className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg flex items-center gap-2"
                           >
-                            <FiMaximize2 className="w-5 h-5 text-[#050b2c]" />
-                            <span className="text-sm font-semibold text-[#050b2c]">
+                            <FiMaximize2 className="w-5 h-5 text-[#000000]" />
+                            <span className="text-sm font-semibold text-[#000000]">
                               {product.images && product.images.length > 0 
                                 ? `${product.images.length} Image${product.images.length > 1 ? 's' : ''}`
                                 : 'View Image'}
@@ -677,7 +680,7 @@ export default function ProductTable({
                           initial={{ scale: 0, rotate: 180 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ delay: 0.3, type: 'spring' }}
-                          className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white"
+                          className="bg-gradient-to-br from-[#F9629F] via-[#FC9BC2] to-[#DB7093] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white"
                         >
                           <div className="text-center">
                             <div className="text-[10px] font-black leading-tight">-{discountPercentage}%</div>
@@ -689,7 +692,7 @@ export default function ProductTable({
 
                     {/* Featured Badge */}
                     {product.featured && (
-                      <div className={`absolute ${product.isFlashSale && hasDiscount ? 'top-14' : 'top-3'} right-3 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10`}>
+                      <div className={`absolute ${product.isFlashSale && hasDiscount ? 'top-14' : 'top-3'} right-3 bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10`}>
                         <FiStar className="w-3 h-3 fill-current" />
                         Featured
                       </div>
@@ -698,71 +701,71 @@ export default function ProductTable({
                   </div>
 
                   {/* Product Info */}
-                  <div className="p-5">
-                    <h4 className="text-lg font-bold text-[#050b2c] mb-2 line-clamp-2">
+                  <div className="p-3 sm:p-4 md:p-5">
+                    <h4 className="text-sm sm:text-base md:text-lg font-bold text-[#000000] mb-1.5 sm:mb-2 line-clamp-2">
                       {product.name}
                     </h4>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-3 py-1 bg-[#ffa509]/10 text-[#ffa509] rounded-lg text-sm font-semibold">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                      <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-[#F9629F]/10 text-[#F9629F] rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold">
                         {getCategoryName(product.category)}
                       </span>
-                          <div className="flex items-baseline gap-2">
-                            {product.isFlashSale && hasDiscount ? (
-                              <>
-                                <span className="text-2xl font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
-                                  {formatCurrency(displayedPrice)}
-                                </span>
-                                <span className="text-sm text-gray-400 line-through">
-                                  {formatCurrency(crossedOutPrice)}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-2xl font-bold text-[#050b2c]">
-                                {formatCurrency(product.price)}
-                              </span>
-                            )}
-                          </div>
+                      <div className="flex items-baseline gap-1.5 sm:gap-2">
+                        {product.isFlashSale && hasDiscount ? (
+                          <>
+                            <span className="text-base sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent tabular-nums">
+                              {formatCurrency(displayedPrice)}
+                            </span>
+                            <span className="text-xs sm:text-sm text-gray-400 line-through tabular-nums">
+                              {formatCurrency(crossedOutPrice)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-base sm:text-lg md:text-2xl font-bold text-[#000000] tabular-nums">
+                            {formatCurrency(product.price)}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Stock Info */}
-                    <div className="flex items-center mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className="flex items-center mb-2 sm:mb-3 md:mb-4">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                        <span className={`text-xs sm:text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                         </span>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
-                      <Link href={`/products/${product._id}`} className="flex-1 cursor-pointer" target="_blank">
+                    <div className="flex gap-1.5 sm:gap-2">
+                      <Link href={`/products/${product._id}`} className="flex-1 min-w-0 cursor-pointer" target="_blank">
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm font-medium cursor-pointer"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium cursor-pointer"
                         >
-                          <FiEye className="w-4 h-4" />
+                          <FiEye className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                           View
                         </motion.button>
                       </Link>
-                      <Link href={`/admin/products/${product._id}/edit`} className="flex-1 cursor-pointer">
+                      <Link href={`/admin/products/${product._id}/edit`} className="flex-1 min-w-0 cursor-pointer">
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="w-full px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-bold cursor-pointer"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm font-bold cursor-pointer"
                         >
-                          <FiEdit className="w-4 h-4" />
+                          <FiEdit className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                           Edit
                         </motion.button>
                       </Link>
                       <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => handleDeleteClick(product._id!, product.name)}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center text-sm font-medium cursor-pointer"
+                        className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center text-xs sm:text-sm font-medium cursor-pointer flex-shrink-0"
                       >
-                        <FiTrash2 className="w-4 h-4" />
+                        <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </motion.button>
                     </div>
                   </div>
@@ -776,36 +779,34 @@ export default function ProductTable({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-200"
+                className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-5 md:pt-6 border-t border-gray-200"
               >
-                <div className="text-sm text-gray-600">
-                  Showing <span className="font-semibold text-[#050b2c]">{(page - 1) * limit + 1}</span> to{' '}
-                  <span className="font-semibold text-[#050b2c]">{Math.min(page * limit, total)}</span> of{' '}
-                  <span className="font-semibold text-[#050b2c]">{total}</span> products
+                <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+                  Showing <span className="font-semibold text-[#000000] tabular-nums">{(page - 1) * limit + 1}</span>–<span className="font-semibold text-[#000000] tabular-nums">{Math.min(page * limit, total)}</span> of <span className="font-semibold text-[#000000] tabular-nums">{total}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
-                    className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm cursor-pointer"
                   >
-                    <FiChevronLeft className="w-4 h-4" />
-                    Previous
+                    <FiChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    Prev
                   </motion.button>
-                  <div className="px-4 py-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] rounded-lg font-bold">
-                    Page {page} of {totalPages}
+                  <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] rounded-lg font-bold text-xs sm:text-sm tabular-nums">
+                    {page} / {totalPages}
                   </div>
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPages}
-                    className="px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 cursor-pointer"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm cursor-pointer"
                   >
                     Next
-                    <FiChevronRight className="w-4 h-4" />
+                    <FiChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </motion.button>
                 </div>
               </motion.div>
@@ -961,7 +962,7 @@ export default function ProductTable({
                       onClick={() => setImageGallery(prev => ({ ...prev, currentIndex: idx }))}
                       className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                         idx === imageGallery.currentIndex
-                          ? 'border-[#ffa509] ring-2 ring-[#ffa509]/50'
+                          ? 'border-[#F9629F] ring-2 ring-[#F9629F]/50'
                           : 'border-white/30 hover:border-white/50'
                       }`}
                     >

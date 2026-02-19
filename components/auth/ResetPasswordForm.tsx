@@ -4,14 +4,16 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiLock, FiEye, FiEyeOff, FiArrowRight, FiCheckCircle, FiAlertCircle, FiX } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiArrowRight, FiCheckCircle, FiAlertCircle, FiX, FiMail } from 'react-icons/fi';
 
 export default function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams?.get('token');
+  const emailFromUrl = searchParams?.get('email');
 
   const [formData, setFormData] = useState({
+    email: emailFromUrl || '',
+    code: '',
     password: '',
     confirmPassword: '',
   });
@@ -20,24 +22,17 @@ export default function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
 
-  // Check token validity on mount
   useEffect(() => {
-    if (!token) {
-      setTokenValid(false);
-      setError('Invalid reset link. Please request a new password reset.');
-      return;
+    if (emailFromUrl) {
+      setFormData((prev) => ({ ...prev, email: emailFromUrl }));
     }
-    // Token will be validated when form is submitted
-    setTokenValid(true);
-  }, [token]);
+  }, [emailFromUrl]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -48,8 +43,13 @@ export default function ResetPasswordForm() {
       return;
     }
 
-    if (!token) {
-      setError('Invalid reset token');
+    if (!formData.email) {
+      setError('Email is required');
+      return;
+    }
+
+    if (!formData.code || formData.code.length !== 6) {
+      setError('Please enter the 6-digit code from your email');
       return;
     }
 
@@ -62,7 +62,8 @@ export default function ResetPasswordForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          token,
+          email: formData.email.trim(),
+          code: formData.code.trim(),
           password: formData.password,
         }),
       });
@@ -95,7 +96,7 @@ export default function ResetPasswordForm() {
     });
   };
 
-  if (tokenValid === false) {
+  if (!emailFromUrl && !formData.email) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -111,15 +112,15 @@ export default function ResetPasswordForm() {
           >
             <FiX className="w-10 h-10 text-red-400" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-white mb-4">Invalid Reset Link</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Email Required</h2>
           <p className="text-white/70 mb-6">
-            This password reset link is invalid or has expired. Please request a new one.
+            Please request a password reset from the forgot password page first.
           </p>
           <Link
             href="/forgot-password"
-            className="inline-flex items-center gap-2 text-[#ffa509] hover:text-[#ffb833] font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-[#F9629F] hover:text-[#FC9BC2] font-medium transition-colors"
           >
-            Request New Reset Link
+            Go to Forgot Password
             <FiArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -152,7 +153,7 @@ export default function ResetPasswordForm() {
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-3 px-6 rounded-xl shadow-lg shadow-[#ffa509]/30 hover:shadow-[#ffa509]/50 transition-all"
+            className="inline-flex items-center gap-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-[#FC9BC2] transition-all"
           >
             Go to Login
             <FiArrowRight className="w-5 h-5" />
@@ -180,8 +181,8 @@ export default function ResetPasswordForm() {
           whileHover={{ rotate: 12, scale: 1.1 }}
           className="inline-block mb-4"
         >
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ffa509]/50">
-            <svg className="w-10 h-10 text-[#050b2c]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50">
+            <svg className="w-10 h-10 text-[#000000]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
           </div>
@@ -189,8 +190,8 @@ export default function ResetPasswordForm() {
         <h2 className="text-4xl font-bold text-white mb-2">
           Reset Password
         </h2>
-        <p className="text-[#ffa509]/80 text-lg">
-          Enter your new password below
+        <p className="text-[#F9629F]/80 text-lg">
+          Enter the code from your email and your new password
         </p>
       </motion.div>
 
@@ -217,6 +218,53 @@ export default function ResetPasswordForm() {
             )}
           </AnimatePresence>
 
+          {/* Email Input (read-only if from URL) */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
+              <FiMail className="w-4 h-4 text-[#F9629F]" />
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              readOnly={!!emailFromUrl}
+              placeholder="your.email@example.com"
+              className="w-full px-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm disabled:opacity-80"
+            />
+            {emailFromUrl && (
+              <p className="text-white/60 text-xs mt-1">We sent a 6-digit code to this email</p>
+            )}
+          </motion.div>
+
+          {/* Code Input */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
+              <FiLock className="w-4 h-4 text-[#F9629F]" />
+              Reset Code
+            </label>
+            <input
+              type="text"
+              name="code"
+              value={formData.code}
+              onChange={handleChange}
+              required
+              maxLength={6}
+              placeholder="Enter 6-digit code"
+              className="w-full px-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm text-center text-2xl tracking-[0.5em] font-mono"
+            />
+          </motion.div>
+
           {/* Password Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -224,12 +272,12 @@ export default function ResetPasswordForm() {
             transition={{ delay: 0.4 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiLock className="w-4 h-4 text-[#ffa509]" />
+              <FiLock className="w-4 h-4 text-[#F9629F]" />
               New Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-[#ffa509]" />
+                <FiLock className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -239,12 +287,12 @@ export default function ResetPasswordForm() {
                 required
                 minLength={6}
                 placeholder="Enter new password"
-                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#ffa509] hover:text-[#ffb833] transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#F9629F] hover:text-[#FC9BC2] transition-colors"
               >
                 {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
@@ -259,12 +307,12 @@ export default function ResetPasswordForm() {
             transition={{ delay: 0.5 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiLock className="w-4 h-4 text-[#ffa509]" />
+              <FiLock className="w-4 h-4 text-[#F9629F]" />
               Confirm Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-[#ffa509]" />
+                <FiLock className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -274,12 +322,12 @@ export default function ResetPasswordForm() {
                 required
                 minLength={6}
                 placeholder="Confirm new password"
-                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#ffa509] hover:text-[#ffb833] transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#F9629F] hover:text-[#FC9BC2] transition-colors"
               >
                 {showConfirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
@@ -297,7 +345,7 @@ export default function ResetPasswordForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-4 px-6 rounded-xl shadow-lg shadow-[#ffa509]/30 hover:shadow-[#ffa509]/50 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 font-bold py-4 px-6 rounded-xl shadow-lg hover:bg-[#FC9BC2] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -333,16 +381,27 @@ export default function ResetPasswordForm() {
           </motion.div>
         </form>
 
-        {/* Back to Login */}
+        {/* Resend code & Back to Login */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="mt-8 text-center"
+          className="mt-8 text-center space-y-2"
         >
+          {formData.email && (
+            <p className="text-white/60 text-sm">
+              Didn&apos;t receive the code?{' '}
+              <Link
+                href={`/forgot-password${formData.email ? `?email=${encodeURIComponent(formData.email)}` : ''}`}
+                className="text-[#F9629F] hover:text-[#FC9BC2] font-medium"
+              >
+                Resend code
+              </Link>
+            </p>
+          )}
           <Link
             href="/login"
-            className="text-white/70 hover:text-[#ffa509] text-sm font-medium transition-colors inline-flex items-center gap-1"
+            className="text-white/70 hover:text-[#F9629F] text-sm font-medium transition-colors inline-flex items-center gap-1"
           >
             <FiArrowRight className="w-4 h-4 rotate-180" />
             Back to Login

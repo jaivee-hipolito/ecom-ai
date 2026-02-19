@@ -53,8 +53,20 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
   const [isCollapsed, setIsCollapsed] = useState(false);
   // Orders section is collapsed by default - only Overview, Products, and Analytics are expanded
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['Overview', 'Products', 'Analytics'])
+    () => new Set(['Overview', 'Products', 'Analytics'])
   );
+
+  // When opening sidebar via hamburger, expand Orders section by default
+  useEffect(() => {
+    if (isMobileOpen) {
+      setExpandedSections((prev) => {
+        if (prev.has('Orders')) return prev;
+        const next = new Set(prev);
+        next.add('Orders');
+        return next;
+      });
+    }
+  }, [isMobileOpen]);
 
   // Update content padding when sidebar collapses/expands
   useEffect(() => {
@@ -274,19 +286,19 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#050b2c] to-[#0a1a4a] border-b border-[#ffa509]/20 px-4 py-3 flex items-center justify-between shadow-lg"
+          className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#000000] to-[#1a1a1a] border-b border-[#F9629F]/20 px-4 py-3 flex items-center justify-between shadow-lg"
         >
           <Link href="/admin/dashboard" className="text-xl font-bold text-white flex items-center gap-2 cursor-pointer">
-            <svg className="w-5 h-5 text-[#ffa509]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[#F9629F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
             <span>Teezee</span>
-            <span className="text-sm text-[#ffa509]">Admin</span>
+            <span className="text-sm text-[#F9629F]">Admin</span>
           </Link>
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="p-2 rounded-lg text-white hover:bg-[#ffa509]/20 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-white hover:bg-[#F9629F]/20 transition-colors cursor-pointer"
           >
             {isMobileOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
           </motion.button>
@@ -302,14 +314,14 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ${
           hideOnMobile ? 'hidden lg:block' : isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } bg-gradient-to-b from-[#050b2c] via-[#0a1a4a] to-[#050b2c] text-white shadow-2xl`}
+        } bg-gradient-to-b from-[#000000] via-[#1a1a1a] to-[#000000] text-white shadow-2xl`}
       >
         <div className="h-full flex flex-col relative overflow-hidden">
           {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(255,165,9,0.1),transparent_50%)] pointer-events-none"></div>
 
           {/* Logo and Toggle */}
-          <div className="h-20 flex items-center justify-between px-4 border-b border-[#ffa509]/20 relative z-10">
+          <div className="h-20 flex items-center justify-between px-4 border-b border-[#F9629F]/20 relative z-10">
             <AnimatePresence mode="wait">
               {!isCollapsed && (
                 <motion.div
@@ -319,12 +331,12 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                   transition={{ duration: 0.2 }}
                 >
                   <Link href="/admin/dashboard" className="text-xl font-bold text-white flex items-center gap-2 group cursor-pointer">
-                    <svg className="w-6 h-6 text-[#ffa509] group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-[#F9629F] group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                     <div>
                       <div className="text-white">Teezee</div>
-                      <div className="text-xs text-[#ffa509] font-semibold">Admin Panel</div>
+                      <div className="text-xs text-[#F9629F] font-semibold">Admin Panel</div>
                     </div>
                   </Link>
                 </motion.div>
@@ -337,7 +349,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                   transition={{ duration: 0.2 }}
                   className="flex justify-center w-full"
                 >
-                  <svg className="w-6 h-6 text-[#ffa509]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-[#F9629F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                 </motion.div>
@@ -347,7 +359,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 rounded-lg text-[#ffa509] hover:bg-[#ffa509]/20 transition-colors relative z-10 cursor-pointer"
+              className="p-2 rounded-lg text-[#F9629F] hover:bg-[#F9629F]/20 transition-colors relative z-10 cursor-pointer"
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? <FiChevronRight className="w-5 h-5" /> : <FiChevronDown className="w-5 h-5 rotate-90" />}
@@ -361,12 +373,12 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="px-6 py-4 border-b border-[#ffa509]/20 relative z-10"
+                className="px-6 py-4 border-b border-[#F9629F]/20 relative z-10"
               >
-                <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-[#ffa509]/10 to-transparent border border-[#ffa509]/20">
+                <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-[#F9629F]/10 to-transparent border border-[#F9629F]/20">
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="h-12 w-12 rounded-full bg-gradient-to-br from-[#ffa509] to-[#ffb833] flex items-center justify-center text-[#050b2c] font-bold text-lg shadow-lg"
+                    className="h-12 w-12 rounded-full bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] flex items-center justify-center text-[#000000] font-bold text-lg shadow-lg"
                   >
                     {user?.firstName && user?.lastName
                       ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
@@ -378,7 +390,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                         ? `${user.firstName} ${user.lastName}`
                         : 'Admin'}
                     </p>
-                    <p className="text-xs text-[#ffa509]/80 truncate">{user?.email}</p>
+                    <p className="text-xs text-[#F9629F]/80 truncate">{user?.email}</p>
                   </div>
                 </div>
               </motion.div>
@@ -388,11 +400,11 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="px-4 py-4 border-b border-[#ffa509]/20 flex justify-center relative z-10"
+                className="px-4 py-4 border-b border-[#F9629F]/20 flex justify-center relative z-10"
               >
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="h-12 w-12 rounded-full bg-gradient-to-br from-[#ffa509] to-[#ffb833] flex items-center justify-center text-[#050b2c] font-bold text-lg shadow-lg"
+                  className="h-12 w-12 rounded-full bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] flex items-center justify-center text-[#000000] font-bold text-lg shadow-lg"
                 >
                   {user?.firstName && user?.lastName
                     ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
@@ -421,7 +433,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                         whileHover={{ x: 5 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => toggleSection(section.title)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-[#ffa509] uppercase tracking-wider hover:text-[#ffb833] transition-colors cursor-pointer"
+                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-[#F9629F] uppercase tracking-wider hover:text-[#FC9BC2] transition-colors cursor-pointer"
                       >
                         <span>{section.title}</span>
                         <motion.div
@@ -444,8 +456,8 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                   onClick={() => setIsMobileOpen(false)}
                                   className={`flex items-center justify-center px-3 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                     active
-                                      ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
-                                      : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
+                                      ? 'bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] shadow-lg shadow-[#F9629F]/30'
+                                      : 'text-white/70 hover:bg-[#F9629F]/10 hover:text-white'
                                   }`}
                                   title={item.name}
                                 >
@@ -475,8 +487,8 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                       onClick={() => setIsMobileOpen(false)}
                                       className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                         active
-                                          ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
-                                          : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
+                                          ? 'bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] shadow-lg shadow-[#F9629F]/30'
+                                          : 'text-white/70 hover:bg-[#F9629F]/10 hover:text-white'
                                       }`}
                                     >
                                       <span className="mr-3">{item.icon}</span>
@@ -503,7 +515,7 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                   transition={{ delay: sectionIndex * 0.05 }}
                 >
                   {!isCollapsed && (
-                    <h3 className="px-3 text-xs font-bold text-[#ffa509] uppercase tracking-wider mb-3">
+                    <h3 className="px-3 text-xs font-bold text-[#F9629F] uppercase tracking-wider mb-3">
                       {section.title}
                     </h3>
                   )}
@@ -530,8 +542,8 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                   }}
                                   className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                     active
-                                      ? 'bg-[#ffa509]/20 text-white border border-[#ffa509]/30'
-                                      : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
+                                      ? 'bg-[#F9629F]/20 text-white border border-[#F9629F]/30'
+                                      : 'text-white/70 hover:bg-[#F9629F]/10 hover:text-white'
                                   }`}
                                 >
                                   <div className="flex items-center">
@@ -563,8 +575,8 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                                 onClick={() => setIsMobileOpen(false)}
                                                 className={`flex items-center px-4 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                                   subActive
-                                                    ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
-                                                    : 'text-white/60 hover:bg-[#ffa509]/10 hover:text-white'
+                                                    ? 'bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] shadow-lg shadow-[#F9629F]/30'
+                                                    : 'text-white/60 hover:bg-[#F9629F]/10 hover:text-white'
                                                 }`}
                                               >
                                                 <span className="mr-3">{subItem.icon}</span>
@@ -589,8 +601,8 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                         onClick={() => setIsMobileOpen(false)}
                                         className={`flex items-center justify-center px-3 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                                           subActive
-                                            ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
-                                            : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
+                                            ? 'bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] shadow-lg shadow-[#F9629F]/30'
+                                            : 'text-white/70 hover:bg-[#F9629F]/10 hover:text-white'
                                         }`}
                                         title={subItem.name}
                                       >
@@ -624,8 +636,8 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
                                   : 'px-4 py-2.5'
                               } text-sm font-medium rounded-xl transition-all ${
                                 active
-                                  ? 'bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg shadow-[#ffa509]/30'
-                                  : 'text-white/70 hover:bg-[#ffa509]/10 hover:text-white'
+                                  ? 'bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] shadow-lg shadow-[#F9629F]/30'
+                                  : 'text-white/70 hover:bg-[#F9629F]/10 hover:text-white'
                               }`}
                               title={isCollapsed ? item.name : undefined}
                             >
@@ -646,16 +658,16 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: navSections.length * 0.05 }}
-              className="lg:hidden mt-4 pt-4 border-t border-[#ffa509]/20"
+              className="lg:hidden mt-4 pt-4 border-t border-[#F9629F]/20"
             >
               <motion.button
                 whileHover={{ x: 5, scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSignOut}
-                className="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all bg-gradient-to-r from-[#ffa509]/20 to-[#ffb833]/20 text-white/90 hover:text-white hover:from-[#ffa509]/30 hover:to-[#ffb833]/30 border border-[#ffa509]/30 hover:border-[#ffa509]/50 shadow-lg shadow-[#ffa509]/10 hover:shadow-[#ffa509]/20 cursor-pointer"
+                className="w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all bg-gradient-to-r from-[#F9629F]/20 to-[#FC9BC2]/20 text-white/90 hover:text-white hover:from-[#F9629F]/30 hover:to-[#FC9BC2]/30 border border-[#F9629F]/30 hover:border-[#F9629F]/50 shadow-lg shadow-[#F9629F]/10 hover:shadow-[#F9629F]/20 cursor-pointer"
               >
                 <span className="mr-3">
-                  <FiLogOut className="w-5 h-5 text-[#ffa509]" />
+                  <FiLogOut className="w-5 h-5 text-[#F9629F]" />
                 </span>
                 <span>Sign Out</span>
               </motion.button>
@@ -663,11 +675,11 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
           </nav>
 
           {/* Footer */}
-          <div className={`px-${isCollapsed ? '2' : '6'} py-4 border-t border-[#ffa509]/20 relative z-10`}>
+          <div className={`px-${isCollapsed ? '2' : '6'} py-4 border-t border-[#F9629F]/20 relative z-10`}>
             <motion.div whileHover={{ x: -5 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/"
-                className={`flex items-center text-sm text-white/70 hover:text-[#ffa509] transition-colors cursor-pointer ${
+                className={`flex items-center text-sm text-white/70 hover:text-[#F9629F] transition-colors cursor-pointer ${
                   isCollapsed ? 'justify-center' : ''
                 }`}
                 title={isCollapsed ? 'Back to Store' : undefined}

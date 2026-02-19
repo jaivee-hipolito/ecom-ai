@@ -38,11 +38,11 @@ export default function PaymentMethodSelector({
           <div className="flex items-center gap-4">
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
               selectedMethod === 'card' 
-                ? 'border-[#050b2c] bg-[#050b2c]' 
+                ? 'border-[#1a1a1a] bg-[#FDE8F0]' 
                 : 'border-gray-300'
             }`}>
               {selectedMethod === 'card' && (
-                <div className="w-2 h-2 bg-white rounded-full" />
+                <div className="w-2 h-2 bg-[#1a1a1a] rounded-full" />
               )}
             </div>
             <span className="text-sm font-medium text-gray-900">Credit card</span>
@@ -66,11 +66,11 @@ export default function PaymentMethodSelector({
           <div className="flex items-center gap-4">
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
               selectedMethod === 'afterpay' 
-                ? 'border-[#050b2c] bg-[#050b2c]' 
+                ? 'border-[#1a1a1a] bg-[#FDE8F0]' 
                 : 'border-gray-300'
             }`}>
               {selectedMethod === 'afterpay' && (
-                <div className="w-2 h-2 bg-white rounded-full" />
+                <div className="w-2 h-2 bg-[#1a1a1a] rounded-full" />
               )}
             </div>
             <span className="text-sm font-medium text-gray-900">Afterpay</span>
@@ -104,11 +104,11 @@ export default function PaymentMethodSelector({
           <div className="flex items-center gap-4">
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
               selectedMethod === 'klarna' 
-                ? 'border-[#050b2c] bg-[#050b2c]' 
+                ? 'border-[#1a1a1a] bg-[#FDE8F0]' 
                 : 'border-gray-300'
             }`}>
               {selectedMethod === 'klarna' && (
-                <div className="w-2 h-2 bg-white rounded-full" />
+                <div className="w-2 h-2 bg-[#1a1a1a] rounded-full" />
               )}
             </div>
             <span className="text-sm font-medium text-gray-900">Klarna - Flexible payments</span>
@@ -133,7 +133,7 @@ export default function PaymentMethodSelector({
             {/* Installment amounts - total already includes 6% fee */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <p className="text-xs text-gray-600 mb-1">4 interest-free payments of:</p>
-              <p className="text-lg font-bold text-[#050b2c]">
+              <p className="text-lg font-bold text-[#000000]">
                 {formatCurrency(total / 4)}
                 <span className="text-xs text-gray-500 ml-1 font-normal">(includes 6% BNPL fee)</span>
               </p>
@@ -161,7 +161,7 @@ export default function PaymentMethodSelector({
             {/* Installment amounts - total already includes 6% fee */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <p className="text-xs text-gray-600 mb-1">4 payments of:</p>
-              <p className="text-lg font-bold text-[#050b2c]">
+              <p className="text-lg font-bold text-[#000000]">
                 {formatCurrency(total / 4)}
                 <span className="text-xs text-gray-500 ml-1 font-normal">(includes 6% BNPL fee)</span>
               </p>

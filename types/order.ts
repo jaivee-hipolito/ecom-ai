@@ -9,6 +9,14 @@ export interface IOrderItem {
   image?: string;
 }
 
+export interface IOrderHistoryEntry {
+  modifiedBy?: string;
+  modifiedByName: string;
+  changes: { field: string; from: string; to: string }[];
+  note?: string;
+  changedAt?: string;
+}
+
 export interface IOrder {
   _id?: string;
   user: string; // User ID
@@ -19,6 +27,7 @@ export interface IOrder {
   shippingAddress: ShippingAddress;
   paymentMethod: string;
   paymentId?: string;
+  history?: IOrderHistoryEntry[];
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -12,7 +12,7 @@ function CheckoutContent() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/auth/signin?redirect=/checkout');
+      router.push('/login?redirect=/checkout');
     }
   }, [isAuthenticated, isLoading, router]);
 

@@ -74,7 +74,7 @@ export default function VerifyPage() {
       const data = await response.json();
       if (response.ok && data.success) {
         setSuccess('Verification code sent to your email!');
-        setTimeout(() => setSuccess(''), 5000);
+        setTimeout(() => setSuccess(''), 15000);
       } else {
         setError(data.error || 'Failed to send verification code');
       }
@@ -103,7 +103,7 @@ export default function VerifyPage() {
       const data = await response.json();
       if (response.ok && data.success) {
         setSuccess('Verification code sent to your phone!');
-        setTimeout(() => setSuccess(''), 5000);
+        setTimeout(() => setSuccess(''), 15000);
       } else {
         setError(data.error || 'Failed to send verification code');
       }
@@ -218,11 +218,11 @@ export default function VerifyPage() {
           className="text-center mb-12"
         >
           <div className="flex items-center justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ffa509]/50">
-              <FiShield className="w-10 h-10 text-[#050b2c]" />
+            <div className="w-20 h-20 bg-gradient-to-br from-[#F9629F] to-[#F9629F] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50">
+              <FiShield className="w-10 h-10 text-[#000000]" />
             </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-[#050b2c] mb-4">
+          <h1 className="text-4xl sm:text-5xl font-black text-[#000000] mb-4">
             Verify Your Account
           </h1>
           <p className="text-gray-600 text-lg">
@@ -273,7 +273,7 @@ export default function VerifyPage() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  emailVerified ? 'bg-green-500' : 'bg-[#ffa509]'
+                  emailVerified ? 'bg-green-500' : 'bg-[#F9629F]'
                 }`}>
                   {emailVerified ? (
                     <FiCheckCircle className="w-6 h-6 text-white" />
@@ -282,7 +282,7 @@ export default function VerifyPage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-[#050b2c]">Email Verification</h2>
+                  <h2 className="text-xl font-bold text-[#000000]">Email Verification</h2>
                   <p className="text-sm text-gray-600">{userProfile?.email}</p>
                 </div>
               </div>
@@ -299,7 +299,7 @@ export default function VerifyPage() {
                   We'll send a verification code to your email address. Enter the code below to verify.
                 </p>
                 <div>
-                  <label className="block text-sm font-semibold text-[#050b2c] mb-2">
+                  <label className="block text-sm font-semibold text-[#000000] mb-2">
                     Enter Verification Code
                   </label>
                   <input
@@ -308,7 +308,7 @@ export default function VerifyPage() {
                     onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
                     maxLength={6}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all text-center text-2xl tracking-widest font-bold text-[#050b2c]"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-center text-2xl tracking-widest font-bold text-[#000000]"
                   />
                 </div>
                 <div className="flex gap-3">
@@ -317,7 +317,7 @@ export default function VerifyPage() {
                     disabled={emailCode.length !== 6 || verifyingEmail}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex-1 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-gradient-to-r from-[#F9629F] to-[#F9629F] text-[#000000] font-bold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {verifyingEmail ? (
                       <>
@@ -339,7 +339,7 @@ export default function VerifyPage() {
                     disabled={sendingEmailCode}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#050b2c] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
+                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#000000] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
                     title="Resend code"
                   >
                     <FiRefreshCw className={`w-5 h-5 ${sendingEmailCode ? 'animate-spin' : ''}`} />
@@ -363,7 +363,7 @@ export default function VerifyPage() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  phoneVerified ? 'bg-green-500' : 'bg-[#ffa509]'
+                  phoneVerified ? 'bg-green-500' : 'bg-[#F9629F]'
                 }`}>
                   {phoneVerified ? (
                     <FiCheckCircle className="w-6 h-6 text-white" />
@@ -372,7 +372,7 @@ export default function VerifyPage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-[#050b2c]">Phone Verification</h2>
+                  <h2 className="text-xl font-bold text-[#000000]">Phone Verification</h2>
                   <p className="text-sm text-gray-600">{userProfile?.contactNumber || 'Not set'}</p>
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function VerifyPage() {
                   We'll send a verification code to your phone number. Enter the code below to verify.
                 </p>
                 <div>
-                  <label className="block text-sm font-semibold text-[#050b2c] mb-2">
+                  <label className="block text-sm font-semibold text-[#000000] mb-2">
                     Enter Verification Code
                   </label>
                   <input
@@ -398,7 +398,7 @@ export default function VerifyPage() {
                     onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
                     maxLength={6}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all text-center text-2xl tracking-widest font-bold text-[#050b2c]"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-center text-2xl tracking-widest font-bold text-[#000000]"
                   />
                 </div>
                 <div className="flex gap-3">
@@ -407,7 +407,7 @@ export default function VerifyPage() {
                     disabled={phoneCode.length !== 6 || verifyingPhone}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex-1 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-gradient-to-r from-[#F9629F] to-[#F9629F] text-[#000000] font-bold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {verifyingPhone ? (
                       <>
@@ -429,7 +429,7 @@ export default function VerifyPage() {
                     disabled={sendingPhoneCode}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#050b2c] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
+                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#000000] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
                     title="Resend code"
                   >
                     <FiRefreshCw className={`w-5 h-5 ${sendingPhoneCode ? 'animate-spin' : ''}`} />
@@ -453,7 +453,7 @@ export default function VerifyPage() {
         >
           <a
             href="/dashboard/profile"
-            className="text-[#ffa509] hover:text-[#ffb833] font-semibold transition-colors inline-flex items-center gap-2"
+            className="text-[#F9629F] hover:text-[#F9629F] font-semibold transition-colors inline-flex items-center gap-2"
           >
             ← Back to Profile
           </a>

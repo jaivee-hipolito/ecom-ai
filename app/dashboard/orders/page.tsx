@@ -112,60 +112,60 @@ export default function DashboardOrdersPage() {
       <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setStatusFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-300 ${
             statusFilter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FDE8F0] text-[#000000] border-gray-400'
+              : 'bg-white text-gray-700 hover:bg-[#FDE8F0]/50'
           }`}
         >
           All Orders
         </button>
         <button
           onClick={() => setStatusFilter('pending')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-300 ${
             statusFilter === 'pending'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FDE8F0] text-[#000000] border-gray-400'
+              : 'bg-white text-gray-700 hover:bg-[#FDE8F0]/50'
           }`}
         >
           Pending
         </button>
         <button
           onClick={() => setStatusFilter('processing')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-300 ${
             statusFilter === 'processing'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FDE8F0] text-[#000000] border-gray-400'
+              : 'bg-white text-gray-700 hover:bg-[#FDE8F0]/50'
           }`}
         >
           Processing
         </button>
         <button
           onClick={() => setStatusFilter('shipped')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-300 ${
             statusFilter === 'shipped'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FDE8F0] text-[#000000] border-gray-400'
+              : 'bg-white text-gray-700 hover:bg-[#FDE8F0]/50'
           }`}
         >
           Shipped
         </button>
         <button
           onClick={() => setStatusFilter('delivered')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-300 ${
             statusFilter === 'delivered'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FDE8F0] text-[#000000] border-gray-400'
+              : 'bg-white text-gray-700 hover:bg-[#FDE8F0]/50'
           }`}
         >
           Delivered
         </button>
         <button
           onClick={() => setStatusFilter('cancelled')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium transition-colors border border-gray-300 ${
             statusFilter === 'cancelled'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FDE8F0] text-[#000000] border-gray-400'
+              : 'bg-white text-gray-700 hover:bg-[#FDE8F0]/50'
           }`}
         >
           Cancelled
@@ -194,7 +194,7 @@ export default function DashboardOrdersPage() {
               : `You don't have any ${statusFilter} orders.`}
           </p>
           <Link href="/dashboard/products" className="inline-block mt-6">
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button className="px-6 py-2 bg-[#FDE8F0] text-[#000000] border border-gray-300 rounded-lg hover:bg-[#FC9BC2] transition-colors font-medium">
               Start Shopping
             </button>
           </Link>
@@ -281,7 +281,7 @@ export default function DashboardOrdersPage() {
                       </Link>
                       <div className="flex-1 min-w-0">
                         <Link href={`/products/${productId}`}>
-                          <h4 className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors cursor-pointer">{item.name}</h4>
+                          <h4 className="text-sm font-medium text-gray-900 hover:text-[#F9629F] transition-colors cursor-pointer">{item.name}</h4>
                         </Link>
                         <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                         <p className="text-sm font-medium text-gray-900 mt-1">
@@ -312,7 +312,7 @@ export default function DashboardOrdersPage() {
                     </p>
                   </div>
                   <Link href={`/orders/${order._id}`}>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button className="px-4 py-2 bg-[#FDE8F0] text-[#000000] border border-gray-300 rounded-lg hover:bg-[#FC9BC2] transition-colors font-medium">
                       View Details
                     </button>
                   </Link>

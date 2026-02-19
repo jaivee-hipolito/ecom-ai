@@ -78,7 +78,7 @@ export default function ProductsPage() {
                   setSearchQuery(e.target.value);
                   setFilters({ ...filters, search: e.target.value || undefined });
                 }}
-                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all shadow-sm hover:shadow-md text-gray-900 placeholder-gray-400 bg-white"
+                className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] transition-all shadow-sm hover:shadow-md text-gray-900 placeholder-gray-400 bg-white"
                 style={{ color: '#111827' }}
               />
               <FiSearch className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
@@ -88,7 +88,7 @@ export default function ProductsPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all shadow-sm hover:shadow-md ${
               Object.keys(filters).length > 0
-                ? 'bg-[#ffa509] text-white border-2 border-[#ffa509] hover:bg-[#ff8c00]'
+                ? 'bg-[#F9629F] text-white border border-gray-300 hover:bg-[#DB7093]'
                 : 'bg-white border border-gray-300 hover:bg-gray-50'
             }`}
           >
@@ -109,8 +109,8 @@ export default function ProductsPage() {
             {Object.keys(filters).length > 0 && (
               <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                 Object.keys(filters).length > 0
-                  ? 'bg-white text-[#ffa509]'
-                  : 'bg-[#ffa509] text-white'
+                  ? 'bg-white text-[#F9629F]'
+                  : 'bg-[#F9629F] text-white'
               }`}>
                 {Object.keys(filters).length}
               </span>
@@ -140,7 +140,7 @@ export default function ProductsPage() {
               className="lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 shadow-2xl overflow-y-auto"
             >
               <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between z-10">
-                <h2 className="text-xl font-bold text-[#050b2c]">Filters</h2>
+                <h2 className="text-xl font-bold text-[#000000]">Filters</h2>
                 <button
                   onClick={() => setShowFilters(false)}
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -187,7 +187,7 @@ export default function ProductsPage() {
               <div className="mb-4 text-sm text-gray-600">
                 Showing {products.length} of {pagination.total} products
               </div>
-              <ProductList products={products} isLoading={isLoading} />
+              <ProductList products={products} isLoading={isLoading} showAttributes="color-only" />
               {pagination.totalPages > 1 && (
                 <Pagination
                   currentPage={pagination.page}

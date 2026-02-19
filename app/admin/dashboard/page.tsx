@@ -124,20 +124,20 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#0a1a4a] to-[#050b2c] p-8"
+          className="relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#1a1a2e] to-[#050b2c] p-6 sm:p-8"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.15),transparent_50%)]"></div>
-          <div className="relative z-10 flex items-center justify-center min-h-[200px]">
-            <div className="flex flex-col items-center gap-4">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.12),transparent_50%)]"></div>
+          <div className="relative z-10 flex items-center justify-center min-h-[160px] sm:min-h-[200px]">
+            <div className="flex flex-col items-center gap-3 sm:gap-4">
               <div className="relative">
-                <div className="w-16 h-16 border-4 border-[#ffa509] border-t-transparent rounded-full animate-spin"></div>
-                <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-[#ff8c00] rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-[#ffa509] border-t-transparent rounded-full animate-spin"></div>
+                <div className="absolute inset-0 w-12 h-12 sm:w-16 sm:h-16 border-4 border-transparent border-r-[#F9629F] rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
               </div>
-              <p className="text-white/80 text-lg font-medium">Loading dashboard...</p>
+              <p className="text-white/80 text-sm sm:text-lg font-medium">Loading dashboard...</p>
             </div>
           </div>
         </motion.div>
@@ -146,28 +146,28 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full max-w-full">
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#0a1a4a] to-[#050b2c] p-8"
+        className="relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#1a1a2e] to-[#050b2c] p-4 sm:p-5 md:p-6 lg:p-8"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.15),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.12),transparent_50%)]"></div>
         <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
-                  className="p-3 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-xl shadow-lg"
+                  className="p-2 sm:p-3 bg-gradient-to-br from-[#ffa509] to-[#F9629F] rounded-lg sm:rounded-xl shadow-lg flex-shrink-0"
                 >
-                  <FiBarChart2 className="w-8 h-8 text-white" />
+                  <FiBarChart2 className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-white" />
                 </motion.div>
-                Admin Dashboard
+                <span>Admin Dashboard</span>
               </h1>
-              <p className="text-white/80 text-lg">
+              <p className="text-white/80 text-xs sm:text-sm md:text-base lg:text-lg">
                 Welcome back, <span className="text-[#ffa509] font-semibold">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Admin'}</span>! Manage your e-commerce platform.
               </p>
             </div>
@@ -175,12 +175,12 @@ export default function AdminDashboardPage() {
         </div>
       </motion.div>
 
-      {/* Main Stats Grid */}
+      {/* Main Stats Grid - 2x2 on mobile/tablet, 4 cols on lg */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6 lg:grid-cols-4"
       >
         {[
           {
@@ -218,9 +218,9 @@ export default function AdminDashboardPage() {
             value: stats ? formatCurrency(stats.totalRevenue) : '$0.00',
             subtitle: `${stats ? formatCurrency(stats.deliveredRevenue) : '$0.00'} delivered`,
             icon: FiDollarSign,
-            color: 'from-[#ffa509] to-[#ff8c00]',
+            color: 'from-[#F9629F] to-[#DB7093]',
             bgColor: 'bg-orange-50',
-            textColor: 'text-[#ffa509]',
+            textColor: 'text-[#F9629F]',
             textDark: 'text-orange-900',
           },
         ].map((card, index) => (
@@ -228,31 +228,31 @@ export default function AdminDashboardPage() {
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + index * 0.1 }}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden group"
+            transition={{ delay: 0.1 + index * 0.05 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-5 lg:p-6 relative overflow-hidden group"
           >
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity`}></div>
+            <div className={`absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br ${card.color} opacity-10 rounded-full blur-xl sm:blur-2xl group-hover:opacity-20 transition-opacity`}></div>
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-14 h-14 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                  <card.icon className="w-7 h-7 text-white" />
+              <div className="flex items-center justify-between mb-1 sm:mb-2 md:mb-3 lg:mb-4">
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${card.color} rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform flex-shrink-0`}>
+                  <card.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 text-white" />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-gray-600 mb-1">{card.title}</p>
-              <p className="text-3xl font-bold text-[#050b2c] mb-1">{card.value}</p>
-              <p className="text-xs text-gray-500">{card.subtitle}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0.5 sm:mb-1 truncate">{card.title}</p>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#000000] mb-0.5 sm:mb-1 tabular-nums leading-tight">{card.value}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 truncate">{card.subtitle}</p>
             </div>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* Additional Stats Grid */}
+      {/* Additional Stats Grid - 2x2 on mobile/tablet, 4 cols on lg */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        transition={{ delay: 0.15 }}
+        className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6 lg:grid-cols-4"
       >
         {[
           {
@@ -296,49 +296,49 @@ export default function AdminDashboardPage() {
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + index * 0.1 }}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden group"
+            transition={{ delay: 0.15 + index * 0.05 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-5 lg:p-6 relative overflow-hidden group"
           >
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity`}></div>
+            <div className={`absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br ${card.color} opacity-10 rounded-full blur-xl sm:blur-2xl group-hover:opacity-20 transition-opacity`}></div>
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-14 h-14 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                  <card.icon className="w-7 h-7 text-white" />
+              <div className="flex items-center justify-between mb-1 sm:mb-2 md:mb-3 lg:mb-4">
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${card.color} rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform flex-shrink-0`}>
+                  <card.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 text-white" />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-gray-600 mb-1">{card.title}</p>
-              <p className="text-3xl font-bold text-[#050b2c]">{card.value}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0.5 sm:mb-1 truncate">{card.title}</p>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#000000] tabular-nums leading-tight truncate">{card.value}</p>
             </div>
           </motion.div>
         ))}
       </motion.div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden"
+            className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-4 sm:p-5 md:p-6 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ffa509]/5 to-transparent rounded-full blur-2xl"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#F9629F]/5 to-transparent rounded-full blur-2xl"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-lg">
-                  <FiArrowRight className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-lg flex-shrink-0">
+                  <FiArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-[#050b2c]">
+                <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">
                   Quick Actions
                 </h2>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {[
                   { href: '/admin/products', label: 'Manage Products', icon: FiPackage, color: 'from-blue-500 to-cyan-600' },
                   { href: '/admin/categories', label: 'Manage Categories', icon: FiTag, color: 'from-purple-500 to-pink-600' },
                   { href: '/admin/orders', label: 'Manage Orders', icon: FiShoppingBag, color: 'from-green-500 to-emerald-600' },
                   { href: '/admin/users', label: 'Manage Users', icon: FiUsers, color: 'from-indigo-500 to-indigo-600' },
-                  { href: '/admin/analytics', label: 'View Analytics', icon: FiBarChart2, color: 'from-[#ffa509] to-[#ff8c00]' },
+                  { href: '/admin/analytics', label: 'View Analytics', icon: FiBarChart2, color: 'from-[#F9629F] to-[#DB7093]' },
                   { href: '/admin/inventory', label: 'Inventory Management', icon: FiBox, color: 'from-orange-500 to-orange-600' },
                 ].map((action, index) => (
                   <motion.div
@@ -350,18 +350,18 @@ export default function AdminDashboardPage() {
                   >
                     <Link
                       href={action.href}
-                      className="block p-4 border-2 border-gray-200 rounded-xl hover:border-[#ffa509] transition-all group cursor-pointer"
+                      className="block p-3 sm:p-4 border-2 border-gray-200 rounded-lg sm:rounded-xl hover:border-[#F9629F] transition-all group cursor-pointer"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 bg-gradient-to-br ${action.color} rounded-lg group-hover:scale-110 transition-transform`}>
-                            <action.icon className="w-5 h-5 text-white" />
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                          <div className={`p-1.5 sm:p-2 bg-gradient-to-br ${action.color} rounded-lg group-hover:scale-105 transition-transform flex-shrink-0`}>
+                            <action.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                           </div>
-                          <span className="font-semibold text-[#050b2c] group-hover:text-[#ffa509] transition-colors">
+                          <span className="font-semibold text-sm sm:text-base text-[#000000] group-hover:text-[#F9629F] transition-colors truncate">
                             {action.label}
                           </span>
                         </div>
-                        <FiChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#ffa509] group-hover:translate-x-1 transition-all" />
+                        <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-[#F9629F] group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>
                     </Link>
                   </motion.div>
@@ -375,29 +375,29 @@ export default function AdminDashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden"
+            className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-4 sm:p-5 md:p-6 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/5 to-transparent rounded-full blur-2xl"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-green-500/5 to-transparent rounded-full blur-2xl"></div>
             <div className="relative z-10">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
-                    <FiShoppingBag className="w-5 h-5 text-white" />
+              <div className="flex justify-between items-center gap-2 mb-4 sm:mb-5 md:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex-shrink-0">
+                    <FiShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <h2 className="text-xl font-bold text-[#050b2c]">
+                  <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#000000] truncate">
                     Recent Orders
                   </h2>
                 </div>
                 <Link
                   href="/admin/orders"
-                  className="text-sm text-[#ffa509] hover:text-[#ff8c00] font-semibold flex items-center gap-1 transition-colors"
+                  className="text-xs sm:text-sm text-[#F9629F] hover:text-[#DB7093] font-semibold flex items-center gap-1 transition-colors flex-shrink-0"
                 >
                   View All
-                  <FiChevronRight className="w-4 h-4" />
+                  <FiChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </Link>
               </div>
             {recentOrders.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {recentOrders.map((order, index) => (
                   <motion.div
                     key={order._id}
@@ -407,39 +407,39 @@ export default function AdminDashboardPage() {
                   >
                     <Link
                       href={`/admin/orders/${order._id}`}
-                      className="block p-4 border-2 border-gray-200 rounded-xl hover:border-[#ffa509] transition-all group"
+                      className="block p-3 sm:p-4 border-2 border-gray-200 rounded-lg sm:rounded-xl hover:border-[#F9629F] transition-all group"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <p className="text-sm font-bold text-[#050b2c]">
-                              Order #{order._id.slice(-8).toUpperCase()}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                            <p className="text-xs sm:text-sm font-bold text-[#000000] truncate">
+                              #{order._id.slice(-8).toUpperCase()}
                             </p>
                             <Badge variant={getStatusBadgeVariant(order.status)}>
                               {order.status.charAt(0).toUpperCase() +
                                 order.status.slice(1)}
                             </Badge>
                           </div>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-[10px] sm:text-xs text-gray-600 line-clamp-2">
                             {order.customerName} • {order.itemsCount} item
                             {order.itemsCount !== 1 ? 's' : ''} •{' '}
-                            <span className="font-semibold text-[#ffa509]">{formatCurrency(order.totalAmount)}</span> •{' '}
-                            {formatDate(order.createdAt)}
+                            <span className="font-semibold text-[#F9629F]">{formatCurrency(order.totalAmount)}</span>
+                            <span className="hidden sm:inline"> • {formatDate(order.createdAt)}</span>
                           </p>
                         </div>
-                        <FiChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#ffa509] group-hover:translate-x-1 transition-all" />
+                        <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-[#F9629F] group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>
                     </Link>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <div className="inline-block p-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-4">
-                  <FiShoppingBag className="w-12 h-12 text-gray-400" />
+              <div className="text-center py-6 sm:py-8">
+                <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-3 sm:mb-4">
+                  <FiShoppingBag className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
                 </div>
-                <p className="text-gray-600 font-medium">No recent orders</p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-gray-600 font-medium text-sm sm:text-base">No recent orders</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 px-2">
                   Orders will appear here as customers place them
                 </p>
               </div>
@@ -453,59 +453,49 @@ export default function AdminDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-white rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden"
+        className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-4 sm:p-5 md:p-6 relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/5 to-transparent rounded-full blur-2xl"></div>
+        <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-500/5 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-              <FiBarChart2 className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex-shrink-0">
+              <FiBarChart2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-[#050b2c]">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">
               Account Summary
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200"
+            className="p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg sm:rounded-xl border-2 border-blue-200"
           >
-            <h3 className="text-sm font-bold text-blue-700 mb-4 flex items-center gap-2">
-              <FiPackage className="w-4 h-4" />
+            <h3 className="text-xs sm:text-sm font-bold text-blue-700 mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+              <FiPackage className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Products Overview
             </h3>
-            <dl className="space-y-3">
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Total Products</dt>
-                <dd className="text-sm font-bold text-[#050b2c]">
-                  {stats?.totalProducts || 0}
-                </dd>
+            <dl className="space-y-1.5 sm:space-y-2 md:space-y-3">
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Total Products</dt>
+                <dd className="text-xs sm:text-sm font-bold text-[#000000] tabular-nums">{stats?.totalProducts || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">In Stock</dt>
-                <dd className="text-sm font-bold text-green-600">
-                  {stats?.inStockProducts || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">In Stock</dt>
+                <dd className="text-xs sm:text-sm font-bold text-green-600 tabular-nums">{stats?.inStockProducts || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Low Stock</dt>
-                <dd className="text-sm font-bold text-yellow-600">
-                  {stats?.lowStockProducts || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Low Stock</dt>
+                <dd className="text-xs sm:text-sm font-bold text-yellow-600 tabular-nums">{stats?.lowStockProducts || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Out of Stock</dt>
-                <dd className="text-sm font-bold text-red-600">
-                  {stats?.outOfStockProducts || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Out of Stock</dt>
+                <dd className="text-xs sm:text-sm font-bold text-red-600 tabular-nums">{stats?.outOfStockProducts || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Featured</dt>
-                <dd className="text-sm font-bold text-[#050b2c]">
-                  {stats?.featuredProducts || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Featured</dt>
+                <dd className="text-xs sm:text-sm font-bold text-[#000000] tabular-nums">{stats?.featuredProducts || 0}</dd>
               </div>
             </dl>
           </motion.div>
@@ -513,48 +503,36 @@ export default function AdminDashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200"
+            className="p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg sm:rounded-xl border-2 border-green-200"
           >
-            <h3 className="text-sm font-bold text-green-700 mb-4 flex items-center gap-2">
-              <FiShoppingBag className="w-4 h-4" />
+            <h3 className="text-xs sm:text-sm font-bold text-green-700 mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+              <FiShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Orders Overview
             </h3>
-            <dl className="space-y-3">
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Total Orders</dt>
-                <dd className="text-sm font-bold text-[#050b2c]">
-                  {stats?.totalOrders || 0}
-                </dd>
+            <dl className="space-y-1.5 sm:space-y-2 md:space-y-3">
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Total Orders</dt>
+                <dd className="text-xs sm:text-sm font-bold text-[#000000] tabular-nums">{stats?.totalOrders || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Delivered</dt>
-                <dd className="text-sm font-bold text-green-600">
-                  {stats?.deliveredOrders || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Delivered</dt>
+                <dd className="text-xs sm:text-sm font-bold text-green-600 tabular-nums">{stats?.deliveredOrders || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Shipped</dt>
-                <dd className="text-sm font-bold text-blue-600">
-                  {stats?.shippedOrders || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Shipped</dt>
+                <dd className="text-xs sm:text-sm font-bold text-blue-600 tabular-nums">{stats?.shippedOrders || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Processing</dt>
-                <dd className="text-sm font-bold text-yellow-600">
-                  {stats?.processingOrders || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Processing</dt>
+                <dd className="text-xs sm:text-sm font-bold text-yellow-600 tabular-nums">{stats?.processingOrders || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Pending</dt>
-                <dd className="text-sm font-bold text-orange-600">
-                  {stats?.pendingOrders || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Pending</dt>
+                <dd className="text-xs sm:text-sm font-bold text-orange-600 tabular-nums">{stats?.pendingOrders || 0}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Cancelled</dt>
-                <dd className="text-sm font-bold text-red-600">
-                  {stats?.cancelledOrders || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Cancelled</dt>
+                <dd className="text-xs sm:text-sm font-bold text-red-600 tabular-nums">{stats?.cancelledOrders || 0}</dd>
               </div>
             </dl>
           </motion.div>
@@ -562,42 +540,32 @@ export default function AdminDashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="p-4 bg-gradient-to-br from-[#ffa509]/10 to-[#ff8c00]/10 rounded-xl border-2 border-[#ffa509]/30"
+            className="p-3 sm:p-4 bg-gradient-to-br from-[#F9629F]/10 to-[#DB7093]/10 rounded-lg sm:rounded-xl border-2 border-[#F9629F]/30"
           >
-            <h3 className="text-sm font-bold text-[#ffa509] mb-4 flex items-center gap-2">
-              <FiDollarSign className="w-4 h-4" />
+            <h3 className="text-xs sm:text-sm font-bold text-[#F9629F] mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+              <FiDollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               Financial Overview
             </h3>
-            <dl className="space-y-3">
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Total Revenue</dt>
-                <dd className="text-sm font-bold text-[#050b2c]">
-                  {stats ? formatCurrency(stats.totalRevenue) : '$0.00'}
-                </dd>
+            <dl className="space-y-1.5 sm:space-y-2 md:space-y-3">
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Total Revenue</dt>
+                <dd className="text-xs sm:text-sm font-bold text-[#000000] tabular-nums">{stats ? formatCurrency(stats.totalRevenue) : '$0.00'}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Delivered Revenue</dt>
-                <dd className="text-sm font-bold text-green-600">
-                  {stats ? formatCurrency(stats.deliveredRevenue) : '$0.00'}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Delivered Revenue</dt>
+                <dd className="text-xs sm:text-sm font-bold text-green-600 tabular-nums">{stats ? formatCurrency(stats.deliveredRevenue) : '$0.00'}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Pending Revenue</dt>
-                <dd className="text-sm font-bold text-yellow-600">
-                  {stats ? formatCurrency(stats.pendingRevenue) : '$0.00'}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Pending Revenue</dt>
+                <dd className="text-xs sm:text-sm font-bold text-yellow-600 tabular-nums">{stats ? formatCurrency(stats.pendingRevenue) : '$0.00'}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Avg Order Value</dt>
-                <dd className="text-sm font-bold text-[#050b2c]">
-                  {stats ? formatCurrency(stats.averageOrderValue) : '$0.00'}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Avg Order Value</dt>
+                <dd className="text-xs sm:text-sm font-bold text-[#000000] tabular-nums">{stats ? formatCurrency(stats.averageOrderValue) : '$0.00'}</dd>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors">
-                <dt className="text-sm text-gray-700 font-medium">Total Items Sold</dt>
-                <dd className="text-sm font-bold text-[#050b2c]">
-                  {stats?.totalItemsSold || 0}
-                </dd>
+              <div className="flex justify-between items-center p-1.5 sm:p-2 rounded-md sm:rounded-lg hover:bg-white/50 transition-colors">
+                <dt className="text-xs sm:text-sm text-gray-700 font-medium">Total Items Sold</dt>
+                <dd className="text-xs sm:text-sm font-bold text-[#000000] tabular-nums">{stats?.totalItemsSold || 0}</dd>
               </div>
             </dl>
           </motion.div>
@@ -611,44 +579,44 @@ export default function AdminDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
-          className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-6 relative overflow-hidden"
+          className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-transparent rounded-full blur-2xl"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-yellow-400/20 to-transparent rounded-full blur-2xl"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg">
-                  <FiAlertCircle className="w-5 h-5 text-white" />
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex-shrink-0">
+                  <FiAlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h2 className="text-lg font-bold text-yellow-900">
+                <h2 className="text-base sm:text-lg font-bold text-yellow-900">
                   Low Stock Alert
                 </h2>
               </div>
               <Link
                 href="/admin/inventory"
-                className="text-sm text-yellow-700 hover:text-yellow-900 font-semibold flex items-center gap-1 transition-colors"
+                className="text-xs sm:text-sm text-yellow-700 hover:text-yellow-900 font-semibold flex items-center gap-1 transition-colors"
               >
-                Manage Inventory
-                <FiChevronRight className="w-4 h-4" />
+                Manage
+                <FiChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Link>
             </div>
-            <p className="text-sm text-yellow-800 mb-4 font-medium">
+            <p className="text-xs sm:text-sm text-yellow-800 mb-3 sm:mb-4 font-medium">
               {lowStockProducts.length} product
-              {lowStockProducts.length !== 1 ? 's' : ''} running low on stock
+              {lowStockProducts.length !== 1 ? 's' : ''} running low
             </p>
-            <div className="space-y-2">
+            <div className="space-y-1.5 sm:space-y-2">
               {lowStockProducts.map((product, index) => (
                 <motion.div
                   key={product._id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.0 + index * 0.05 }}
-                  className="flex items-center justify-between bg-white p-4 rounded-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all shadow-sm"
+                  className="flex items-center justify-between bg-white p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all shadow-sm gap-2"
                 >
-                  <span className="text-sm font-semibold text-[#050b2c]">
+                  <span className="text-xs sm:text-sm font-semibold text-[#000000] truncate min-w-0">
                     {product.name}
                   </span>
-                  <span className="px-3 py-1 text-sm text-yellow-700 font-bold bg-yellow-100 rounded-lg border border-yellow-300">
+                  <span className="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm text-yellow-700 font-bold bg-yellow-100 rounded-md sm:rounded-lg border border-yellow-300 flex-shrink-0">
                     {product.stock} left
                   </span>
                 </motion.div>

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import {
   FiHome,
@@ -41,7 +42,7 @@ export default function Footer() {
     { name: 'Contact Us', href: '#', isModal: true },
     { name: 'FAQs', href: '/faq' },
     { name: 'Shipping Info', href: '/shipping' },
-    { name: 'Returns', href: '/returns' },
+    { name: 'Returns', href: '/refund' },
     { name: 'Track Order', href: '/orders' },
   ];
 
@@ -73,11 +74,11 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] text-white relative overflow-hidden">
+    <footer className="bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] text-white relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 left-10 w-96 h-96 bg-[#ffa509]/5 rounded-full blur-3xl"
+          className="absolute top-20 left-10 w-96 h-96 bg-[#F9629F]/5 rounded-full blur-3xl"
           animate={{
             x: [0, 50, 0],
             y: [0, 30, 0],
@@ -90,7 +91,7 @@ export default function Footer() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-[#ffa509]/5 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 w-96 h-96 bg-[#F9629F]/5 rounded-full blur-3xl"
           animate={{
             x: [0, -50, 0],
             y: [0, -30, 0],
@@ -119,14 +120,16 @@ export default function Footer() {
               <Link href="/" className="inline-block mb-6">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center"
                 >
-                  <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-2 rounded-lg">
-                    <FiShoppingBag className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-2xl font-black bg-gradient-to-r from-white to-[#ffa509] bg-clip-text text-transparent">
-                    TeeZee
-                  </span>
+                  <Image
+                    src="/teezee-logo.png"
+                    alt="Teezee - Adorn Yourself With The Radiance Of 18K Gold"
+                    width={200}
+                    height={85}
+                    className="h-12 lg:h-16 w-auto object-contain"
+                    suppressHydrationWarning
+                  />
                 </motion.div>
               </Link>
               <p className="text-white/70 text-sm mb-6 leading-relaxed">
@@ -141,7 +144,7 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <h3 className="text-lg font-bold mb-6 text-[#ffa509]">Quick Links</h3>
+              <h3 className="text-lg font-bold mb-6 text-[#F9629F]">Quick Links</h3>
               <ul className="space-y-3">
                 {quickLinks.map((link, index) => {
                   const Icon = link.icon;
@@ -155,7 +158,7 @@ export default function Footer() {
                     >
                       <Link
                         href={link.href}
-                        className="flex items-center gap-2 text-white/70 hover:text-[#ffa509] transition-colors group text-sm"
+                        className="flex items-center gap-2 text-white/70 hover:text-[#F9629F] transition-colors group text-sm"
                       >
                         <Icon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         <span>{link.name}</span>
@@ -173,7 +176,7 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h3 className="text-lg font-bold mb-6 text-[#ffa509]">Customer Service</h3>
+              <h3 className="text-lg font-bold mb-6 text-[#F9629F]">Customer Service</h3>
               <ul className="space-y-3">
                 {customerService.map((link, index) => (
                   <motion.li
@@ -186,7 +189,7 @@ export default function Footer() {
                     {(link as any).isModal ? (
                       <button
                         onClick={() => setIsContactModalOpen(true)}
-                        className="text-white/70 hover:text-[#ffa509] transition-colors text-sm flex items-center gap-2 group w-full text-left"
+                        className="text-white/70 hover:text-[#F9629F] transition-colors text-sm flex items-center gap-2 group w-full text-left"
                       >
                         <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         <span>{link.name}</span>
@@ -194,7 +197,7 @@ export default function Footer() {
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-white/70 hover:text-[#ffa509] transition-colors text-sm flex items-center gap-2 group"
+                        className="text-white/70 hover:text-[#F9629F] transition-colors text-sm flex items-center gap-2 group"
                       >
                         <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         <span>{link.name}</span>
@@ -212,7 +215,7 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <h3 className="text-lg font-bold mb-6 text-[#ffa509]">Stay Connected</h3>
+              <h3 className="text-lg font-bold mb-6 text-[#F9629F]">Stay Connected</h3>
 
               {/* Account Links (if authenticated) */}
               {isAuthenticated && (
@@ -223,7 +226,7 @@ export default function Footer() {
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-white/70 hover:text-[#ffa509] transition-colors text-xs flex items-center gap-2 group"
+                          className="text-white/70 hover:text-[#F9629F] transition-colors text-xs flex items-center gap-2 group"
                         >
                           <FiArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                           <span>{link.name}</span>
@@ -255,7 +258,7 @@ export default function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-[#ffa509] transition-colors text-xs"
+                    className="text-white/60 hover:text-[#F9629F] transition-colors text-xs"
                   >
                     {link.name}
                   </Link>
@@ -319,15 +322,15 @@ export default function Footer() {
             >
               <div className="flex items-center gap-2 flex-wrap justify-center">
                 <div className="flex items-center gap-1 text-white/60 text-xs">
-                  <FiShield className="w-4 h-4 text-[#ffa509]" />
+                  <FiShield className="w-4 h-4 text-[#F9629F]" />
                   <span>Secure</span>
                 </div>
                 <div className="flex items-center gap-1 text-white/60 text-xs">
-                  <FiTruck className="w-4 h-4 text-[#ffa509]" />
+                  <FiTruck className="w-4 h-4 text-[#F9629F]" />
                   <span>Free Shipping</span>
                 </div>
                 <div className="flex items-center gap-1 text-white/60 text-xs">
-                  <FiCreditCard className="w-4 h-4 text-[#ffa509]" />
+                  <FiCreditCard className="w-4 h-4 text-[#F9629F]" />
                   <span>Easy Payment</span>
                 </div>
               </div>

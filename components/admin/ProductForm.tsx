@@ -361,7 +361,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8">
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -387,11 +387,11 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center py-8"
+          className="text-center py-4 sm:py-6 md:py-8"
         >
-          <div className="inline-flex items-center gap-3 text-[#050b2c]">
-            <div className="w-6 h-6 border-4 border-[#ffa509] border-t-transparent rounded-full animate-spin" />
-            <p className="text-[#050b2c] font-medium">Loading categories...</p>
+          <div className="inline-flex items-center gap-2 sm:gap-3 text-[#000000]">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 border-4 border-[#F9629F] border-t-transparent rounded-full animate-spin" />
+            <p className="text-[#000000] font-medium text-sm sm:text-base">Loading categories...</p>
           </div>
         </motion.div>
       ) : categories.length === 0 ? (
@@ -399,7 +399,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
           No categories found. Please{' '}
           <a
             href="/admin/categories/create"
-            className="text-[#ffa509] hover:text-[#ff8c00] font-semibold underline transition-colors"
+            className="text-[#F9629F] hover:text-[#DB7093] font-semibold underline transition-colors"
           >
             create a category
           </a>{' '}
@@ -412,9 +412,9 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6"
       >
-        <div className="space-y-2">
+        <div className="space-y-1.5 sm:space-y-2">
           <Input
             label="Product Name"
             name="name"
@@ -422,11 +422,11 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             onChange={handleChange}
             required
             placeholder="Enter product name"
-            className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all text-[#050b2c] placeholder:text-gray-400"
+            className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-[#000000] placeholder:text-gray-400"
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5 sm:space-y-2">
           <Select
             label="Category"
             name="category"
@@ -435,20 +435,20 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             required
             options={categoryOptions}
             disabled={loadingCategories || categories.length === 0}
-            className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all text-[#050b2c]"
+            className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-[#000000]"
           />
           {selectedCategory && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="mt-3 p-4 bg-gradient-to-br from-[#ffa509]/10 to-[#ff8c00]/10 rounded-xl border border-[#ffa509]/20"
+              className="mt-2 sm:mt-3 p-2.5 sm:p-3 md:p-4 bg-gradient-to-br from-[#F9629F]/10 to-[#DB7093]/10 rounded-lg sm:rounded-xl border border-[#F9629F]/20"
             >
               {selectedCategory.description && (
-                <p className="mb-2 text-sm text-[#050b2c]/80">{selectedCategory.description}</p>
+                <p className="mb-2 text-sm text-[#000000]/80">{selectedCategory.description}</p>
               )}
               {selectedCategory.attributes && selectedCategory.attributes.length > 0 ? (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="text-xs font-semibold text-[#050b2c]">
+                  <span className="text-xs font-semibold text-[#000000]">
                     Attributes ({selectedCategory.attributes.length}):
                   </span>
                   {selectedCategory.attributes.slice(0, 5).map((attr, index) => (
@@ -457,20 +457,20 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: index * 0.05 }}
-                      className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white shadow-md"
+                      className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white shadow-md"
                     >
                       {attr.label || attr.name}
                       {attr.required && <span className="ml-1 text-white">*</span>}
                     </motion.span>
                   ))}
                   {selectedCategory.attributes.length > 5 && (
-                    <span className="text-xs text-[#050b2c]/60 font-medium">
+                    <span className="text-xs text-[#000000]/60 font-medium">
                       +{selectedCategory.attributes.length - 5} more
                     </span>
                   )}
                 </div>
               ) : (
-                <p className="text-xs text-[#050b2c]/60 mt-1">
+                <p className="text-xs text-[#000000]/60 mt-1">
                   No attributes defined for this category
                 </p>
               )}
@@ -479,17 +479,17 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         </div>
       </motion.div>
 
-      {/* Description Section */}
+      {/* Description Section — stack label + button on mobile */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="space-y-3"
+        className="space-y-2 sm:space-y-3"
       >
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-semibold text-[#050b2c]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-0 sm:mb-1">
+          <label className="block text-xs sm:text-sm font-semibold text-[#000000]">
             Description
-            <span className="text-[#ffa509] ml-1">*</span>
+            <span className="text-[#F9629F] ml-1">*</span>
           </label>
           <Button
             type="button"
@@ -498,7 +498,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             onClick={handleGenerateDescription}
             isLoading={generatingDescription}
             disabled={!formData.name || generatingDescription || isLoading}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all"
+            className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm"
           >
             {generatingDescription ? 'Generating...' : '✨ Generate with AI'}
           </Button>
@@ -509,19 +509,19 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
           onChange={handleChange}
           required
           placeholder="Enter product description or click 'Generate with AI' to auto-generate"
-          rows={4}
-          className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all resize-none text-[#050b2c] placeholder:text-gray-400"
+          rows={3}
+          className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all resize-none text-[#000000] placeholder:text-gray-400 text-sm sm:text-base min-h-[72px] sm:min-h-0"
         />
       </motion.div>
 
-      {/* Price, Stock & Featured Section */}
+      {/* Price, Stock & Featured Section — 2x2 on mobile, 4 cols on desktop */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-6"
+        className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-6"
       >
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           <Input
             label="Price"
             name="price"
@@ -532,11 +532,11 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             onChange={handleChange}
             required
             placeholder="0.00"
-            className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all text-[#050b2c] placeholder:text-gray-400"
+            className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-[#000000] placeholder:text-gray-400 text-sm sm:text-base"
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           <Input
             label="Stock Quantity"
             name="stock"
@@ -546,12 +546,12 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             onChange={handleChange}
             required
             placeholder="0"
-            className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all text-[#050b2c] placeholder:text-gray-400"
+            className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-[#000000] placeholder:text-gray-400 text-sm sm:text-base"
           />
         </div>
 
-        <div className="flex items-center pt-8">
-          <label className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex items-center pt-4 sm:pt-6 md:pt-8 col-span-2 md:col-span-1">
+          <label className="flex items-center gap-2 sm:gap-3 cursor-pointer group">
             <input
               type="checkbox"
               id="featured"
@@ -560,16 +560,16 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, featured: e.target.checked })
               }
-              className="h-5 w-5 text-[#ffa509] focus:ring-[#ffa509] border-2 border-gray-300 rounded transition-all cursor-pointer group-hover:border-[#ffa509]"
+              className="h-4 w-4 sm:h-5 sm:w-5 text-[#F9629F] focus:ring-[#F9629F] border-2 border-gray-300 rounded transition-all cursor-pointer group-hover:border-[#F9629F] flex-shrink-0"
             />
-            <span className="block text-sm font-semibold text-[#050b2c] group-hover:text-[#ffa509] transition-colors">
+            <span className="block text-xs sm:text-sm font-semibold text-[#000000] group-hover:text-[#F9629F] transition-colors">
               Featured Product
             </span>
           </label>
         </div>
 
-        <div className="flex items-center pt-8">
-          <label className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex items-center pt-4 sm:pt-6 md:pt-8 col-span-2 md:col-span-1">
+          <label className="flex items-center gap-2 sm:gap-3 cursor-pointer group">
             <input
               type="checkbox"
               id="isFlashSale"
@@ -578,32 +578,32 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, isFlashSale: e.target.checked })
               }
-              className="h-5 w-5 text-[#ffa509] focus:ring-[#ffa509] border-2 border-gray-300 rounded transition-all cursor-pointer group-hover:border-[#ffa509]"
+              className="h-4 w-4 sm:h-5 sm:w-5 text-[#F9629F] focus:ring-[#F9629F] border-2 border-gray-300 rounded transition-all cursor-pointer group-hover:border-[#F9629F] flex-shrink-0"
             />
-            <span className="block text-sm font-semibold text-[#050b2c] group-hover:text-[#ffa509] transition-colors">
+            <span className="block text-xs sm:text-sm font-semibold text-[#000000] group-hover:text-[#F9629F] transition-colors">
               Enable Flash Sale
             </span>
           </label>
         </div>
       </motion.div>
 
-      {/* Flash Sale Section */}
+      {/* Flash Sale Section — compact on small screens */}
       {formData.isFlashSale && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border-2 border-red-200"
+          className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 border-2 border-red-200"
         >
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4"
             >
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-[#050b2c]">
+                <label className="block text-sm font-semibold text-[#000000]">
                   Discount Type
                 </label>
                 <select
@@ -615,7 +615,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
                       flashSaleDiscountType: e.target.value as 'percentage' | 'fixed',
                     })
                   }
-                  className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-[#050b2c]"
+                  className="w-full px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-[#000000]"
                 >
                   <option value="percentage">Percentage (%)</option>
                   <option value="fixed">Fixed Amount ($)</option>
@@ -646,7 +646,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
                       ? 'e.g., 20'
                       : 'e.g., 10.00'
                   }
-                  className="bg-white border-2 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-[#050b2c] placeholder:text-gray-400"
+                  className="bg-white border-2 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all text-[#000000] placeholder:text-gray-400"
                 />
                 {formData.flashSaleDiscount > 0 && formData.price && previewDiscountedPrice !== null && (
                   <motion.div
@@ -688,25 +688,25 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         onCoverImageChange={setCoverImage}
       />
 
-      {/* Dynamic Attributes */}
+      {/* Dynamic Attributes — compact on mobile */}
       {selectedCategory?.attributes && selectedCategory.attributes.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="border-t-2 border-gradient-to-r from-[#ffa509] to-[#ff8c00] pt-8 mt-8"
+          className="border-t-2 border-gradient-to-r from-[#F9629F] to-[#DB7093] pt-4 mt-4 sm:pt-6 sm:mt-6 md:pt-8 md:mt-8"
         >
-          <div className="mb-6 p-4 bg-gradient-to-r from-[#ffa509]/10 to-[#ff8c00]/10 rounded-xl border border-[#ffa509]/20">
-            <h3 className="text-xl font-bold text-[#050b2c] mb-2 flex items-center gap-2">
-              <span className="p-2 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] rounded-lg text-white text-sm">
+          <div className="mb-3 sm:mb-4 md:mb-6 p-2.5 sm:p-3 md:p-4 bg-gradient-to-r from-[#F9629F]/10 to-[#DB7093]/10 rounded-lg sm:rounded-xl border border-[#F9629F]/20">
+            <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#000000] mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+              <span className="p-1.5 sm:p-2 bg-gradient-to-r from-[#F9629F] to-[#DB7093] rounded-lg text-white text-xs sm:text-sm">
                 ⚙️
               </span>
               Category Attributes
             </h3>
-            <p className="text-sm text-[#050b2c]/70">
-              Fill in the attributes specific to the <strong className="text-[#ffa509]">{selectedCategory.name}</strong> category.
+            <p className="text-xs sm:text-sm text-[#000000]/70">
+              Fill in the attributes specific to the <strong className="text-[#F9629F]">{selectedCategory.name}</strong> category.
               {selectedCategory.attributes.filter(attr => attr.required).length > 0 && (
-                <span className="text-[#ffa509] ml-1 font-semibold">
+                <span className="text-[#F9629F] ml-1 font-semibold">
                   * Required fields
                 </span>
               )}
@@ -734,18 +734,18 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         </motion.div>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Buttons — full width on mobile, compact */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t-2 border-gray-200"
+        className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 md:gap-4 pt-4 sm:pt-5 md:pt-6 border-t-2 border-gray-200"
       >
         <Button
           type="button"
           variant="outline"
           onClick={() => router.back()}
-          className="border-2 border-gray-300 text-[#050b2c] hover:bg-gray-50 hover:border-[#ffa509] transition-all font-semibold"
+          className="w-full sm:w-auto border-2 border-gray-300 text-[#000000] hover:bg-gray-50 hover:border-[#F9629F] transition-all font-semibold text-sm sm:text-base py-2 sm:py-2.5"
         >
           Cancel
         </Button>
@@ -754,7 +754,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
           variant="primary"
           isLoading={isLoading}
           disabled={loadingCategories || categories.length === 0}
-          className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white border-none hover:from-[#ff8c00] hover:to-[#ffa509] shadow-lg hover:shadow-xl transition-all font-semibold px-8"
+          className="w-full sm:w-auto bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white border-none hover:from-[#DB7093] hover:to-[#F9629F] shadow-lg hover:shadow-xl transition-all font-semibold px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 text-sm sm:text-base"
         >
           {product ? 'Update Product' : 'Create Product'}
         </Button>

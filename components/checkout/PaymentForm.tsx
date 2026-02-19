@@ -682,8 +682,8 @@ export default function PaymentForm({
       {/* Billing Address Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-lg font-semibold text-[#050b2c] flex items-center gap-2">
-            <FiMapPin className="w-5 h-5 text-[#ffa509]" />
+          <h3 className="text-lg font-semibold text-[#000000] flex items-center gap-2">
+            <FiMapPin className="w-5 h-5 text-[#F9629F]" />
             Billing Address
           </h3>
         </div>
@@ -695,7 +695,7 @@ export default function PaymentForm({
               type="checkbox"
               checked={useShippingAsBilling}
               onChange={(e) => handleUseShippingToggle(e.target.checked)}
-              className="w-4 h-4 text-[#ffa509] border-gray-300 rounded focus:ring-[#ffa509] focus:ring-2"
+              className="w-4 h-4 text-[#F9629F] border-gray-300 rounded focus:ring-[#F9629F] focus:ring-2"
             />
             <span className="text-sm text-gray-700">Use shipping address as billing address</span>
           </label>
@@ -766,7 +766,7 @@ export default function PaymentForm({
                   value={billingAddress.country}
                   onChange={handleBillingChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all bg-white text-gray-900 font-medium"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] transition-all bg-white text-gray-900 font-medium"
                 >
                   <option value="CA">Canada</option>
                   <option value="US">United States</option>
@@ -802,14 +802,14 @@ export default function PaymentForm({
             {total > 0 && (
               <div className="mb-3 p-3 bg-white rounded-lg border border-[#7ee8c0]">
                 <p className="text-xs text-gray-600 mb-2 uppercase tracking-wide">4 interest-free payments of:</p>
-                <p className="text-2xl font-black text-[#050b2c] mb-1">
+                <p className="text-2xl font-black text-[#000000] mb-1">
                   {formatCurrency(total / 4)}
                 </p>
                 <p className="text-xs text-gray-500 mb-2">
                   <span className="font-semibold">(includes 6% BNPL fee)</span>
                 </p>
                 <p className="text-sm text-gray-700 font-semibold border-t border-gray-200 pt-2 mt-2">
-                  Total: <span className="text-[#050b2c]">{formatCurrency(total)}</span>
+                  Total: <span className="text-[#000000]">{formatCurrency(total)}</span>
                 </p>
               </div>
             )}
@@ -828,14 +828,14 @@ export default function PaymentForm({
             {total > 0 && (
               <div className="mb-3 p-3 bg-white rounded-lg border border-[#ffb3c7]">
                 <p className="text-xs text-gray-600 mb-2 uppercase tracking-wide">4 interest-free payments of:</p>
-                <p className="text-2xl font-black text-[#050b2c] mb-1">
+                <p className="text-2xl font-black text-[#000000] mb-1">
                   {formatCurrency(total / 4)}
                 </p>
                 <p className="text-xs text-gray-500 mb-2">
                   <span className="font-semibold">(includes 6% BNPL fee)</span>
                 </p>
                 <p className="text-sm text-gray-700 font-semibold border-t border-gray-200 pt-2 mt-2">
-                  Total: <span className="text-[#050b2c]">{formatCurrency(total)}</span>
+                  Total: <span className="text-[#000000]">{formatCurrency(total)}</span>
                 </p>
               </div>
             )}
@@ -925,7 +925,7 @@ export default function PaymentForm({
 
       {/* Security Badge */}
       <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-        <FiLock className="w-4 h-4 text-[#ffa509]" />
+        <FiLock className="w-4 h-4 text-[#F9629F]" />
         <span>Your payment is secure and encrypted</span>
       </div>
 
@@ -935,7 +935,7 @@ export default function PaymentForm({
         disabled={!stripe || isProcessing || isLoading}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isProcessing || isLoading ? (
           <>

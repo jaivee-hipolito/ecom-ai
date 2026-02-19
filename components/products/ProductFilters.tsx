@@ -62,82 +62,91 @@ export default function ProductFilters({
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-[#050b2c]">Filters</h3>
+    <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100/80">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
+        <h3 className="text-base font-bold text-[#000000] tracking-tight">Refine by</h3>
         <button
           onClick={clearFilters}
-          className="text-sm font-semibold text-[#ffa509] hover:text-[#ff8c00] transition-colors"
+          className="text-xs font-semibold text-[#F9629F] hover:text-[#DB7093] transition-colors uppercase tracking-wide"
         >
-          Clear All
+          Clear all
         </button>
       </div>
 
       {/* Categories */}
-      <div className="mb-6">
-        <h4 className="text-sm font-bold text-[#050b2c] mb-3 uppercase tracking-wide">
-          Categories
+      <div className="mb-5">
+        <h4 className="text-xs font-bold text-gray-500 mb-2.5 uppercase tracking-wider">
+          Category
         </h4>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
-          {categories.map((category) => (
-            <label
-              key={category._id}
-              className="flex items-center space-x-3 cursor-pointer group p-2 rounded-lg hover:bg-[#ffa509]/10 transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={filters.category === category.name}
-                onChange={() => handleCategoryChange(category.name)}
-                className="w-4 h-4 rounded border-gray-300 text-[#ffa509] focus:ring-[#ffa509] focus:ring-2 cursor-pointer"
-              />
-              <span className="text-sm text-gray-700 group-hover:text-[#050b2c] font-medium">
-                {category.name}
-              </span>
-            </label>
-          ))}
+        <div className="space-y-0.5 max-h-56 overflow-y-auto pr-1">
+          {categories.map((category) => {
+            const isChecked = filters.category === category.name;
+            return (
+              <label
+                key={category._id}
+                className={`flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-lg transition-colors ${
+                  isChecked ? 'bg-[#FDE8F0]' : 'hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => handleCategoryChange(category.name)}
+                  className="w-4 h-4 rounded border-gray-300 text-[#F9629F] focus:ring-[#F9629F] focus:ring-2 cursor-pointer"
+                />
+                <span className={`text-sm font-medium ${isChecked ? 'text-[#000000]' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                  {category.name}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
       {/* Price Range */}
-      <div className="mb-6">
-        <h4 className="text-sm font-bold text-[#050b2c] mb-3 uppercase tracking-wide">
-          Price Range
+      <div className="mb-5">
+        <h4 className="text-xs font-bold text-gray-500 mb-2.5 uppercase tracking-wider">
+          Price range
         </h4>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Min</label>
-          <input
-            type="number"
-              placeholder="$0"
-            value={filters.minPrice || ''}
-            onChange={(e) => handlePriceRangeChange('minPrice', e.target.value)}
-              className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all"
-          />
+            <label className="block text-[11px] text-gray-500 mb-1 font-medium">Min ($)</label>
+            <input
+              type="number"
+              placeholder="0"
+              value={filters.minPrice || ''}
+              onChange={(e) => handlePriceRangeChange('minPrice', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#F9629F]/30 focus:border-[#F9629F] transition-all bg-gray-50/50"
+            />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Max</label>
-          <input
-            type="number"
-              placeholder="$1000"
-            value={filters.maxPrice || ''}
-            onChange={(e) => handlePriceRangeChange('maxPrice', e.target.value)}
-              className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all"
-          />
+            <label className="block text-[11px] text-gray-500 mb-1 font-medium">Max ($)</label>
+            <input
+              type="number"
+              placeholder="999"
+              value={filters.maxPrice || ''}
+              onChange={(e) => handlePriceRangeChange('maxPrice', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#F9629F]/30 focus:border-[#F9629F] transition-all bg-gray-50/50"
+            />
           </div>
         </div>
       </div>
 
       {/* Featured */}
-      <div className="mb-4">
-        <label className="flex items-center space-x-3 cursor-pointer group p-2 rounded-lg hover:bg-[#ffa509]/10 transition-colors">
+      <div>
+        <label
+          className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg transition-colors ${
+            filters.featured ? 'bg-[#FDE8F0]' : 'hover:bg-gray-50'
+          }`}
+        >
           <input
             type="checkbox"
             checked={filters.featured === true}
             onChange={handleFeaturedToggle}
-            className="w-4 h-4 rounded border-gray-300 text-[#ffa509] focus:ring-[#ffa509] focus:ring-2 cursor-pointer"
+            className="w-4 h-4 rounded border-gray-300 text-[#F9629F] focus:ring-[#F9629F] focus:ring-2 cursor-pointer"
           />
-          <span className="text-sm text-gray-700 group-hover:text-[#050b2c] font-medium">
-            Featured Only
+          <span className={`text-sm font-medium ${filters.featured ? 'text-[#000000]' : 'text-gray-600'}`}>
+            Featured only
           </span>
         </label>
       </div>

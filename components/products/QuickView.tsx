@@ -66,24 +66,24 @@ export default function QuickView({ productId, isOpen, onClose, isFlashSale = fa
             {/* Floating Close Button - Mobile Only (Always Visible) */}
             <button
               onClick={onClose}
-              className="lg:hidden fixed top-20 sm:top-24 right-4 z-[60] p-3 bg-white rounded-full shadow-xl border-2 border-[#ffa509] hover:bg-[#ffa509] active:bg-[#ff8c00] transition-all flex items-center justify-center group"
+              className="lg:hidden fixed top-20 sm:top-24 right-4 z-[60] p-3 bg-[#FDE8F0] rounded-full shadow-xl border border-gray-300 hover:bg-[#FC9BC2] active:bg-[#DB7093] transition-all flex items-center justify-center group text-[#000000]"
               aria-label="Close quick view"
             >
-              <FiX className="w-6 h-6 text-[#ffa509] group-hover:text-white transition-colors" />
+              <FiX className="w-6 h-6 text-[#000000] group-hover:text-white transition-colors" />
             </button>
 
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 z-20 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-2">
-                <FiEye className="w-4 h-4 sm:w-5 sm:h-5 text-[#ffa509]" />
-                <h2 className="text-lg sm:text-xl font-bold text-[#050b2c]">Quick View</h2>
+                <FiEye className="w-4 h-4 sm:w-5 sm:h-5 text-[#F9629F]" />
+                <h2 className="text-lg sm:text-xl font-bold text-[#000000]">Quick View</h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-2.5 sm:p-2.5 hover:bg-gray-100 active:bg-gray-200 rounded-full transition-colors flex-shrink-0 z-30 relative"
+                className="group p-2.5 sm:p-2.5 hover:bg-[#FDE8F0] active:bg-[#FC9BC2] rounded-full transition-colors flex-shrink-0 z-30 relative"
                 aria-label="Close quick view"
               >
-                <FiX className="w-6 h-6 sm:w-6 sm:h-6 text-gray-700" />
+                <FiX className="w-6 h-6 sm:w-6 sm:h-6 text-[#000000] group-hover:text-[#F9629F]" />
               </button>
             </div>
 
@@ -98,7 +98,7 @@ export default function QuickView({ productId, isOpen, onClose, isFlashSale = fa
                   <p className="text-red-600 mb-4">{error}</p>
                   <button
                     onClick={onClose}
-                    className="px-6 py-2 bg-[#050b2c] text-white rounded-lg hover:bg-[#050b2c]/90 transition-colors"
+                    className="px-6 py-2 bg-[#FDE8F0] text-[#000000] border border-gray-300 rounded-lg hover:bg-[#FC9BC2] transition-colors font-medium"
                   >
                     Close
                   </button>

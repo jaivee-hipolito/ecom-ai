@@ -136,7 +136,7 @@ export default function OrderDetailPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
               <p className="text-gray-600 mb-6">{error}</p>
               <Link href="/dashboard/orders">
-                <button className="px-6 py-2 bg-[#050b2c] text-white rounded-lg hover:bg-[#0a1538] transition-colors">
+                <button className="px-6 py-2 bg-[#FDE8F0] text-[#000000] border border-gray-300 rounded-lg hover:bg-[#FC9BC2] transition-colors font-medium">
                   Back to Orders
                 </button>
               </Link>
@@ -166,7 +166,7 @@ export default function OrderDetailPage() {
             <motion.button
               whileHover={{ x: -5 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 text-gray-600 hover:text-[#050b2c] mb-4 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-[#F9629F] mb-4 transition-colors"
             >
               <FiArrowLeft className="w-5 h-5" />
               <span>Back to Orders</span>
@@ -174,7 +174,7 @@ export default function OrderDetailPage() {
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-[#050b2c]">
+              <h1 className="text-3xl font-bold text-[#1a1a1a]">
                 Order #{order._id?.slice(-8).toUpperCase()}
               </h1>
               <p className="mt-2 text-gray-600">
@@ -215,8 +215,8 @@ export default function OrderDetailPage() {
               transition={{ delay: 0.2 }}
               className="bg-white rounded-xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-bold text-[#050b2c] mb-6 flex items-center gap-2">
-                <FiPackage className="w-6 h-6 text-[#ffa509]" />
+              <h2 className="text-xl font-bold text-[#1a1a1a] mb-6 flex items-center gap-2">
+                <FiPackage className="w-6 h-6 text-[#FC9BC2]" />
                 Order Items
               </h2>
               <div className="space-y-4">
@@ -250,7 +250,7 @@ export default function OrderDetailPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 + index * 0.1 }}
-                      className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-[#ffa509] transition-colors"
+                      className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-[#FC9BC2] transition-colors"
                     >
                       <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                         {imageUrl ? (
@@ -263,14 +263,14 @@ export default function OrderDetailPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <Link href={`/products/${typeof item.product === 'object' ? item.product._id : item.product}`}>
-                          <h3 className="text-lg font-semibold text-[#050b2c] hover:text-[#ffa509] transition-colors mb-2">
+                          <h3 className="text-lg font-semibold text-[#1a1a1a] hover:text-[#FC9BC2] transition-colors mb-2">
                             {item.name}
                           </h3>
                         </Link>
                         <p className="text-sm text-gray-600 mb-2">
                           Quantity: <span className="font-medium">{item.quantity}</span>
                         </p>
-                        <p className="text-lg font-bold text-[#ffa509]">
+                        <p className="text-lg font-bold text-[#FC9BC2]">
                           {formatCurrency(item.price * item.quantity)}
                         </p>
                       </div>
@@ -280,10 +280,10 @@ export default function OrderDetailPage() {
               </div>
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex justify-between items-center">
-                  <span className="text-xl font-semibold text-[#050b2c]">
+                  <span className="text-xl font-semibold text-[#1a1a1a]">
                     Total Amount
                   </span>
-                  <span className="text-3xl font-bold text-[#ffa509]">
+                  <span className="text-3xl font-bold text-[#FC9BC2]">
                     {formatCurrency(order.totalAmount)}
                   </span>
                 </div>
@@ -297,13 +297,13 @@ export default function OrderDetailPage() {
               transition={{ delay: 0.3 }}
               className="bg-white rounded-xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-bold text-[#050b2c] mb-4 flex items-center gap-2">
-                <FiTruck className="w-6 h-6 text-[#ffa509]" />
+              <h2 className="text-xl font-bold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                <FiTruck className="w-6 h-6 text-[#FC9BC2]" />
                 Shipping Address
               </h2>
               {order.shippingAddress && (
                 <div className="space-y-2 text-gray-700">
-                  <p className="font-semibold text-lg text-[#050b2c]">
+                  <p className="font-semibold text-lg text-[#1a1a1a]">
                     {order.shippingAddress.fullName}
                   </p>
                   <p>{order.shippingAddress.address}</p>
@@ -333,7 +333,7 @@ export default function OrderDetailPage() {
               transition={{ delay: 0.4 }}
               className="bg-white rounded-xl shadow-lg p-6"
             >
-              <h2 className="text-xl font-bold text-[#050b2c] mb-4">
+              <h2 className="text-xl font-bold text-[#1a1a1a] mb-4">
                 Order Information
               </h2>
               <dl className="space-y-3">

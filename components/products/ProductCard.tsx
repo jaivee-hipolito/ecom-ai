@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IProduct } from '@/types/product';
 import ProductImage from './ProductImage';
-import ColorSwatch from './ColorSwatch';
 import Button from '@/components/ui/Button';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
@@ -17,9 +16,10 @@ import { formatCurrency } from '@/utils/currency';
 
 interface ProductCardProps {
   product: IProduct;
+  showAttributes?: boolean | 'color-only';
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, showAttributes = true }: ProductCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { addToCart, isLoading: cartLoading, cart } = useCart();
@@ -178,9 +178,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden relative">
-      <Link href={`/products/${product._id}${hasFlashSaleDiscount ? '?flashSale=true' : ''}`} className="block">
-        <div className="relative aspect-square">
+    <div className="h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden relative">
+      <Link href={`/products/${product._id}${hasFlashSaleDiscount ? '?flashSale=true' : ''}`} className="flex flex-col flex-1 min-h-0">
+        <div className="relative aspect-square flex-shrink-0">
           <ProductImage product={product} className="w-full h-full" />
           {availableStock === 0 && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -217,7 +217,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 initial={{ scale: 0, rotate: 180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.3, type: 'spring' }}
-                className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white"
+                className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-full w-12 h-12 flex items-center justify-center shadow-xl"
               >
                 <div className="text-center">
                   <div className="text-[10px] font-black leading-tight">-{flashSaleData.discountPercentage}%</div>
@@ -251,121 +251,70 @@ export default function ProductCard({ product }: ProductCardProps) {
             </svg>
           </button>
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-            {product.name}
-          </h3>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-            {product.description}
-          </p>
+        <div className="p-4 flex flex-col flex-1 min-h-0">
+          <div className="flex-1 min-h-0">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+              {product.name}
+            </h3>
+            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+              {product.description}
+            </p>
           
-          {/* Product Attributes */}
-          {product.attributes && Object.keys(product.attributes).length > 0 && (
-            <div className="mb-3 pb-3 border-b border-gray-200">
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(product.attributes)
-                  .slice(0, 3) // Show only first 3 attributes to keep card compact
-                  .map(([key, value]) => {
-                    // Skip null, undefined, or empty values
-                    if (value === null || value === undefined || value === '') {
-                      return null;
-                    }
+            {/* Product Attributes - Minimal text style (Label: Value inline) */}
+            {showAttributes && product.attributes && (() => {
+            const entries = Object.entries(product.attributes).filter(([key]) => {
+              if (showAttributes === 'color-only') {
+                const k = key.toLowerCase();
+                return k.includes('color') || k.includes('colour');
+              }
+              return true;
+            });
+            if (entries.length === 0) return null;
+            return (
+            <div className="mb-3 pb-3 border-b border-gray-100 space-y-1">
+              {entries.slice(0, 3).map(([key, value]) => {
+                  if (value === null || value === undefined || value === '') {
+                    return null;
+                  }
 
-                    const label = key
-                      .replace(/([A-Z])/g, ' $1')
-                      .replace(/^./, (str) => str.toUpperCase())
-                      .trim();
+                  const label = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, (str) => str.toUpperCase())
+                    .trim();
 
-                    // Handle color attributes with swatches
-                    if (
-                      (key.toLowerCase().includes('color') ||
-                        key.toLowerCase().includes('colour')) &&
-                      typeof value === 'string'
-                    ) {
-                      // Single color
-                      if (!value.includes(',')) {
-                        return (
-                          <div key={key} className="flex items-center gap-1.5">
-                            <ColorSwatch color={value} size="sm" />
-                            <span className="text-xs text-gray-600 capitalize">
-                              {value}
-                            </span>
-                          </div>
-                        );
-                      }
-                      // Multiple colors - show first color only
-                      const firstColor = value.split(',')[0].trim();
-                      return (
-                        <div key={key} className="flex items-center gap-1.5">
-                          <ColorSwatch color={firstColor} size="sm" />
-                          <span className="text-xs text-gray-600">
-                            {firstColor}
-                          </span>
-                        </div>
-                      );
-                    }
+                  let displayValue: string;
+                  if (typeof value === 'boolean') {
+                    displayValue = value ? 'Yes' : 'No';
+                  } else if (Array.isArray(value) && value.length > 0) {
+                    displayValue = value.map(String).join(', ');
+                  } else {
+                    displayValue = String(value);
+                  }
 
-                    // Handle boolean attributes
-                    if (typeof value === 'boolean') {
-                      return (
-                        <div key={key} className="flex items-center gap-1">
-                          <span className="text-xs font-medium text-gray-600">
-                            {label}:
-                          </span>
-                          <span className="text-xs text-gray-700">
-                            {value ? (
-                              <span className="text-green-600">Yes</span>
-                            ) : (
-                              <span className="text-gray-400">No</span>
-                            )}
-                          </span>
-                        </div>
-                      );
-                    }
-
-                    // Handle array values - show first item
-                    if (Array.isArray(value) && value.length > 0) {
-                      return (
-                        <div key={key} className="flex items-center gap-1">
-                          <span className="text-xs font-medium text-gray-600">
-                            {label}:
-                          </span>
-                          <span className="px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                            {String(value[0])}
-                            {value.length > 1 && ` +${value.length - 1}`}
-                          </span>
-                        </div>
-                      );
-                    }
-
-                    // Default: display as string (truncate if too long)
-                    const stringValue = String(value);
-                    return (
-                      <div key={key} className="flex items-center gap-1">
-                        <span className="text-xs font-medium text-gray-600">
-                          {label}:
-                        </span>
-                        <span className="text-xs text-gray-700 truncate max-w-[100px]">
-                          {stringValue.length > 15
-                            ? `${stringValue.substring(0, 15)}...`
-                            : stringValue}
-                        </span>
-                      </div>
-                    );
-                  })}
-              </div>
-              {Object.keys(product.attributes).length > 3 && (
-                <p className="text-xs text-gray-500 mt-2">
-                  +{Object.keys(product.attributes).length - 3} more attributes
+                  return (
+                    <p
+                      key={key}
+                      className="text-sm text-[#4D4D4D] leading-relaxed m-0"
+                    >
+                      {label}: {displayValue}
+                    </p>
+                  );
+                })}
+              {entries.length > 3 && (
+                <p className="text-sm text-[#4D4D4D] pt-0.5">
+                  +{entries.length - 3} more
                 </p>
               )}
             </div>
-          )}
+            );
+          })()}
+          </div>
           
-          <div className="flex items-center justify-end mb-3 gap-2">
+          <div className="mt-auto pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-end mb-3 gap-2">
             {hasFlashSaleDiscount ? (
               <>
-                <span className="text-lg font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                <span className="text-lg font-bold bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent">
                   {formatCurrency(flashSaleData.displayedPrice)}
                 </span>
                 <span className="text-sm text-gray-400 line-through">
@@ -373,12 +322,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </span>
               </>
             ) : (
-              <span className="text-lg font-bold text-blue-600">
+              <span className="text-lg font-bold text-[#F9629F]">
                 {formatCurrency(product.price)}
               </span>
             )}
-          </div>
-          <Button
+            </div>
+            <Button
             ref={addToCartButtonRef}
             onClick={handleAddToCart}
             disabled={isOutOfStock || stockLimitReached || isAddingToCart || cartLoading}
@@ -392,7 +341,8 @@ export default function ProductCard({ product }: ProductCardProps) {
               : stockLimitReached
               ? 'Stock Limit Reached'
               : 'Add to Cart'}
-          </Button>
+            </Button>
+          </div>
         </div>
       </Link>
     </div>

@@ -76,7 +76,7 @@ export default function ColorSwatch({
       disabled={disabled}
       className={`${sizes[size]} rounded-full border-2 transition-all ${
         selected
-          ? 'border-blue-600 ring-2 ring-blue-200 ring-offset-2'
+          ? 'border-[#F9629F] ring-2 ring-[#F9629F]/30 ring-offset-2'
           : 'border-gray-300 hover:border-gray-400'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       style={{ backgroundColor: colorHex }}

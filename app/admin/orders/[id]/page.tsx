@@ -8,7 +8,9 @@ import Alert from '@/components/ui/Alert';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
-import { Order } from '@/types/order';
+import Textarea from '@/components/ui/Textarea';
+import { Order, IOrderHistoryEntry } from '@/types/order';
+import { FiClock, FiUser } from 'react-icons/fi';
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
@@ -21,6 +23,7 @@ export default function AdminOrderDetailPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [status, setStatus] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
+  const [comment, setComment] = useState('');
 
   useEffect(() => {
     if (orderId) {
@@ -68,6 +71,7 @@ export default function AdminOrderDetailPage() {
         body: JSON.stringify({
           status: status !== order?.status ? status : undefined,
           paymentStatus: paymentStatus !== order?.paymentStatus ? paymentStatus : undefined,
+          comment: comment.trim(),
         }),
       });
 
@@ -79,7 +83,8 @@ export default function AdminOrderDetailPage() {
 
       setOrder(data.order);
       setSuccessMessage('Order updated successfully!');
-      
+      setComment('');
+
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
@@ -182,6 +187,7 @@ export default function AdminOrderDetailPage() {
   }
 
   const hasChanges = status !== order.status || paymentStatus !== order.paymentStatus;
+  const canUpdate = hasChanges && comment.trim().length > 0;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -349,10 +355,26 @@ export default function AdminOrderDetailPage() {
                 />
               </div>
               {hasChanges && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Note <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Explain why the status is being changed..."
+                    rows={3}
+                    required
+                    className="border-gray-300 focus:border-[#F9629F] focus:ring-[#F9629F]/20"
+                  />
+                </div>
+              )}
+              {hasChanges && (
                 <Button
                   variant="primary"
                   onClick={handleUpdateStatus}
                   isLoading={updating}
+                  disabled={!canUpdate}
                   className="w-full"
                 >
                   Update Order
@@ -404,6 +426,56 @@ export default function AdminOrderDetailPage() {
             </dl>
           </div>
         </div>
+      </div>
+
+      {/* Order History */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <FiClock className="w-5 h-5 text-[#F9629F]" />
+          Order History
+        </h2>
+        {order.history && order.history.length > 0 ? (
+          <div className="space-y-4">
+            {([...order.history].reverse()).map((entry: IOrderHistoryEntry, index: number) => (
+              <div
+                key={index}
+                className="flex gap-4 p-4 border border-gray-100 rounded-lg bg-gray-50/50"
+              >
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FDE8F0] flex items-center justify-center">
+                  <FiUser className="w-5 h-5 text-[#F9629F]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900">
+                    {entry.modifiedByName}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {formatDate(entry.changedAt)}
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {entry.changes?.map((change, i) => (
+                      <li key={i} className="text-sm text-gray-700">
+                        <span className="font-medium capitalize">{change.field.replace(/([A-Z])/g, ' $1').trim()}:</span>{' '}
+                        <span className="text-gray-500 line-through">{change.from}</span>
+                        {' → '}
+                        <span className="font-medium text-gray-900">{change.to}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-sm text-gray-600 border-l-2 border-[#F9629F] pl-3">
+                    <span className="font-medium text-gray-700">Note: </span>
+                    <span className="italic">
+                      {(entry as IOrderHistoryEntry).note?.trim()
+                        ? `"${(entry as IOrderHistoryEntry).note}"`
+                        : '—'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm">No changes recorded yet. Updates to order or payment status will appear here.</p>
+        )}
       </div>
     </div>
   );

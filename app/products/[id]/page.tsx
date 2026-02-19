@@ -30,7 +30,7 @@ function ProductDetailContent() {
     return (
       <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
         {isAuthenticated && <DashboardSidebar />}
-        <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64 pt-16 lg:pt-0' : ''} overflow-x-hidden`}>
+        <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
           <Navbar />
           <div className="flex items-center justify-center min-h-[60vh]">
             <Loading size="lg" text="Loading..." />
@@ -43,7 +43,7 @@ function ProductDetailContent() {
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       {isAuthenticated && <DashboardSidebar />}
-      <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64 pt-16 lg:pt-0' : ''} overflow-x-hidden`}>
+      <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
         <Navbar />
 
         <main>
@@ -60,7 +60,7 @@ function ProductDetailContent() {
                 <p className="text-gray-600 mb-6">{error}</p>
                 <Link
                   href="/products"
-                  className="inline-block px-6 py-3 bg-[#050b2c] text-white rounded-lg hover:bg-[#0a1538] transition-colors"
+                  className="inline-block px-6 py-3 bg-[#FDE8F0] text-[#000000] border border-gray-300 rounded-lg hover:bg-[#FC9BC2] transition-colors font-medium"
                 >
                   Back to Products
                 </Link>

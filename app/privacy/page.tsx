@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-gradient-to-r from-[#050b2c] via-[#0a1538] to-[#050b2c] py-16 sm:py-20"
+        className="bg-gradient-to-r from-[#000000] via-[#1a1a1a] to-[#000000] py-16 sm:py-20"
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center mb-6">
@@ -28,9 +28,9 @@ export default function PrivacyPolicyPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring' }}
-              className="w-20 h-20 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ffa509]/50"
+              className="w-20 h-20 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50"
             >
-              <FiShield className="w-10 h-10 text-[#050b2c]" />
+              <FiShield className="w-10 h-10 text-[#000000]" />
             </motion.div>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-center text-white mb-4">
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
               Teezee operates this store and website, including all related information, content, features, tools, products and services, in order to provide you, the customer, with a curated shopping experience (the "Services"). Teezee is powered by Shopify, which enables us to provide the Services to you.
             </p>
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg mb-4">
-              This Privacy Policy describes how we collect, use, and disclose your personal information when you visit, use, or make a purchase or other transaction using the Services or otherwise communicate with us. If there is a conflict between our <Link href="/terms" className="text-[#ffa509] hover:text-[#ffb833] font-semibold underline">Terms of Service</Link> and this Privacy Policy, this Privacy Policy controls with respect to the collection, processing, and disclosure of your personal information.
+              This Privacy Policy describes how we collect, use, and disclose your personal information when you visit, use, or make a purchase or other transaction using the Services or otherwise communicate with us. If there is a conflict between our <Link href="/terms" className="text-[#F9629F] hover:text-[#FC9BC2] font-semibold underline">Terms of Service</Link> and this Privacy Policy, this Privacy Policy controls with respect to the collection, processing, and disclosure of your personal information.
             </p>
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
               Please read this Privacy Policy carefully. By using or accessing any of the Services, you acknowledge that you have read this Privacy Policy and understand the collection, use, and disclosure of your information as described.
@@ -75,8 +75,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 0.5 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiUser className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiUser className="w-8 h-8 text-[#F9629F]" />
               Personal Information We Collect or Process
             </h2>
             <div className="ml-2 space-y-4 text-gray-700">
@@ -88,32 +88,32 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="space-y-3 ml-4">
                 <li className="flex items-start gap-3">
-                  <FiMail className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Contact details</strong> including your name, billing address, shipping address, phone number, and email address</span>
+                  <FiMail className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Contact details</strong> including your name, billing address, shipping address, phone number, and email address</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FiCreditCard className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Financial information</strong> including credit card or debit card details, payment confirmation, transaction details, and form of payment</span>
+                  <FiCreditCard className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Financial information</strong> including credit card or debit card details, payment confirmation, transaction details, and form of payment</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FiUser className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Account information</strong> including username, password, preferences, and settings</span>
+                  <FiUser className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Account information</strong> including username, password, preferences, and settings</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FiShoppingBag className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Transaction information</strong> including items viewed, added to cart or wishlist, purchased, returned, exchanged, or canceled</span>
+                  <FiShoppingBag className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Transaction information</strong> including items viewed, added to cart or wishlist, purchased, returned, exchanged, or canceled</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FiMessageCircle className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Communications</strong> including messages you send us through customer support or inquiries</span>
+                  <FiMessageCircle className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Communications</strong> including messages you send us through customer support or inquiries</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FiSmartphone className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Device information</strong> including IP address, browser type, device identifiers, and network information</span>
+                  <FiSmartphone className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Device information</strong> including IP address, browser type, device identifiers, and network information</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <FiActivity className="w-5 h-5 text-[#ffa509] mt-1 flex-shrink-0" />
-                  <span><strong className="text-[#050b2c]">Usage information</strong> including how and when you interact with or navigate the Services</span>
+                  <FiActivity className="w-5 h-5 text-[#F9629F] mt-1 flex-shrink-0" />
+                  <span><strong className="text-[#000000]">Usage information</strong> including how and when you interact with or navigate the Services</span>
                 </li>
               </ul>
             </div>
@@ -126,28 +126,28 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiEye className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiEye className="w-8 h-8 text-[#F9629F]" />
               Personal Information Sources
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
               <p className="leading-relaxed">We may collect personal information from the following sources:</p>
               <ul className="space-y-2 ml-4">
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
-                  <span><strong className="text-[#050b2c]">Directly from you,</strong> such as when you create an account, place an order, contact us, or otherwise provide information</span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
+                  <span><strong className="text-[#000000]">Directly from you,</strong> such as when you create an account, place an order, contact us, or otherwise provide information</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
-                  <span><strong className="text-[#050b2c]">Automatically,</strong> through cookies and similar technologies when you use our website or Services</span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
+                  <span><strong className="text-[#000000]">Automatically,</strong> through cookies and similar technologies when you use our website or Services</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
-                  <span><strong className="text-[#050b2c]">From service providers,</strong> payment processors who collect or process information on our behalf</span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
+                  <span><strong className="text-[#000000]">From service providers,</strong> payment processors who collect or process information on our behalf</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
-                  <span><strong className="text-[#050b2c]">From partners or other third parties,</strong> as permitted by law</span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
+                  <span><strong className="text-[#000000]">From partners or other third parties,</strong> as permitted by law</span>
                 </li>
               </ul>
             </div>
@@ -160,16 +160,16 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 0.7 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiActivity className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiActivity className="w-8 h-8 text-[#F9629F]" />
               How We Use Your Personal Information
             </h2>
             <div className="ml-2 space-y-4 text-gray-700">
               <p className="leading-relaxed">We may use your personal information for the following purposes:</p>
               
-              <div className="bg-gradient-to-r from-[#050b2c]/5 to-[#ffa509]/5 rounded-xl p-4 mb-4">
-                <h3 className="font-bold text-[#050b2c] mb-2 flex items-center gap-2">
-                  <FiShoppingBag className="w-5 h-5 text-[#ffa509]" />
+              <div className="bg-gradient-to-r from-[#000000]/5 to-[#F9629F]/5 rounded-xl p-4 mb-4">
+                <h3 className="font-bold text-[#000000] mb-2 flex items-center gap-2">
+                  <FiShoppingBag className="w-5 h-5 text-[#F9629F]" />
                   Provide, Tailor, and Improve the Services
                 </h3>
                 <p className="leading-relaxed ml-7">
@@ -177,9 +177,9 @@ export default function PrivacyPolicyPage() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-[#050b2c]/5 to-[#ffa509]/5 rounded-xl p-4 mb-4">
-                <h3 className="font-bold text-[#050b2c] mb-2 flex items-center gap-2">
-                  <FiMailIcon className="w-5 h-5 text-[#ffa509]" />
+              <div className="bg-gradient-to-r from-[#000000]/5 to-[#F9629F]/5 rounded-xl p-4 mb-4">
+                <h3 className="font-bold text-[#000000] mb-2 flex items-center gap-2">
+                  <FiMailIcon className="w-5 h-5 text-[#F9629F]" />
                   Marketing and Advertising
                 </h3>
                 <p className="leading-relaxed ml-7">
@@ -187,9 +187,9 @@ export default function PrivacyPolicyPage() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-[#050b2c]/5 to-[#ffa509]/5 rounded-xl p-4 mb-4">
-                <h3 className="font-bold text-[#050b2c] mb-2 flex items-center gap-2">
-                  <FiLock className="w-5 h-5 text-[#ffa509]" />
+              <div className="bg-gradient-to-r from-[#000000]/5 to-[#F9629F]/5 rounded-xl p-4 mb-4">
+                <h3 className="font-bold text-[#000000] mb-2 flex items-center gap-2">
+                  <FiLock className="w-5 h-5 text-[#F9629F]" />
                   Security and Fraud Prevention
                 </h3>
                 <p className="leading-relaxed ml-7">
@@ -197,9 +197,9 @@ export default function PrivacyPolicyPage() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-[#050b2c]/5 to-[#ffa509]/5 rounded-xl p-4 mb-4">
-                <h3 className="font-bold text-[#050b2c] mb-2 flex items-center gap-2">
-                  <FiMessageCircle className="w-5 h-5 text-[#ffa509]" />
+              <div className="bg-gradient-to-r from-[#000000]/5 to-[#F9629F]/5 rounded-xl p-4 mb-4">
+                <h3 className="font-bold text-[#000000] mb-2 flex items-center gap-2">
+                  <FiMessageCircle className="w-5 h-5 text-[#F9629F]" />
                   Communicating with You
                 </h3>
                 <p className="leading-relaxed ml-7">
@@ -207,9 +207,9 @@ export default function PrivacyPolicyPage() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-[#050b2c]/5 to-[#ffa509]/5 rounded-xl p-4">
-                <h3 className="font-bold text-[#050b2c] mb-2 flex items-center gap-2">
-                  <FiShield className="w-5 h-5 text-[#ffa509]" />
+              <div className="bg-gradient-to-r from-[#000000]/5 to-[#F9629F]/5 rounded-xl p-4">
+                <h3 className="font-bold text-[#000000] mb-2 flex items-center gap-2">
+                  <FiShield className="w-5 h-5 text-[#F9629F]" />
                   Legal Reasons
                 </h3>
                 <p className="leading-relaxed ml-7">
@@ -226,31 +226,31 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 0.8 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiLink className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiLink className="w-8 h-8 text-[#F9629F]" />
               How We Disclose Personal Information
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
               <p className="leading-relaxed">We may disclose personal information in the following circumstances:</p>
               <ul className="space-y-2 ml-4">
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>With vendors, and service providers (payment processing, analytics, shipping, customer support)</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>With marketing and advertising partners for personalized advertising, in accordance with their privacy policies</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>When you direct or consent to disclosure (e.g., shipping providers or social media integrations)</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>With affiliates or within our corporate group</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>In connection with business transactions, legal obligations, or to protect rights and safety</span>
                 </li>
               </ul>
@@ -264,8 +264,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 0.9 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiLink className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiLink className="w-8 h-8 text-[#F9629F]" />
               Third-Party Websites and Links
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
@@ -282,8 +282,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.0 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiUsers className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiUsers className="w-8 h-8 text-[#F9629F]" />
               Children's Data
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
@@ -300,8 +300,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.1 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiLock className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiLock className="w-8 h-8 text-[#F9629F]" />
               Security and Retention of Information
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
@@ -318,8 +318,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.2 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiCheckCircle className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiCheckCircle className="w-8 h-8 text-[#F9629F]" />
               Your Rights and Choices
             </h2>
             <div className="ml-2 space-y-4 text-gray-700">
@@ -328,23 +328,23 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="space-y-2 ml-4">
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>Access or know what personal information we hold</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>Request deletion of personal information</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>Correct inaccurate personal information</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>Request portability of your information</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 bg-[#ffa509] rounded-full mt-2 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-[#F9629F] rounded-full mt-2 flex-shrink-0"></span>
                   <span>Opt out of sale or sharing of personal information for targeted advertising</span>
                 </li>
               </ul>
@@ -367,8 +367,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.3 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiAlertCircle className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiAlertCircle className="w-8 h-8 text-[#F9629F]" />
               Complaints
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
@@ -385,8 +385,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.4 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiGlobe className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiGlobe className="w-8 h-8 text-[#F9629F]" />
               International Transfers
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
@@ -403,8 +403,8 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.5 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiActivity className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiActivity className="w-8 h-8 text-[#F9629F]" />
               Changes to This Privacy Policy
             </h2>
             <div className="ml-2 space-y-3 text-gray-700">
@@ -421,23 +421,23 @@ export default function PrivacyPolicyPage() {
             transition={{ delay: 1.6 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <FiMail className="w-8 h-8 text-[#ffa509]" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <FiMail className="w-8 h-8 text-[#F9629F]" />
               Contact
             </h2>
             <div className="ml-2 space-y-4 text-gray-700">
               <p className="leading-relaxed">
                 If you have questions about this Privacy Policy or wish to exercise your rights, contact us at:
               </p>
-              <div className="bg-gradient-to-r from-[#050b2c]/10 to-[#ffa509]/10 rounded-xl p-6 space-y-4">
-                <div className="flex items-center gap-3 text-[#050b2c]">
-                  <FiMail className="w-6 h-6 text-[#ffa509]" />
-                  <a href="mailto:support@teezee.com" className="font-semibold text-lg hover:text-[#ffa509] transition-colors">
+              <div className="bg-gradient-to-r from-[#000000]/10 to-[#F9629F]/10 rounded-xl p-6 space-y-4">
+                <div className="flex items-center gap-3 text-[#000000]">
+                  <FiMail className="w-6 h-6 text-[#F9629F]" />
+                  <a href="mailto:support@teezee.com" className="font-semibold text-lg hover:text-[#F9629F] transition-colors">
                     📧 support@teezee.com
                   </a>
                 </div>
-                <div className="flex items-center gap-3 text-[#050b2c]">
-                  <FiMapPin className="w-6 h-6 text-[#ffa509]" />
+                <div className="flex items-center gap-3 text-[#000000]">
+                  <FiMapPin className="w-6 h-6 text-[#F9629F]" />
                   <span className="font-semibold text-lg">
                     📍 Victoria, British Columbia, Canada
                   </span>
@@ -456,7 +456,7 @@ export default function PrivacyPolicyPage() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={scrollToTop}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-[#ffa509] to-[#ffb833] text-white rounded-full shadow-2xl shadow-[#ffa509]/50 flex items-center justify-center z-50 hover:shadow-[#ffa509]/70 transition-all"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] text-white rounded-full shadow-2xl shadow-[#F9629F]/50 flex items-center justify-center z-50 hover:shadow-[#F9629F]/70 transition-all"
         aria-label="Scroll to top"
       >
         <FiArrowUp className="w-6 h-6" />

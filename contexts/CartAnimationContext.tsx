@@ -149,7 +149,7 @@ function CartAnimationFly({
           transition={{ duration: 0.3 }}
           className="absolute inset-0 -translate-x-1/2 -translate-y-1/2"
         >
-          <div className="w-32 h-32 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-full blur-2xl opacity-60" />
+          <div className="w-32 h-32 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-full blur-2xl opacity-60" />
         </motion.div>
 
         {/* Sparkle particles */}
@@ -170,7 +170,7 @@ function CartAnimationFly({
             }}
             className="absolute -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="w-2 h-2 bg-[#ffa509] rounded-full shadow-lg shadow-[#ffa509]/50" />
+            <div className="w-2 h-2 bg-[#F9629F] rounded-full shadow-lg shadow-[#F9629F]/50" />
           </motion.div>
         ))}
 
@@ -203,11 +203,11 @@ function CartAnimationFly({
             transition={{ duration: 1.2 }}
             className="absolute inset-0 -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="w-28 h-28 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-xl blur-xl" />
+            <div className="w-28 h-28 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-xl blur-xl" />
           </motion.div>
 
           {/* Product image container */}
-          <div className="relative w-24 h-24 rounded-xl overflow-hidden shadow-2xl border-4 border-white ring-4 ring-[#ffa509]/50">
+          <div className="relative w-24 h-24 rounded-xl overflow-hidden shadow-2xl border-4 border-white ring-4 ring-[#F9629F]/50">
             {productImage ? (
               <img
                 src={productImage}
@@ -215,7 +215,7 @@ function CartAnimationFly({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#ffa509] to-[#ff8c00] flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-[#F9629F] to-[#DB7093] flex items-center justify-center">
                 <svg
                   className="w-12 h-12 text-white"
                   fill="none"
@@ -262,10 +262,10 @@ function CartAnimationFly({
                 initial={{ scale: 0, opacity: 0.8 }}
                 animate={{ scale: 3, opacity: 0 }}
                 transition={{ duration: 0.6 }}
-                className="absolute inset-0 rounded-full bg-[#ffa509]"
+                className="absolute inset-0 rounded-full bg-[#F9629F]"
               />
               {/* Checkmark circle */}
-              <div className="relative w-12 h-12 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-full flex items-center justify-center shadow-lg ring-4 ring-white/50">
+              <div className="relative w-12 h-12 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-full flex items-center justify-center shadow-lg ring-4 ring-white/50">
                 <motion.svg
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
@@ -303,7 +303,7 @@ function CartAnimationFly({
             }}
           >
             <div className="relative -translate-x-1/2 -translate-y-1/2">
-              <div className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg border-2 border-white">
+              <div className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg border-2 border-white">
                 +1
               </div>
             </div>

@@ -105,7 +105,7 @@ export default function AddressSelector({ onSelect, isLoading = false }: Address
     <div className="space-y-6">
       {addresses.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-[#050b2c]">Select a saved address</h3>
+          <h3 className="text-lg font-semibold text-[#000000]">Select a saved address</h3>
           <div className="space-y-3">
             {addresses.map((address, index) => (
               <motion.div
@@ -116,18 +116,18 @@ export default function AddressSelector({ onSelect, isLoading = false }: Address
                 onClick={() => handleAddressSelect(address)}
                 className={`p-4 sm:p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
                   selectedAddressId === address._id
-                    ? 'border-[#ffa509] bg-gradient-to-br from-[#ffa509]/10 to-[#ff8c00]/5 shadow-lg'
+                    ? 'border-[#ffa509] bg-gradient-to-br from-[#ffa509]/10 to-[#DB7093]/5 shadow-lg'
                     : 'border-gray-200 hover:border-[#ffa509]/50 hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {address.isDefault && (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white mb-2">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#ffa509] to-[#DB7093] text-white mb-2">
                         Default
                       </span>
                     )}
-                    <h4 className="font-bold text-[#050b2c] text-base sm:text-lg mb-1">{address.fullName}</h4>
+                    <h4 className="font-bold text-[#000000] text-base sm:text-lg mb-1">{address.fullName}</h4>
                     <p className="text-sm text-gray-600 mt-1">{address.address}</p>
                     <p className="text-sm text-gray-600">
                       {address.city}, {address.state} {address.zipCode}
@@ -140,7 +140,7 @@ export default function AddressSelector({ onSelect, isLoading = false }: Address
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-full p-1.5"
+                        className="bg-gradient-to-br from-[#ffa509] to-[#DB7093] rounded-full p-1.5"
                       >
                         <FiCheck className="w-5 h-5 text-white" />
                       </motion.div>
@@ -161,7 +161,7 @@ export default function AddressSelector({ onSelect, isLoading = false }: Address
                 setShowNewAddressForm(true);
                 setSelectedAddressId(null);
               }}
-              className="w-full px-4 py-3 border-2 border-[#ffa509] text-[#ffa509] rounded-xl hover:bg-[#ffa509] hover:text-white transition-all duration-300 font-semibold flex items-center justify-center gap-2"
+              className="w-full px-4 py-3 border border-gray-300 text-[#ffa509] rounded-xl hover:bg-[#ffa509] hover:text-white transition-all duration-300 font-semibold flex items-center justify-center gap-2"
             >
               <FiPlus className="w-5 h-5" />
               {addresses.length > 0 ? 'Add New Address' : 'Add Address'}
@@ -169,7 +169,7 @@ export default function AddressSelector({ onSelect, isLoading = false }: Address
           </motion.div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#050b2c]">Add New Address</h3>
+            <h3 className="text-lg font-semibold text-[#000000]">Add New Address</h3>
             <AddressForm
               onSubmit={handleNewAddressSubmit}
               isLoading={isLoading}

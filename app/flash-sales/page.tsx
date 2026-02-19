@@ -197,9 +197,9 @@ function FlashSalesContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] w-full overflow-x-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] w-full overflow-x-hidden">
         {isAuthenticated && <DashboardSidebar />}
-        <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64 pt-16 lg:pt-0' : ''} overflow-x-hidden`}>
+        <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
           <Navbar />
           <div className="flex items-center justify-center min-h-[60vh]">
             <Loading size="lg" text="Loading..." />
@@ -210,9 +210,9 @@ function FlashSalesContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] w-full overflow-x-hidden">
       {isAuthenticated && <DashboardSidebar />}
-      <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64 pt-16 lg:pt-0' : ''} overflow-x-hidden`}>
+      <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
         <Navbar />
 
       {/* Hero Section */}
@@ -225,7 +225,7 @@ function FlashSalesContent() {
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, #ffa509 1px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 2px 2px, #F9629F 1px, transparent 0)`,
             backgroundSize: '40px 40px'
           }}></div>
         </div>
@@ -256,7 +256,7 @@ function FlashSalesContent() {
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                   className="hidden sm:block"
                 >
-                  <FiZap className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-[#ffa509]" />
+                  <FiZap className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-[#F9629F]" />
                 </motion.div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
                   Flash Sales
@@ -266,7 +266,7 @@ function FlashSalesContent() {
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="hidden sm:block"
                 >
-                  <FiZap className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-[#ffa509]" />
+                  <FiZap className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-[#F9629F]" />
                 </motion.div>
               </motion.div>
 
@@ -284,26 +284,26 @@ function FlashSalesContent() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-sm px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-full border border-[#ffa509]/30 w-full sm:w-auto max-w-full mx-4 sm:mx-0"
+                className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-sm px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-full border border-[#F9629F]/30 w-full sm:w-auto max-w-full mx-4 sm:mx-0"
               >
                 <div className="flex items-center gap-2">
-                  <FiClock className="w-4 h-4 sm:w-5 sm:h-6 text-[#ffa509] flex-shrink-0" />
+                  <FiClock className="w-4 h-4 sm:w-5 sm:h-6 text-[#F9629F] flex-shrink-0" />
                   <span className="text-white font-semibold text-xs sm:text-sm md:text-base lg:text-lg whitespace-nowrap">Sale Ends in:</span>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
-                  <div className="bg-[#ffa509] text-[#050b2c] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
+                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
                     {String(timeLeft.days).padStart(2, '0')}D
                   </div>
                   <span className="text-white text-sm sm:text-base md:text-xl">:</span>
-                  <div className="bg-[#ffa509] text-[#050b2c] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
+                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
                     {String(timeLeft.hours).padStart(2, '0')}H
                   </div>
                   <span className="text-white text-sm sm:text-base md:text-xl">:</span>
-                  <div className="bg-[#ffa509] text-[#050b2c] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
+                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
                     {String(timeLeft.minutes).padStart(2, '0')}M
                   </div>
                   <span className="text-white text-sm sm:text-base md:text-xl">:</span>
-                  <div className="bg-[#ffa509] text-[#050b2c] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
+                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
                     {String(timeLeft.seconds).padStart(2, '0')}S
                   </div>
                 </div>
@@ -330,7 +330,7 @@ function FlashSalesContent() {
                   placeholder="Search flash sale products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2.5 sm:py-3 pl-10 sm:pl-12 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all shadow-lg bg-white text-[#050b2c] placeholder-gray-400 text-sm sm:text-base"
+                  className="w-full px-4 py-2.5 sm:py-3 pl-10 sm:pl-12 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] transition-all shadow-lg bg-white text-[#000000] placeholder-gray-400 text-sm sm:text-base"
                 />
                 <FiSearch className="absolute left-3 sm:left-4 top-3 sm:top-3.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               </div>
@@ -348,11 +348,11 @@ function FlashSalesContent() {
           >
             <p className="text-white font-medium text-sm sm:text-base">
               Showing{' '}
-              <span className="text-[#ffa509] font-bold">
+              <span className="text-[#F9629F] font-bold">
                 {products.length}
               </span>{' '}
               of{' '}
-              <span className="text-[#ffa509] font-bold">
+              <span className="text-[#F9629F] font-bold">
                 {pagination.total}
               </span>{' '}
               <span className="hidden sm:inline">flash sale products</span>
@@ -435,7 +435,7 @@ function FlashSalesContent() {
                           onClick={(e) => handleQuickView(e, product._id!)}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="bg-white text-[#050b2c] px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:bg-[#ffa509] hover:text-white transition-all duration-300 text-sm sm:text-base"
+                          className="bg-white text-[#000000] px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:bg-[#F9629F] hover:text-white transition-all duration-300 text-sm sm:text-base"
                         >
                           <FiEye className="w-4 h-4 sm:w-5 sm:h-5" />
                           <span className="hidden sm:inline">Quick View</span>
@@ -449,7 +449,7 @@ function FlashSalesContent() {
                           initial={{ scale: 0, rotate: -180 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ delay: 0.3, type: 'spring' }}
-                          className="bg-gradient-to-br from-[#ffa509] to-orange-500 text-white rounded-full w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center shadow-xl"
+                          className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] text-white rounded-full w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center shadow-xl"
                         >
                           <div className="text-center">
                             <div className="text-[10px] sm:text-xs font-bold leading-tight">-{discount}%</div>
@@ -462,7 +462,7 @@ function FlashSalesContent() {
                     {/* Product Info */}
                     <div className="p-3 sm:p-4 md:p-5">
                       {/* Product Name */}
-                      <h3 className="text-base sm:text-lg font-bold text-[#050b2c] mb-2 line-clamp-2 group-hover:text-[#ffa509] transition-colors">
+                      <h3 className="text-base sm:text-lg font-bold text-[#000000] mb-2 line-clamp-2 group-hover:text-[#F9629F] transition-colors">
                         {product.name}
                       </h3>
 
@@ -477,7 +477,7 @@ function FlashSalesContent() {
 
                       {/* Price */}
                       <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
-                        <span className="text-xl sm:text-2xl font-bold text-[#ffa509]">
+                        <span className="text-xl sm:text-2xl font-bold text-[#F9629F]">
                           {formatCurrency(displayedPrice)}
                         </span>
                         {hasDiscount && (
@@ -491,14 +491,14 @@ function FlashSalesContent() {
                       <div className="mb-2">
                         <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-600 mb-1">
                           <span>Available: {product.stock}</span>
-                          <span className="text-[#ffa509] font-semibold">Sold: {sold}</span>
+                          <span className="text-[#F9629F] font-semibold">Sold: {sold}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2 overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${soldPercentage}%` }}
                             transition={{ duration: 1, delay: index * 0.1 }}
-                            className="h-full bg-gradient-to-r from-[#ffa509] to-orange-500 rounded-full"
+                            className="h-full bg-gradient-to-r from-[#F9629F] to-[#DB7093] rounded-full"
                           />
                         </div>
                       </div>
@@ -541,7 +541,7 @@ function FlashSalesContent() {
             className="text-center py-12 sm:py-16 bg-white/10 backdrop-blur-sm rounded-lg shadow-md mx-2 sm:mx-0"
           >
             <div className="max-w-md mx-auto px-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-full flex items-center justify-center">
                 <FiZap className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
@@ -555,7 +555,7 @@ function FlashSalesContent() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-[#ffa509] text-white rounded-lg font-semibold hover:bg-[#ff8c00] transition-colors shadow-lg text-sm sm:text-base"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-[#F9629F] text-white rounded-lg font-semibold hover:bg-[#DB7093] transition-colors shadow-lg text-sm sm:text-base"
                 >
                   Clear Search
                 </button>
@@ -573,7 +573,7 @@ function FlashSalesContent() {
 export default function FlashSalesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-[#050b2c] via-[#0a1538] to-[#050b2c] w-full overflow-x-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] w-full overflow-x-hidden">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loading size="lg" text="Loading flash sales..." />

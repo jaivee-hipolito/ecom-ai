@@ -200,8 +200,8 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
           className="text-center mb-8"
         >
           <div className="flex items-center justify-center gap-2 mb-3">
-            <FiZap className="w-8 h-8 text-[#ffa509]" />
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#050b2c]">
+            <FiZap className="w-8 h-8 text-[#F9629F]" />
+            <h2 className="text-3xl lg:text-4xl font-bold text-[#000000]">
               Deal of the Day
             </h2>
           </div>
@@ -236,8 +236,8 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                   whileTap={{ scale: 0.95 }}
                   className={`px-6 py-2.5 rounded-full font-semibold text-sm lg:text-base transition-all duration-300 ${
                     isActive
-                      ? 'bg-[#ffa509] text-white shadow-lg shadow-[#ffa509]/30'
-                      : 'bg-white text-[#050b2c] border-2 border-gray-200 hover:border-[#ffa509]'
+                      ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 shadow-lg'
+                      : 'bg-white text-[#000000] border-2 border-gray-200 hover:border-[#F9629F]'
                   }`}
                 >
                   {category}
@@ -289,7 +289,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                           onClick={(e) => handleQuickView(e, product._id!)}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="bg-white text-[#050b2c] px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:bg-[#ffa509] hover:text-white transition-all duration-300"
+                          className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:bg-[#FC9BC2] transition-all duration-300"
                         >
                           <FiEye className="w-5 h-5" />
                           <span>Quick View</span>
@@ -320,7 +320,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                           initial={{ scale: 0, rotate: 180 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ delay: 0.3, type: 'spring' }}
-                          className="absolute top-3 right-3 bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white z-30"
+                          className="absolute top-3 right-3 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-xl z-30"
                         >
                           <div className="text-center">
                             <div className="text-xs font-black leading-tight">-{discount}%</div>
@@ -335,9 +335,9 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                           initial={{ opacity: 0, y: -20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 }}
-                          className="absolute top-3 left-3 bg-[#050b2c] text-white px-3 py-2 rounded-lg shadow-lg z-30 flex items-center gap-2"
+                          className="absolute top-3 left-3 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-2 rounded-lg shadow-lg z-30 flex items-center gap-2"
                         >
-                          <FiClock className="w-4 h-4 text-[#ffa509]" />
+                          <FiClock className="w-4 h-4 text-[#F9629F]" />
                           <span className="text-xs font-bold">
                             {timeLeft.days}D : {timeLeft.hours}H : {timeLeft.minutes}M : {timeLeft.seconds}S
                           </span>
@@ -348,7 +348,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                     {/* Product Info */}
                     <div className="p-5">
                       {/* Product Name */}
-                      <h3 className="text-lg font-bold text-[#050b2c] mb-2 line-clamp-2 group-hover:text-[#ffa509] transition-colors">
+                      <h3 className="text-lg font-bold text-[#000000] mb-2 line-clamp-2 group-hover:text-[#F9629F] transition-colors">
                         {product.name}
                       </h3>
 
@@ -357,7 +357,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                       <div className="flex items-center gap-2 mb-4">
                         {hasDiscount ? (
                           <>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent">
                               {formatCurrency(displayedPrice)}
                             </span>
                             <span className="text-lg text-gray-400 line-through">
@@ -365,7 +365,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                             </span>
                           </>
                         ) : (
-                          <span className="text-2xl font-bold text-[#050b2c]">
+                          <span className="text-2xl font-bold text-[#000000]">
                             {formatCurrency(product.price)}
                           </span>
                         )}

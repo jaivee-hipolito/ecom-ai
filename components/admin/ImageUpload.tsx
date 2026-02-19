@@ -197,26 +197,26 @@ export default function ImageUpload({
   const canAddMore = images.length < maxImages;
 
   return (
-    <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700">
+    <div className="space-y-2 sm:space-y-4">
+      <label className="block text-xs sm:text-sm font-medium text-gray-700">
         Product Images ({images.length}/{maxImages})
       </label>
-      <p className="text-sm text-gray-500">
+      <p className="text-xs sm:text-sm text-gray-500">
         The first image or selected cover image will be used as the main product image.
       </p>
 
       {error && <Alert variant="error">{error}</Alert>}
 
-      {/* Image Preview Grid */}
+      {/* Image Preview Grid — compact on mobile */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           {images.map((imageUrl, index) => {
             const isCover = imageUrl === currentCoverImage;
             return (
               <div key={index} className="relative group">
                 {/* Image Container */}
                 <div
-                  className={`relative w-full h-32 rounded-lg overflow-hidden border-2 ${
+                  className={`relative w-full h-24 sm:h-28 md:h-32 rounded-lg overflow-hidden border-2 ${
                     isCover
                       ? 'border-blue-500 ring-2 ring-blue-200'
                       : 'border-gray-300'
@@ -379,9 +379,9 @@ export default function ImageUpload({
       )}
 
       {images.length === 0 && (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 md:p-8 text-center">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400"
             stroke="currentColor"
             fill="none"
             viewBox="0 0 48 48"

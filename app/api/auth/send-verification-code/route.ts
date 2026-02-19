@@ -1,3 +1,9 @@
+/**
+ * Send verification code (email or phone).
+ * Requires: RESEND_API_KEY (and EMAIL_FROM optional) for email;
+ *           TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER for SMS.
+ * In development, the code is also returned in the response so you can verify without email/SMS configured.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
@@ -61,24 +67,28 @@ export async function POST(request: NextRequest) {
       await user.save();
 
       // Send email with verification code
-      const emailSent = await sendVerificationEmail(email, verificationCode);
+      const emailResult = await sendVerificationEmail(email, verificationCode);
 
       // In development mode, also log the code for testing
       if (process.env.NODE_ENV === 'development') {
         console.log(`Email verification code for ${email}: ${verificationCode}`);
       }
 
-      // If email service is not configured, still allow registration but warn
-      if (!emailSent && process.env.NODE_ENV === 'production') {
-        console.error('Failed to send verification email. Email service may not be configured.');
+      if (!emailResult.success) {
+        console.error('Failed to send verification email:', emailResult.error);
+        return NextResponse.json(
+          {
+            success: false,
+            error: emailResult.error || 'Failed to send verification email',
+          },
+          { status: 503 }
+        );
       }
 
       return NextResponse.json(
         {
           success: true,
           message: 'Verification code sent to your email',
-          // Only return code in development mode for testing
-          ...(process.env.NODE_ENV === 'development' && { code: verificationCode }),
         },
         { status: 200 }
       );
@@ -110,25 +120,27 @@ export async function POST(request: NextRequest) {
       user.phoneVerificationCodeExpires = expiresAt;
       await user.save();
 
-      // Send SMS with verification code
-      const smsSent = await sendVerificationSMS(phoneNumber, verificationCode);
+      const smsResult = await sendVerificationSMS(phoneNumber, verificationCode);
 
-      // In development mode, also log the code for testing
       if (process.env.NODE_ENV === 'development') {
         console.log(`Phone verification code for ${phoneNumber}: ${verificationCode}`);
       }
 
-      // If SMS service is not configured, still allow registration but warn
-      if (!smsSent && process.env.NODE_ENV === 'production') {
-        console.error('Failed to send verification SMS. SMS service may not be configured.');
+      if (!smsResult.success) {
+        console.error('Failed to send verification SMS:', smsResult.error);
+        return NextResponse.json(
+          {
+            success: false,
+            error: smsResult.error || 'Failed to send verification SMS',
+          },
+          { status: 503 }
+        );
       }
 
       return NextResponse.json(
         {
           success: true,
           message: 'Verification code sent to your phone',
-          // Only return code in development mode for testing
-          ...(process.env.NODE_ENV === 'development' && { code: verificationCode }),
         },
         { status: 200 }
       );

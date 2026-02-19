@@ -113,7 +113,7 @@ export default function SessionSecurity() {
           initial={{ opacity: 0, y: -100 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] shadow-lg"
+          className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] shadow-lg"
         >
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export default function SessionSecurity() {
             </div>
             <button
               onClick={handleStayLoggedIn}
-              className="px-4 py-2 bg-[#050b2c] text-white rounded-lg hover:bg-[#050b2c]/90 transition-colors font-medium"
+              className="px-4 py-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-lg hover:bg-[#FC9BC2] transition-colors font-medium"
             >
               Stay Logged In
             </button>

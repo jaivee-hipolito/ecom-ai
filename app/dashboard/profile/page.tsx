@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Loading from '@/components/ui/Loading';
 import { useRouter } from 'next/navigation';
+import { FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface UserProfile {
   _id: string;
@@ -24,6 +25,17 @@ export default function ProfilePage() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -53,6 +65,46 @@ export default function ProfilePage() {
       fetchUserProfile();
     }
   }, [isAuthenticated]);
+
+  const handlePasswordChange = async (e: FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          password: passwordForm.newPassword,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setPasswordError(data.error || 'Failed to change password');
+        return;
+      }
+
+      setPasswordSuccess('Password changed successfully');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch {
+      setPasswordError('An error occurred. Please try again.');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -120,7 +172,7 @@ export default function ProfilePage() {
             <div className="mt-6 pt-6 border-t border-gray-200">
               <Link
                 href="/dashboard/verify"
-                className="block w-full bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-3 px-6 rounded-xl text-center hover:shadow-lg transition-all"
+                className="block w-full bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] font-bold py-3 px-6 rounded-xl text-center hover:shadow-lg transition-all"
               >
                 Verify Email & Phone
               </Link>
@@ -151,6 +203,91 @@ export default function ProfilePage() {
             Manage Addresses
           </Button>
         </Link>
+
+        {/* Change Password Card */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FiLock className="w-5 h-5 text-[#F9629F]" />
+            Change Password
+          </h2>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            {passwordError && (
+              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{passwordError}</div>
+            )}
+            {passwordSuccess && (
+              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">{passwordSuccess}</div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  required
+                  placeholder="Enter current password"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] pr-10 text-gray-900 placeholder-gray-500 bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showCurrentPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  required
+                  minLength={6}
+                  placeholder="Enter new password (min 6 characters)"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] pr-10 text-gray-900 placeholder-gray-500 bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  required
+                  minLength={6}
+                  placeholder="Confirm new password"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] pr-10 text-gray-900 placeholder-gray-500 bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={isChangingPassword}
+              className="w-full bg-[#FDE8F0] text-[#000000] border border-gray-300 hover:bg-[#FC9BC2]"
+            >
+              {isChangingPassword ? 'Updating...' : 'Update Password'}
+            </Button>
+          </form>
+        </div>
 
         {/* Orders Card */}
         <Link href="/dashboard/orders" className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow block">

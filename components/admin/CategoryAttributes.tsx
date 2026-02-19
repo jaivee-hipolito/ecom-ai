@@ -127,8 +127,8 @@ export default function CategoryAttributes({
           <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
             <FiTag className="w-4 h-4 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-[#050b2c]">
-            Attributes <span className="text-[#ffa509]">({safeAttributes.length})</span>
+          <h3 className="text-lg font-bold text-[#000000]">
+            Attributes <span className="text-[#F9629F]">({safeAttributes.length})</span>
           </h3>
         </div>
         {!showAddForm && (
@@ -213,7 +213,7 @@ export default function CategoryAttributes({
                   }
                   className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
                 />
-                <label htmlFor="required" className="ml-3 block text-sm font-semibold text-[#050b2c] cursor-pointer">
+                <label htmlFor="required" className="ml-3 block text-sm font-semibold text-[#000000] cursor-pointer">
                   This attribute is required
                 </label>
               </motion.div>
@@ -224,7 +224,7 @@ export default function CategoryAttributes({
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3 bg-white p-4 rounded-lg border-2 border-purple-200"
                 >
-                  <label className="block text-sm font-semibold text-[#050b2c]">
+                  <label className="block text-sm font-semibold text-[#000000]">
                     Options
                   </label>
                   <div className="flex gap-2">
@@ -332,7 +332,7 @@ export default function CategoryAttributes({
                     <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
                       <FiTag className="w-3 h-3 text-white" />
                     </div>
-                    <div className="font-bold text-[#050b2c]">{attr.label}</div>
+                    <div className="font-bold text-[#000000]">{attr.label}</div>
                     {attr.required && (
                       <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
                         Required

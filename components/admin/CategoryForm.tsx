@@ -239,7 +239,7 @@ export default function CategoryForm({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gradient-to-br from-white to-blue-50/30 rounded-xl p-6 border-2 border-blue-100 relative overflow-hidden"
+        className="bg-gradient-to-br from-white to-blue-50/30 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 border-2 border-blue-100 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
@@ -247,9 +247,9 @@ export default function CategoryForm({
             <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
               <FiTag className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-[#050b2c]">Basic Information</h2>
+            <h2 className="text-xl font-bold text-[#000000]">Basic Information</h2>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-5 md:space-y-6">
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.2 }}
@@ -261,7 +261,7 @@ export default function CategoryForm({
                 onChange={handleChange}
                 required
                 placeholder="e.g., Electronics, Clothing, Books"
-                className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+                className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
               />
             </motion.div>
 
@@ -277,7 +277,7 @@ export default function CategoryForm({
                 required
                 placeholder="Describe what products belong to this category..."
                 rows={4}
-                className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 bg-white"
+                className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 bg-white"
               />
             </motion.div>
           </div>
@@ -289,7 +289,7 @@ export default function CategoryForm({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-gradient-to-br from-white to-purple-50/30 rounded-xl p-6 border-2 border-purple-100 relative overflow-hidden"
+        className="bg-gradient-to-br from-white to-purple-50/30 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 border-2 border-purple-100 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-200/20 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
@@ -297,7 +297,7 @@ export default function CategoryForm({
             <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
               <FiSettings className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-[#050b2c]">Category Attributes</h2>
+            <h2 className="text-xl font-bold text-[#000000]">Category Attributes</h2>
           </div>
           <CategoryAttributes
             attributes={attributes}
@@ -329,7 +329,7 @@ export default function CategoryForm({
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="border-2 border-[#050b2c] text-[#050b2c] hover:bg-[#050b2c] hover:text-white font-semibold px-6 py-3"
+            className="border border-gray-300 text-[#1a1a1a] bg-[#FDE8F0] hover:bg-[#FC9BC2] font-semibold px-6 py-3"
           >
             <FiX className="w-4 h-4 mr-2 inline" />
             Cancel
@@ -340,7 +340,7 @@ export default function CategoryForm({
             type="submit"
             variant="primary"
             isLoading={isLoading}
-            className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] border-0 text-white font-semibold shadow-lg px-6 py-3"
+            className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] hover:from-[#DB7093] hover:to-[#F9629F] border-0 text-white font-semibold shadow-lg px-6 py-3"
           >
             {!isLoading && <FiSave className="w-4 h-4 mr-2 inline" />}
             {category ? 'Update Category' : 'Create Category'}

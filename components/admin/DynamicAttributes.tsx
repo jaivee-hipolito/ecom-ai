@@ -133,11 +133,11 @@ export default function DynamicAttributes({
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">
+    <div className="space-y-2 sm:space-y-3 md:space-y-4">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-900">
         Category-Specific Attributes
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
         {attributes.map((attr) => renderField(attr))}
       </div>
     </div>

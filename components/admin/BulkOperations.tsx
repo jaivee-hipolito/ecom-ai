@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { FiFilter, FiRefreshCw, FiCheckSquare, FiSquare, FiTrash2, FiSave, FiX, FiEdit } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
@@ -26,6 +26,7 @@ export default function BulkOperations() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [filterKey, setFilterKey] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Filter input values (immediate updates for UI)
   const [filterInputs, setFilterInputs] = useState({
@@ -347,10 +348,10 @@ export default function BulkOperations() {
       <div className="flex justify-center items-center py-12">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="w-16 h-16 border-4 border-[#ffa509] border-t-transparent rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-[#ff8c00] rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            <div className="w-16 h-16 border-4 border-[#F9629F] border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-[#DB7093] rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
           </div>
-          <p className="text-[#050b2c] font-medium">Loading products...</p>
+          <p className="text-[#000000] font-medium">Loading products...</p>
         </div>
       </div>
     );
@@ -361,7 +362,7 @@ export default function BulkOperations() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 lg:p-8 relative overflow-hidden"
+        className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
@@ -387,40 +388,61 @@ export default function BulkOperations() {
             </motion.div>
           )}
 
-          {/* Filters */}
+          {/* Filters — hidden by default */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border-2 border-gray-200 mb-6"
+            className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl border-2 border-gray-200 mb-3 sm:mb-4 md:mb-6"
             key={filterKey}
           >
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-lg">
-                  <FiFilter className="w-5 h-5 text-white" />
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-2 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-lg">
+                  <FiFilter className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-[#050b2c]">Filters</h3>
+                <h3 className="text-base sm:text-xl font-bold text-[#000000]">Filters</h3>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                className="border-2 border-gray-300 text-[#050b2c] hover:border-[#ffa509] transition-all font-semibold flex items-center gap-2"
-              >
-                <FiRefreshCw className="w-4 h-4" />
-                Reset Filters
-              </Button>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="border-2 border-gray-300 text-[#000000] hover:border-[#F9629F] transition-all font-semibold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+                >
+                  <FiRefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Reset
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white border-none hover:opacity-90 font-semibold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+                >
+                  {showFilters ? <FiX className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <FiFilter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                  {showFilters ? 'Hide' : 'Show'}
+                </Button>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-4 sm:pt-5 md:pt-6">
               <Input
                 label="Search"
                 type="text"
                 placeholder="Search products..."
                 value={filterInputs.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Select
@@ -434,7 +456,7 @@ export default function BulkOperations() {
                 ]}
                 value={filterInputs.category}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Input
@@ -443,7 +465,7 @@ export default function BulkOperations() {
                 placeholder="0"
                 value={filterInputs.minPrice || ''}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Input
@@ -452,7 +474,7 @@ export default function BulkOperations() {
                 placeholder="1000"
                 value={filterInputs.maxPrice || ''}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Input
@@ -462,7 +484,7 @@ export default function BulkOperations() {
                 min="0"
                 value={filterInputs.minStock || ''}
                 onChange={(e) => handleFilterChange('minStock', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Input
@@ -472,7 +494,7 @@ export default function BulkOperations() {
                 min="0"
                 value={filterInputs.maxStock || ''}
                 onChange={(e) => handleFilterChange('maxStock', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Select
@@ -485,7 +507,7 @@ export default function BulkOperations() {
                 ]}
                 value={filterInputs.stockStatus}
                 onChange={(e) => handleFilterChange('stockStatus', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
 
               <Select
@@ -497,9 +519,12 @@ export default function BulkOperations() {
                 ]}
                 value={filterInputs.featured}
                 onChange={(e) => handleFilterChange('featured', e.target.value)}
-                className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
               />
-            </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -514,7 +539,7 @@ export default function BulkOperations() {
                 <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
                   <FiEdit className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-[#050b2c]">
+                <h3 className="text-xl font-bold text-[#000000]">
                   Update Fields
                 </h3>
               </div>
@@ -527,7 +552,7 @@ export default function BulkOperations() {
                   step="0.01"
                   value={updates.price}
                   onChange={(e) => handleUpdateChange('price', e.target.value)}
-                  className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                  className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
                 />
 
                 <Select
@@ -541,7 +566,7 @@ export default function BulkOperations() {
                   ]}
                   value={updates.category}
                   onChange={(e) => handleUpdateChange('category', e.target.value)}
-                  className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                  className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
                 />
 
                 <Input
@@ -551,7 +576,7 @@ export default function BulkOperations() {
                   min="0"
                   value={updates.stock}
                   onChange={(e) => handleUpdateChange('stock', e.target.value)}
-                  className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                  className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
                 />
 
                 <Select
@@ -563,7 +588,7 @@ export default function BulkOperations() {
                   ]}
                   value={updates.featured}
                   onChange={(e) => handleUpdateChange('featured', e.target.value)}
-                  className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20"
+                  className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20"
                 />
               </div>
             </motion.div>
@@ -577,16 +602,16 @@ export default function BulkOperations() {
             >
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-lg">
+                  <div className="p-2 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-lg">
                     {selectedProducts.size > 0 ? (
                       <FiCheckSquare className="w-5 h-5 text-white" />
                     ) : (
                       <FiSquare className="w-5 h-5 text-white" />
                     )}
                   </div>
-                  <h3 className="text-xl font-bold text-[#050b2c]">
+                  <h3 className="text-xl font-bold text-[#000000]">
                     Select Products{' '}
-                    <span className="text-[#ffa509]">({selectedProducts.size} selected)</span>
+                    <span className="text-[#F9629F]">({selectedProducts.size} selected)</span>
                   </h3>
                 </div>
                 <Button
@@ -594,7 +619,7 @@ export default function BulkOperations() {
                   variant="outline"
                   size="sm"
                   onClick={handleSelectAll}
-                  className="border-2 border-gray-300 text-[#050b2c] hover:border-[#ffa509] transition-all font-semibold flex items-center gap-2"
+                  className="border-2 border-gray-300 text-[#000000] hover:border-[#F9629F] transition-all font-semibold flex items-center gap-2"
                 >
                   {selectedProducts.size === products.length ? (
                     <>
@@ -614,7 +639,7 @@ export default function BulkOperations() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#050b2c] uppercase tracking-wider w-12">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#000000] uppercase tracking-wider w-12">
                         <input
                           type="checkbox"
                           checked={
@@ -622,19 +647,19 @@ export default function BulkOperations() {
                             products.length > 0
                           }
                           onChange={handleSelectAll}
-                          className="rounded border-2 border-gray-300 text-[#ffa509] focus:ring-[#ffa509] w-5 h-5 cursor-pointer"
+                          className="rounded border-2 border-gray-300 text-[#F9629F] focus:ring-[#F9629F] w-5 h-5 cursor-pointer"
                         />
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#050b2c] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#000000] uppercase tracking-wider">
                         Product
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#050b2c] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#000000] uppercase tracking-wider">
                         Price
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#050b2c] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#000000] uppercase tracking-wider">
                         Stock
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-[#050b2c] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-[#000000] uppercase tracking-wider">
                         Category
                       </th>
                     </tr>
@@ -661,7 +686,7 @@ export default function BulkOperations() {
                           transition={{ delay: index * 0.02 }}
                           className={`transition-colors ${
                             selectedProducts.has(product._id!)
-                              ? 'bg-gradient-to-r from-[#ffa509]/10 to-[#ff8c00]/10 border-l-4 border-[#ffa509]'
+                              ? 'bg-gradient-to-r from-[#F9629F]/10 to-[#DB7093]/10 border-l-4 border-[#F9629F]'
                               : 'hover:bg-gray-50'
                           }`}
                         >
@@ -670,7 +695,7 @@ export default function BulkOperations() {
                               type="checkbox"
                               checked={selectedProducts.has(product._id!)}
                               onChange={() => handleSelectProduct(product._id!)}
-                              className="rounded border-2 border-gray-300 text-[#ffa509] focus:ring-[#ffa509] w-5 h-5 cursor-pointer"
+                              className="rounded border-2 border-gray-300 text-[#F9629F] focus:ring-[#F9629F] w-5 h-5 cursor-pointer"
                             />
                           </td>
                           <td className="px-6 py-4">
@@ -687,18 +712,18 @@ export default function BulkOperations() {
                                 <div className="h-12 w-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg mr-3 border-2 border-gray-200"></div>
                               )}
                               <div>
-                                <div className="text-sm font-semibold text-[#050b2c]">
+                                <div className="text-sm font-semibold text-[#000000]">
                                   {product.name}
                                 </div>
                                 {product.featured && (
-                                  <span className="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-bold rounded-lg bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white">
+                                  <span className="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-bold rounded-lg bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white">
                                     Featured
                                   </span>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#050b2c]">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#000000]">
                             ${product.price?.toFixed(2) || '0.00'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -757,7 +782,7 @@ export default function BulkOperations() {
                   variant="outline"
                   onClick={() => router.back()}
                   disabled={deleting || updating}
-                  className="border-2 border-gray-300 text-[#050b2c] hover:border-[#ffa509] transition-all font-semibold flex items-center justify-center gap-2"
+                  className="border-2 border-gray-300 text-[#000000] hover:border-[#F9629F] transition-all font-semibold flex items-center justify-center gap-2"
                 >
                   <FiX className="w-4 h-4" />
                   Cancel
@@ -767,7 +792,7 @@ export default function BulkOperations() {
                   variant="primary"
                   isLoading={updating}
                   disabled={selectedProducts.size === 0 || deleting}
-                  className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white border-none hover:from-[#ff8c00] hover:to-[#ffa509] shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2"
+                  className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white border-none hover:from-[#DB7093] hover:to-[#F9629F] shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2"
                 >
                   <FiSave className="w-4 h-4" />
                   Update {selectedProducts.size} Product(s)

@@ -34,49 +34,51 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2 mt-8">
+    <nav className="flex items-center justify-center flex-wrap gap-2 mt-6 sm:mt-8" aria-label="Pagination">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#050b2c] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
+        className="px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 text-xs sm:text-sm font-semibold text-[#1a1a1a] bg-[#FDE8F0] hover:bg-[#FC9BC2] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#FDE8F0] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer touch-manipulation min-h-[40px] min-w-[44px]"
       >
-        Previous
+        Prev
       </button>
 
-      {getVisiblePages().map((page, index) => {
-        if (page === '...') {
-          return (
-            <span
-              key={`ellipsis-${index}`}
-              className="px-3 py-2 text-gray-500 font-semibold"
-            >
-              ...
-            </span>
-          );
-        }
+      <div className="flex items-center flex-wrap justify-center gap-1 sm:gap-2">
+        {getVisiblePages().map((page, index) => {
+          if (page === '...') {
+            return (
+              <span
+                key={`ellipsis-${index}`}
+                className="px-2 sm:px-3 py-2 text-gray-500 font-semibold text-xs sm:text-sm"
+              >
+                ...
+              </span>
+            );
+          }
 
-        return (
-          <button
-            key={page}
-            onClick={() => onPageChange(page as number)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer ${
-              currentPage === page
-                ? 'bg-[#ffa509] text-white border-2 border-[#ffa509] shadow-lg'
-                : 'border-2 border-gray-200 text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509]'
-            }`}
-          >
-            {page}
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={page}
+              onClick={() => onPageChange(page as number)}
+              className={`min-w-[36px] sm:min-w-[40px] min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer touch-manipulation ${
+                currentPage === page
+                  ? 'bg-[#FC9BC2] text-[#1a1a1a] border border-gray-300 shadow-lg'
+                  : 'border border-gray-300 text-[#1a1a1a] bg-[#FDE8F0] hover:bg-[#FC9BC2]'
+              }`}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
 
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 rounded-lg border-2 border-gray-200 text-sm font-semibold text-[#050b2c] bg-white hover:bg-[#ffa509] hover:text-white hover:border-[#ffa509] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#050b2c] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
+        className="px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 text-xs sm:text-sm font-semibold text-[#1a1a1a] bg-[#FDE8F0] hover:bg-[#FC9BC2] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#FDE8F0] transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer touch-manipulation min-h-[40px] min-w-[44px]"
       >
         Next
       </button>
-    </div>
+    </nav>
   );
 }

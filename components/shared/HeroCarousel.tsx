@@ -102,11 +102,11 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4, duration: 0.6 }}
-                    className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-[#050b2c] leading-tight cursor-pointer hover:text-[#0a1538] transition-colors duration-300"
+                    className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-[#000000] leading-tight cursor-pointer hover:text-[#1a1a1a] transition-colors duration-300"
                   >
                     {currentProduct.name.split(' ').slice(0, -1).join(' ')}
                     <br />
-                    <span className="text-[#ffa509] hover:text-[#ff8c00] transition-colors duration-300">
+                    <span className="text-[#F9629F] hover:text-[#DB7093] transition-colors duration-300">
                       {currentProduct.name.split(' ').slice(-1).join(' ')}
                     </span>
                   </motion.h1>
@@ -129,7 +129,7 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                   transition={{ delay: 0.6, duration: 0.6 }}
                   className="flex items-center gap-4"
                 >
-                  <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#050b2c]">
+                  <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#000000]">
                     {formatCurrency(currentProduct.price)}
                   </span>
                   {currentProduct.stock === 0 && (
@@ -163,7 +163,7 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                     />
                   </motion.div>
                   {/* Decorative background circle */}
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#ffa509]/20 to-[#ff8c00]/10 rounded-full blur-3xl transform scale-150"></div>
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#F9629F]/20 to-[#DB7093]/10 rounded-full blur-3xl transform scale-150"></div>
                 </Link>
               </motion.div>
             </div>
@@ -179,14 +179,14 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
             aria-label="Previous slide"
           >
-            <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#050b2c] group-hover:text-[#ffa509] transition-colors" />
+            <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#000000] group-hover:text-[#F9629F] transition-colors" />
           </button>
           <button
             onClick={goToNext}
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 bg-white/90 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
             aria-label="Next slide"
           >
-            <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-[#050b2c] group-hover:text-[#ffa509] transition-colors" />
+            <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-[#000000] group-hover:text-[#F9629F] transition-colors" />
           </button>
         </>
       )}
@@ -200,7 +200,7 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
               onClick={() => goToSlide(index)}
               className={`transition-all duration-300 ${
                 index === currentIndex
-                  ? 'w-10 sm:w-12 h-1.5 bg-[#050b2c] rounded-full'
+                  ? 'w-10 sm:w-12 h-1.5 bg-[#000000] rounded-full'
                   : 'w-6 sm:w-8 h-1.5 bg-gray-300 hover:bg-gray-400 rounded-full'
               }`}
               aria-label={`Go to slide ${index + 1}`}

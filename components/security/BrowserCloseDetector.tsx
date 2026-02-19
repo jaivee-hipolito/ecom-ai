@@ -50,6 +50,8 @@ export default function BrowserCloseDetector() {
     // Check if browser was closed
     // sessionStorage is cleared when browser closes, so if user is authenticated
     // but sessionStorage flag doesn't exist, browser was closed
+    // EXCEPTION: If window.opener exists, we're in a tab opened via target="_blank"
+    // (e.g. Terms link) - new tabs have empty sessionStorage but user didn't close browser
     let wasSessionActive: string | null = null;
     try {
       wasSessionActive = sessionStorage.getItem(SESSION_ACTIVE_KEY);
@@ -59,17 +61,12 @@ export default function BrowserCloseDetector() {
       hasCheckedRef.current = true;
       return;
     }
-    
-    console.log('BrowserCloseDetector - Check:', {
-      isAuthenticated,
-      status,
-      wasSessionActive,
-      pathname,
-      hasSession: !!session
-    });
+
+    const isNewTabFromLink = typeof window !== 'undefined' && !!window.opener;
     
     // If user is authenticated but sessionStorage flag doesn't exist, browser was closed
-    if (isAuthenticated && status === 'authenticated' && !wasSessionActive) {
+    // Skip logout when we're in a newly opened tab (e.g. Terms/Privacy opened via target="_blank")
+    if (isAuthenticated && status === 'authenticated' && !wasSessionActive && !isNewTabFromLink) {
       console.log('Browser was closed - signing out and redirecting');
       // Browser was closed - sign out and redirect
       hasCheckedRef.current = true;

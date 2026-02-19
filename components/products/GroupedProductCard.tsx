@@ -18,9 +18,10 @@ import { formatCurrency } from '@/utils/currency';
 
 interface GroupedProductCardProps {
   groupedProduct: GroupedProduct;
+  showAttributes?: boolean | 'color-only';
 }
 
-export default function GroupedProductCard({ groupedProduct }: GroupedProductCardProps) {
+export default function GroupedProductCard({ groupedProduct, showAttributes = true }: GroupedProductCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { addToCart, isLoading: cartLoading, cart } = useCart();
@@ -273,14 +274,14 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
   }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+    <div className="h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
       <Link 
         href={productLink} 
         key={productLink}
         className="block" 
         onClick={handleCardClick}
       >
-        <div className="relative aspect-square">
+        <div className="relative aspect-square flex-shrink-0">
           <ProductImage product={mockProduct} className="w-full h-full" />
           {displayStock === 0 && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -317,7 +318,7 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
                 initial={{ scale: 0, rotate: 180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.3, type: 'spring' }}
-                className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-xl border-2 border-white"
+                className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-full w-12 h-12 flex items-center justify-center shadow-xl"
               >
                 <div className="text-center">
                   <div className="text-[10px] font-black leading-tight">-{flashSaleData.discountPercentage}%</div>
@@ -352,7 +353,8 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
           </button>
         </div>
       </Link>
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1 min-h-0">
+        <div className="flex-1 min-h-0">
         <Link href={productLink} key={`title-${productLink}`}>
           <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
             {groupedProduct.name}
@@ -362,10 +364,19 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
           </p>
         </Link>
 
-        {/* Attribute Selection */}
-        {Object.keys(groupedProduct.allAttributes).length > 0 && (
-          <div className="mb-3 pb-3 border-b border-gray-200 space-y-2">
-            {Object.entries(groupedProduct.allAttributes).map(([key, values]) => {
+        {/* Attribute Selection - Inline style: Label: [values] */}
+        {showAttributes && (() => {
+          const attrEntries = Object.entries(groupedProduct.allAttributes).filter(([key]) => {
+            if (showAttributes === 'color-only') {
+              const k = key.toLowerCase();
+              return k.includes('color') || k.includes('colour');
+            }
+            return true;
+          });
+          if (attrEntries.length === 0) return null;
+          return (
+          <div className="mb-3 pb-3 border-b border-gray-100 space-y-2">
+            {attrEntries.map(([key, values]) => {
               const attributeValues = Array.from(values);
               const label = key
                 .replace(/([A-Z])/g, ' $1')
@@ -375,8 +386,8 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
               const isColor = key.toLowerCase().includes('color') || key.toLowerCase().includes('colour');
 
               return (
-                <div key={key} className="space-y-1">
-                  <div className="text-xs font-medium text-gray-600">{label}:</div>
+                <div key={key} className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                  <span className="text-sm font-medium text-[#4D4D4D] shrink-0">{label}:</span>
                   <div className="flex flex-wrap gap-2">
                     {attributeValues.map((value) => {
                       const isSelected = selectedAttributes[key] === value;
@@ -408,7 +419,7 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
                       }
 
                       return (
-                        <button
+                        <motion.button
                           key={String(value)}
                           onClick={(e) => {
                             e.preventDefault();
@@ -416,15 +427,19 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
                             handleAttributeSelect(key, value);
                           }}
                           disabled={!isAvailable}
-                          className={`px-2 py-1 text-xs rounded border transition-colors ${
+                          whileHover={isAvailable ? { scale: 1.02 } : {}}
+                          whileTap={isAvailable ? { scale: 0.98 } : {}}
+                          className={`min-w-[36px] px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-all ${
                             isSelected
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
-                          } ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              ? 'bg-[#FDE8F0] text-[#F9629F] border-[#F9629F] shadow-sm'
+                              : isAvailable
+                                ? 'bg-white text-gray-700 border-gray-200 hover:border-[#FC9BC2] hover:bg-[#FDE8F0]/30'
+                                : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed line-through'
+                          }`}
                           title={!isAvailable ? 'Out of stock' : String(value)}
                         >
                           {String(value)}
-                        </button>
+                        </motion.button>
                       );
                     })}
                   </div>
@@ -432,13 +447,17 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
               );
             })}
           </div>
-        )}
+          );
+        })()}
 
+        </div>
+
+        <div className="mt-auto pt-3 border-t border-gray-100">
         <div className="flex items-center justify-end mb-3">
           <div className="text-right">
             {hasFlashSaleDiscount ? (
               <>
-                <span className="text-lg font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                <span className="text-lg font-bold bg-gradient-to-r from-[#F9629F] to-orange-500 bg-clip-text text-transparent">
                   {formatCurrency(flashSaleData.displayedPrice)}
                 </span>
                 <div className="text-xs text-gray-500 line-through">
@@ -452,7 +471,7 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
                     {formatCurrency(groupedProduct.basePrice)}
                   </div>
                 )}
-                <span className="text-lg font-bold text-blue-600">
+                <span className="text-lg font-bold text-[#F9629F]">
                   {formatCurrency(displayPrice)}
                 </span>
               </>
@@ -481,6 +500,7 @@ export default function GroupedProductCard({ groupedProduct }: GroupedProductCar
             ? 'Stock Limit Reached'
             : 'Add to Cart'}
         </Button>
+        </div>
       </div>
     </div>
   );

@@ -153,7 +153,7 @@ export default function ProductImportExport() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 lg:p-8 relative overflow-hidden"
+        className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/5 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
@@ -161,7 +161,7 @@ export default function ProductImportExport() {
             <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
               <FiUpload className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-[#050b2c]">
+            <h2 className="text-2xl font-bold text-[#000000]">
               Import Products
             </h2>
           </div>
@@ -195,13 +195,13 @@ export default function ProductImportExport() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mb-6 p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200"
+              className="mb-3 sm:mb-4 md:mb-6 p-3 sm:p-4 md:p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg sm:rounded-xl border-2 border-blue-200"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
                   <FiFileText className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="font-bold text-[#050b2c]">Import Results</h3>
+                <h3 className="font-bold text-[#000000]">Import Results</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-green-200">
@@ -237,7 +237,7 @@ export default function ProductImportExport() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-[#050b2c] mb-3">
+              <label className="block text-sm font-semibold text-[#000000] mb-3">
                 Select File (CSV or Excel)
               </label>
               <div className="relative">
@@ -246,17 +246,17 @@ export default function ProductImportExport() {
                   type="file"
                   accept=".csv,.xlsx,.xls"
                   onChange={handleFileChange}
-                  className="bg-white border-2 border-gray-200 focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#ffa509] file:text-white hover:file:bg-[#ff8c00] transition-all"
+                  className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#F9629F] file:text-white hover:file:bg-[#DB7093] transition-all"
                 />
                 {importFile && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-3 flex items-center gap-2 p-3 bg-gradient-to-r from-[#ffa509]/10 to-[#ff8c00]/10 rounded-lg border border-[#ffa509]/20"
+                    className="mt-3 flex items-center gap-2 p-3 bg-gradient-to-r from-[#F9629F]/10 to-[#DB7093]/10 rounded-lg border border-[#F9629F]/20"
                   >
-                    <FiFile className="w-5 h-5 text-[#ffa509]" />
-                    <p className="text-sm font-medium text-[#050b2c]">
-                      Selected: <strong className="text-[#ffa509]">{importFile.name}</strong>
+                    <FiFile className="w-5 h-5 text-[#F9629F]" />
+                    <p className="text-sm font-medium text-[#000000]">
+                      Selected: <strong className="text-[#F9629F]">{importFile.name}</strong>
                     </p>
                   </motion.div>
                 )}
@@ -267,7 +267,7 @@ export default function ProductImportExport() {
               <Button
                 variant="outline"
                 onClick={handleDownloadTemplate}
-                className="border-2 border-gray-300 text-[#050b2c] hover:border-[#ffa509] transition-all font-semibold flex items-center justify-center gap-2"
+                className="border-2 border-gray-300 text-[#000000] hover:border-[#F9629F] transition-all font-semibold flex items-center justify-center gap-2"
               >
                 <FiDownload className="w-4 h-4" />
                 Download Template
@@ -277,7 +277,7 @@ export default function ProductImportExport() {
                 onClick={handleImport}
                 isLoading={importing}
                 disabled={!importFile || importing}
-                className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white border-none hover:from-[#ff8c00] hover:to-[#ffa509] shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2"
+                className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white border-none hover:from-[#DB7093] hover:to-[#F9629F] shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2"
               >
                 <FiUpload className="w-4 h-4" />
                 Import Products
@@ -289,13 +289,13 @@ export default function ProductImportExport() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200"
+            className="mt-4 sm:mt-6 md:mt-8 p-3 sm:p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl border-2 border-gray-200"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-lg">
                 <FiFileText className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-bold text-[#050b2c]">Import Format Guide</h3>
+              <h3 className="font-bold text-[#000000]">Import Format Guide</h3>
             </div>
             <p className="text-sm text-gray-600 mb-4">
               Your CSV/Excel file should have the following columns:
@@ -323,7 +323,7 @@ export default function ProductImportExport() {
                     {item.required ? 'Required' : 'Optional'}
                   </span>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-[#050b2c]">{item.field}</p>
+                    <p className="text-sm font-semibold text-[#000000]">{item.field}</p>
                     <p className="text-xs text-gray-600">{item.desc}</p>
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export default function ProductImportExport() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 lg:p-8 relative overflow-hidden"
+        className="bg-white rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/5 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10">
@@ -346,7 +346,7 @@ export default function ProductImportExport() {
             <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
               <FiDownload className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-[#050b2c]">
+            <h2 className="text-2xl font-bold text-[#000000]">
               Export Products
             </h2>
           </div>

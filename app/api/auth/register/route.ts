@@ -10,15 +10,30 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
-    const body: RegisterData = await request.json();
-    const { firstName, lastName, contactNumber, email, password } = body;
+    const body = await request.json();
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json<AuthResponse>(
+        { success: false, message: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
+    const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : '';
+    const lastName = typeof body.lastName === 'string' ? body.lastName.trim() : '';
+    const contactNumber = typeof body.contactNumber === 'string' ? body.contactNumber.trim() : '';
+    const email = typeof body.email === 'string' ? body.email.trim() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
 
-    // Validation
-    if (!firstName || !lastName || !contactNumber || !email || !password) {
+    const missing: string[] = [];
+    if (!firstName) missing.push('First name');
+    if (!lastName) missing.push('Last name');
+    if (!contactNumber) missing.push('Contact number');
+    if (!email) missing.push('Email');
+    if (!password) missing.push('Password');
+    if (missing.length > 0) {
       return NextResponse.json<AuthResponse>(
         {
           success: false,
-          message: 'Please provide all required fields',
+          message: `Missing required fields: ${missing.join(', ')}`,
         },
         { status: 400 }
       );

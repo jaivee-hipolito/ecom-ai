@@ -44,32 +44,55 @@ export default function RegisterForm() {
       return;
     }
 
+    const missing: string[] = [];
+    if (!formData.firstName.trim()) missing.push('First name');
+    if (!formData.lastName.trim()) missing.push('Last name');
+    if (!formData.contactNumber.trim()) missing.push('Contact number');
+    if (!formData.email.trim()) missing.push('Email');
+    if (missing.length > 0) {
+      setError(`Please fill in: ${missing.join(', ')}`);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      const payload = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        contactNumber: formData.contactNumber.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      };
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setError(data.message || 'Registration failed');
+        setError(data.message || data.error || `Registration failed (${response.status})`);
         setIsLoading(false);
         return;
       }
 
-      // Registration successful - send verification codes in background
+      // Registration successful - send verification codes before redirect so requests complete (not cancelled by navigation)
       if (data.requiresVerification) {
-        // Send verification codes in background (don't wait for them)
-        sendEmailVerificationCode(formData.email).catch(console.error);
-        sendPhoneVerificationCode(formData.contactNumber).catch(console.error);
+        try {
+          await Promise.all([
+            sendEmailVerificationCode(formData.email),
+            sendPhoneVerificationCode(formData.contactNumber),
+          ]);
+        } catch (err) {
+          console.error('Failed to send verification codes:', err);
+          // Still proceed; user can request codes again on verify page
+        }
       }
-      
+
       // Automatically sign in the user after successful registration
       setSuccess(true);
       try {
@@ -89,10 +112,10 @@ export default function RegisterForm() {
           return;
         }
 
-        // Update session and redirect to homepage
+        // Update session and redirect to verify page so user can enter codes or resend
         await updateSession();
         setTimeout(() => {
-          router.push('/');
+          router.push('/dashboard/verify');
           router.refresh();
         }, 500);
       } catch (signInError: any) {
@@ -162,8 +185,8 @@ export default function RegisterForm() {
           whileHover={{ rotate: 12, scale: 1.1 }}
           className="inline-block mb-4"
         >
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ffa509]/50">
-            <svg className="w-10 h-10 text-[#050b2c]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#F9629F] to-[#F9629F] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50">
+            <svg className="w-10 h-10 text-[#000000]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
@@ -171,7 +194,7 @@ export default function RegisterForm() {
         <h2 className="text-4xl font-bold text-white mb-2">
           Join Teezee Today!
         </h2>
-        <p className="text-[#ffa509]/80 text-lg">
+        <p className="text-[#F9629F]/80 text-lg">
           Create your account and start shopping
         </p>
       </motion.div>
@@ -192,7 +215,7 @@ export default function RegisterForm() {
         >
           <div className="text-center">
             <div className="flex items-center justify-center mb-3">
-              <svg className="w-8 h-8 text-[#ffa509]" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-8 h-8 text-[#F9629F]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
@@ -200,7 +223,7 @@ export default function RegisterForm() {
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-3">
-              <svg className="w-8 h-8 text-[#ffa509]" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-8 h-8 text-[#F9629F]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </div>
@@ -208,7 +231,7 @@ export default function RegisterForm() {
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-3">
-              <svg className="w-8 h-8 text-[#ffa509]" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-8 h-8 text-[#F9629F]" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
@@ -249,12 +272,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.4 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiUser className="w-4 h-4 text-[#ffa509]" />
+              <FiUser className="w-4 h-4 text-[#F9629F]" />
               First Name
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiUser className="h-5 w-5 text-[#ffa509]" />
+                <FiUser className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type="text"
@@ -263,7 +286,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="John"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -275,12 +298,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.45 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiUser className="w-4 h-4 text-[#ffa509]" />
+              <FiUser className="w-4 h-4 text-[#F9629F]" />
               Last Name
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiUser className="h-5 w-5 text-[#ffa509]" />
+                <FiUser className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type="text"
@@ -289,7 +312,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="Doe"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -301,12 +324,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.5 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiPhone className="w-4 h-4 text-[#ffa509]" />
+              <FiPhone className="w-4 h-4 text-[#F9629F]" />
               Contact Number
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiPhone className="h-5 w-5 text-[#ffa509]" />
+                <FiPhone className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type="tel"
@@ -315,7 +338,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="+1 (555) 123-4567"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -327,12 +350,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.55 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiMail className="w-4 h-4 text-[#ffa509]" />
+              <FiMail className="w-4 h-4 text-[#F9629F]" />
               Email Address
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiMail className="h-5 w-5 text-[#ffa509]" />
+                <FiMail className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type="email"
@@ -341,7 +364,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="your.email@example.com"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -353,12 +376,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.6 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiLock className="w-4 h-4 text-[#ffa509]" />
+              <FiLock className="w-4 h-4 text-[#F9629F]" />
               Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-[#ffa509]" />
+                <FiLock className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -367,12 +390,12 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="Minimum 6 characters"
-                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#ffa509] hover:text-[#ffb833] transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#F9629F] hover:text-[#F9629F] transition-colors"
               >
                 {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
@@ -394,12 +417,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.65 }}
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <FiLock className="w-4 h-4 text-[#ffa509]" />
+              <FiLock className="w-4 h-4 text-[#F9629F]" />
               Confirm Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-[#ffa509]" />
+                <FiLock className="h-5 w-5 text-[#F9629F]" />
               </div>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -408,12 +431,12 @@ export default function RegisterForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="Re-enter your password"
-                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#ffa509] focus:ring-2 focus:ring-[#ffa509]/20 transition-all backdrop-blur-sm"
+                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#ffa509] hover:text-[#ffb833] transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#F9629F] hover:text-[#F9629F] transition-colors"
               >
                 {showConfirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
@@ -443,15 +466,15 @@ export default function RegisterForm() {
               type="checkbox"
               id="terms"
               required
-              className="mt-1 w-4 h-4 rounded border-white/20 bg-white/10 text-[#ffa509] focus:ring-[#ffa509]"
+              className="mt-1 w-4 h-4 rounded border-white/20 bg-white/10 text-[#F9629F] focus:ring-[#F9629F]"
             />
             <label htmlFor="terms" className="text-sm text-white/70 cursor-pointer">
               I agree to the{' '}
-              <Link href="/terms" className="text-[#ffa509] hover:text-[#ffb833] underline">
+              <Link href="/terms" className="text-[#F9629F] hover:text-[#F9629F] underline">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-[#ffa509] hover:text-[#ffb833] underline">
+              <Link href="/privacy" className="text-[#F9629F] hover:text-[#F9629F] underline">
                 Privacy Policy
               </Link>
             </label>
@@ -464,11 +487,12 @@ export default function RegisterForm() {
             transition={{ delay: 0.75 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            className="mb-2"
           >
             <button
               type="submit"
               disabled={isLoading || !passwordStrength}
-              className="w-full bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-4 px-6 rounded-xl shadow-lg shadow-[#ffa509]/30 hover:shadow-[#ffa509]/50 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 font-bold py-3 px-5 rounded-xl shadow-lg hover:bg-[#FC9BC2] transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -506,6 +530,16 @@ export default function RegisterForm() {
         </form>
 
         {/* Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center" aria-hidden>
+            <div className="w-full border-t border-white/20" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-transparent px-3 text-xs font-medium uppercase tracking-wider text-white/60">
+              Or continue with
+            </span>
+          </div>
+        </div>
 
         {/* Social Sign Up Buttons */}
         <motion.div
@@ -524,7 +558,7 @@ export default function RegisterForm() {
                 redirect: true 
               });
             }}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#ffa509]/50 transition-all backdrop-blur-sm"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#F9629F]/50 transition-all backdrop-blur-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -553,7 +587,7 @@ export default function RegisterForm() {
             onClick={() => {
               router.push('/');
             }}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#ffa509]/50 transition-all backdrop-blur-sm"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white hover:bg-white/20 hover:border-[#F9629F]/50 transition-all backdrop-blur-sm"
           >
             <FiPackage className="w-5 h-5" />
             <span className="text-sm font-medium">Guest</span>
@@ -571,7 +605,7 @@ export default function RegisterForm() {
             Already have an account?{' '}
             <Link
               href="/login"
-              className="text-[#ffa509] hover:text-[#ffb833] font-bold transition-colors inline-flex items-center gap-1"
+              className="text-[#F9629F] hover:text-[#F9629F] font-bold transition-colors inline-flex items-center gap-1"
             >
               Sign in
               <FiArrowRight className="w-4 h-4" />
@@ -588,7 +622,7 @@ export default function RegisterForm() {
         >
           <div className="text-center">
             <div>
-              <div className="text-2xl font-bold text-[#ffa509] mb-1">Free</div>
+              <div className="text-2xl font-bold text-[#F9629F] mb-1">Free</div>
               <div className="text-xs text-white/60">Shipping - Victoria BC area only</div>
             </div>
           </div>
@@ -596,7 +630,7 @@ export default function RegisterForm() {
       </motion.div>
 
       {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050b2c] to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#000000] to-transparent pointer-events-none"></div>
     </motion.div>
   );
 }

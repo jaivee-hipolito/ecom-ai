@@ -11,12 +11,14 @@ interface ProductListProps {
   products: IProduct[];
   isLoading?: boolean;
   groupByName?: boolean; // New prop to enable grouping
+  showAttributes?: boolean | 'color-only'; // true = all, false = none, 'color-only' = only color attr
 }
 
 export default function ProductList({
   products,
   isLoading = false,
-  groupByName = true, // Default to true to group products
+  groupByName = true,
+  showAttributes = true,
 }: ProductListProps) {
   // Group products by name if enabled
   const groupedProducts = useMemo(() => {
@@ -26,7 +28,7 @@ export default function ProductList({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
@@ -73,11 +75,12 @@ export default function ProductList({
   // If grouping is enabled and we have grouped products, show grouped view
   if (groupByName && groupedProducts && groupedProducts.length > 0) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
         {groupedProducts.map((groupedProduct) => (
           <GroupedProductCard
             key={groupedProduct.name}
             groupedProduct={groupedProduct}
+            showAttributes={showAttributes}
           />
         ))}
       </div>
@@ -88,7 +91,7 @@ export default function ProductList({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product) => (
-        <ProductCard key={product._id} product={product} />
+        <ProductCard key={product._id} product={product} showAttributes={showAttributes} />
       ))}
     </div>
   );

@@ -129,10 +129,10 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
             >
-              <FiTrendingUp className="w-8 h-8 text-[#ffa509]" />
+              <FiTrendingUp className="w-8 h-8 text-[#F9629F]" />
             </motion.div>
             <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#050b2c]">
+              <h2 className="text-3xl lg:text-4xl font-bold text-[#000000]">
                 Most Viewed Products
               </h2>
               <p className="text-gray-600 mt-1">
@@ -144,7 +144,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
             <motion.button
               whileHover={{ scale: 1.05, x: 5 }}
               whileTap={{ scale: 0.95 }}
-              className="hidden sm:flex items-center gap-2 text-[#ffa509] hover:text-[#ff8c00] font-semibold transition-colors"
+              className="hidden sm:flex items-center gap-2 text-[#F9629F] hover:text-[#DB7093] font-semibold transition-colors"
             >
               View All
               <FiArrowRight className="w-5 h-5" />
@@ -192,7 +192,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                           onClick={(e) => handleQuickView(e, product._id!)}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="bg-white text-[#050b2c] px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:bg-[#ffa509] hover:text-white transition-all duration-300"
+                          className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:bg-[#FC9BC2] transition-all duration-300"
                         >
                           <FiEye className="w-5 h-5" />
                           <span>Quick View</span>
@@ -226,7 +226,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                             initial={{ scale: 0, rotate: 180 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ delay: 0.3, type: 'spring' }}
-                            className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl border-2 border-white"
+                            className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-xl"
                           >
                             <div className="text-center">
                               <div className="text-xs font-black leading-tight">-{flashSaleData.discountPercentage}%</div>
@@ -242,9 +242,9 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ delay: 0.2 }}
-                          className="bg-[#050b2c]/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2"
+                          className="bg-[#000000]/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2"
                         >
-                          <FiEye className="w-4 h-4 text-[#ffa509]" />
+                          <FiEye className="w-4 h-4 text-[#F9629F]" />
                           <span className="text-xs font-bold">{viewCount.toLocaleString()}</span>
                         </motion.div>
                       </div>
@@ -253,7 +253,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                     {/* Product Info */}
                     <div className="p-5">
                       {/* Product Name */}
-                      <h3 className="text-lg font-bold text-[#050b2c] mb-2 line-clamp-2 group-hover:text-[#ffa509] transition-colors">
+                      <h3 className="text-lg font-bold text-[#000000] mb-2 line-clamp-2 group-hover:text-[#F9629F] transition-colors">
                         {product.name}
                       </h3>
 
@@ -262,7 +262,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                       <div className="mb-2 flex items-baseline gap-2">
                         {hasFlashSaleDiscount ? (
                           <>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-[#ffa509] to-orange-500 bg-clip-text text-transparent">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent">
                               {formatCurrency(flashSaleData.displayedPrice)}
                             </span>
                             <span className="text-sm text-gray-400 line-through">
@@ -270,7 +270,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                             </span>
                           </>
                         ) : (
-                          <span className="text-2xl font-bold text-[#050b2c]">
+                          <span className="text-2xl font-bold text-[#000000]">
                             {formatCurrency(product.price)}
                           </span>
                         )}

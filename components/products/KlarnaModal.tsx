@@ -209,7 +209,7 @@ export default function KlarnaModal({ isOpen, onClose, price }: KlarnaModalProps
                         href="https://www.klarna.com/us/terms-and-conditions/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-900 hover:text-[#ffa509] underline font-semibold transition-colors"
+                        className="text-gray-900 hover:text-[#F9629F] underline font-semibold transition-colors"
                       >
                         terms & conditions
                       </a>
@@ -230,7 +230,7 @@ export default function KlarnaModal({ isOpen, onClose, price }: KlarnaModalProps
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={onClose}
-                  className="w-full bg-[#050b2c] hover:bg-[#0a1533] text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                  className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] font-bold py-3 px-6 rounded-lg transition-colors"
                 >
                   Close
                 </motion.button>

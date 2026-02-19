@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import { requireAdmin } from '@/lib/auth';
@@ -35,6 +36,7 @@ export async function GET(
       );
     }
 
+    const history = (order as any).history || [];
     return NextResponse.json({
       order: {
         ...order,
@@ -48,6 +50,13 @@ export async function GET(
           : String(order.user || ''),
         createdAt: order.createdAt?.toISOString(),
         updatedAt: order.updatedAt?.toISOString(),
+        history: history.map((h: any) => ({
+          modifiedBy: h.modifiedBy?.toString(),
+          modifiedByName: h.modifiedByName,
+          changes: h.changes || [],
+          note: h.note || '',
+          changedAt: h.changedAt?.toISOString?.(),
+        })),
         items: order.items.map((item: any) => ({
           ...item,
           product: item.product
@@ -82,12 +91,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
     await connectDB();
 
     const { id: orderId } = await params;
     const body = await request.json();
-    const { status, paymentStatus } = body;
+    const { status, paymentStatus, comment } = body; // UI sends "comment", we save as "note"
 
     if (!orderId) {
       return NextResponse.json(
@@ -97,8 +106,17 @@ export async function PUT(
     }
 
     const updateData: any = {};
-    
-    if (status) {
+    const changes: { field: string; from: string; to: string }[] = [];
+
+    const existingOrder = await Order.findById(orderId).lean();
+    if (!existingOrder) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    if (status && status !== (existingOrder as any).status) {
       const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
       if (!validStatuses.includes(status)) {
         return NextResponse.json(
@@ -107,9 +125,14 @@ export async function PUT(
         );
       }
       updateData.status = status;
+      changes.push({
+        field: 'status',
+        from: (existingOrder as any).status || 'pending',
+        to: status,
+      });
     }
 
-    if (paymentStatus) {
+    if (paymentStatus && paymentStatus !== (existingOrder as any).paymentStatus) {
       const validPaymentStatuses = ['pending', 'paid', 'failed', 'refunded'];
       if (!validPaymentStatuses.includes(paymentStatus)) {
         return NextResponse.json(
@@ -118,6 +141,11 @@ export async function PUT(
         );
       }
       updateData.paymentStatus = paymentStatus;
+      changes.push({
+        field: 'paymentStatus',
+        from: (existingOrder as any).paymentStatus || 'pending',
+        to: paymentStatus,
+      });
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -127,11 +155,48 @@ export async function PUT(
       );
     }
 
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      updateData,
-      { new: true, runValidators: true }
-    )
+    const commentTrimmed = typeof comment === 'string' ? comment.trim() : '';
+    if (!commentTrimmed) {
+      return NextResponse.json(
+        { error: 'Comment is required when updating order status' },
+        { status: 400 }
+      );
+    }
+
+    const adminUser = session.user as any;
+    const modifiedByName = [adminUser.firstName, adminUser.lastName].filter(Boolean).join(' ') || adminUser.name || adminUser.email || 'Admin';
+
+    // Use raw MongoDB update to ensure "note" is persisted (bypass Mongoose schema handling)
+    const modifiedBy = mongoose.Types.ObjectId.isValid(adminUser.id)
+      ? new mongoose.Types.ObjectId(adminUser.id)
+      : adminUser.id;
+
+    const historyEntry = {
+      modifiedBy,
+      modifiedByName,
+      changes,
+      note: commentTrimmed,
+      changedAt: new Date(),
+    };
+
+    const rawUpdate: Record<string, unknown> = { $set: updateData };
+    if (changes.length > 0) {
+      rawUpdate.$push = { history: historyEntry };
+    }
+
+    const updateResult = await Order.collection.updateOne(
+      { _id: new mongoose.Types.ObjectId(orderId) },
+      rawUpdate
+    );
+
+    if (updateResult.matchedCount === 0) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    const order = await Order.findById(orderId)
       .populate('user', 'name email')
       .populate('items.product')
       .lean();
@@ -143,6 +208,7 @@ export async function PUT(
       );
     }
 
+    const history = (order as any).history || [];
     return NextResponse.json({
       message: 'Order updated successfully',
       order: {
@@ -157,6 +223,13 @@ export async function PUT(
           : String(order.user || ''),
         createdAt: order.createdAt?.toISOString(),
         updatedAt: order.updatedAt?.toISOString(),
+        history: history.map((h: any) => ({
+          modifiedBy: h.modifiedBy?.toString(),
+          modifiedByName: h.modifiedByName,
+          changes: h.changes || [],
+          note: h.note || '',
+          changedAt: h.changedAt?.toISOString?.(),
+        })),
         items: order.items.map((item: any) => ({
           ...item,
           product: item.product

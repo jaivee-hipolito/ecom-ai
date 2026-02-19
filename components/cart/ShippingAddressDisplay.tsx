@@ -102,15 +102,15 @@ export default function ShippingAddressDisplay({
         className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-2 rounded-lg">
-            <FiMapPin className="w-5 h-5 text-white" />
+          <div className="bg-[#FDE8F0] border border-gray-300 p-2 rounded-lg">
+            <FiMapPin className="w-5 h-5 text-[#1a1a1a]" />
           </div>
-          <h3 className="text-lg font-bold text-[#050b2c]">Shipping Address</h3>
+          <h3 className="text-lg font-bold text-[#000000]">Shipping Address</h3>
         </div>
         <p className="text-sm text-gray-600 mb-4">No shipping address saved</p>
         <Link href="/dashboard/profile/addresses">
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <button className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-lg hover:shadow-xl py-3 px-4 text-sm sm:text-base font-semibold transition-all duration-300 rounded-lg flex items-center justify-center gap-2">
+            <button className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-lg hover:shadow-xl py-3 px-4 text-sm sm:text-base font-semibold transition-all duration-300 rounded-lg flex items-center justify-center gap-2">
               <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
               Add Shipping Address
             </button>
@@ -128,13 +128,13 @@ export default function ShippingAddressDisplay({
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-2 rounded-lg">
-            <FiMapPin className="w-5 h-5 text-white" />
+          <div className="bg-[#FDE8F0] border border-gray-300 p-2 rounded-lg">
+            <FiMapPin className="w-5 h-5 text-[#1a1a1a]" />
           </div>
-          <h3 className="text-lg font-bold text-[#050b2c]">Shipping Address</h3>
+          <h3 className="text-lg font-bold text-[#000000]">Shipping Address</h3>
         </div>
         {currentAddress.isDefault && (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300">
             Default
           </span>
         )}
@@ -151,18 +151,18 @@ export default function ShippingAddressDisplay({
               onClick={() => handleAddressSelect(address)}
               className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
                 selectedAddressId === address._id
-                  ? 'border-[#ffa509] bg-gradient-to-br from-[#ffa509]/10 to-[#ff8c00]/5 shadow-md'
-                  : 'border-gray-200 hover:border-[#ffa509]/50 hover:bg-gray-50'
+                  ? 'border-[#DB7093] bg-[#FDE8F0]/50 shadow-md'
+                  : 'border-gray-200 hover:border-[#DB7093]/50 hover:bg-[#FDE8F0]/30'
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   {address.isDefault && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ffa509]/20 text-[#ffa509] mb-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 mb-2">
                       Default
                     </span>
                   )}
-                  <p className="text-sm font-bold text-[#050b2c] mb-1">{address.fullName}</p>
+                  <p className="text-sm font-bold text-[#000000] mb-1">{address.fullName}</p>
                   <p className="text-xs text-gray-600 mb-1">{address.address}</p>
                   <p className="text-xs text-gray-600">
                     {address.city}, {address.state} {address.zipCode}
@@ -172,9 +172,9 @@ export default function ShippingAddressDisplay({
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-full p-1.5"
+                    className="bg-[#FDE8F0] border border-gray-300 rounded-full p-1.5"
                   >
-                    <FiCheck className="w-4 h-4 text-white" />
+                    <FiCheck className="w-4 h-4 text-[#1a1a1a]" />
                   </motion.div>
                 )}
               </div>
@@ -185,7 +185,7 @@ export default function ShippingAddressDisplay({
       
       {addresses.length === 1 && (
         <div className="space-y-2 text-sm text-gray-700 bg-gray-50 rounded-lg p-4">
-          <p className="font-bold text-[#050b2c]">{currentAddress.fullName}</p>
+          <p className="font-bold text-[#000000]">{currentAddress.fullName}</p>
           <p>{currentAddress.address}</p>
           <p>
             {currentAddress.city}, {currentAddress.state} {currentAddress.zipCode}
@@ -197,7 +197,7 @@ export default function ShippingAddressDisplay({
 
       <Link href="/dashboard/profile/addresses" className="block mt-4">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <button className="w-full bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-lg hover:shadow-xl py-3 px-4 text-sm sm:text-base font-semibold transition-all duration-300 rounded-lg">
+          <button className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-lg hover:shadow-xl py-3 px-4 text-sm sm:text-base font-semibold transition-all duration-300 rounded-lg">
             {addresses.length > 1 ? 'Manage Addresses' : 'Change Address'}
           </button>
         </motion.div>

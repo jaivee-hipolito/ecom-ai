@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { signOut } from 'next-auth/react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProductSearch } from '@/hooks/useProducts';
 import {
   FiGrid,
   FiChevronDown,
@@ -31,6 +33,8 @@ import {
   FiSearch,
   FiClock,
   FiBell,
+  FiLogOut,
+  FiArrowRight,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
@@ -60,9 +64,9 @@ function NavbarContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, isAuthenticated, isAdmin, isLoading } = useAuth();
-  const { getCartSummary } = useCart();
-  const cartSummary = getCartSummary();
-  const cartItemCount = cartSummary.totalItems;
+  const { cart } = useCart();
+  const cartItemCount =
+    cart?.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) ?? 0;
   const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -70,6 +74,9 @@ function NavbarContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
+  const [showSearchBox, setShowSearchBox] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const searchBoxRef = useRef<HTMLDivElement>(null);
   const [showFlashSaleBanner, setShowFlashSaleBanner] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     days: 2,
@@ -79,6 +86,8 @@ function NavbarContent() {
   });
   const shopDropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const { results: searchResults, isLoading: isSearching } = useProductSearch(searchInput);
 
   const isActive = (path: string) => pathname === path;
 
@@ -131,7 +140,7 @@ function NavbarContent() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close shop dropdown when clicking outside
+  // Close shop dropdown and search box when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -147,16 +156,22 @@ function NavbarContent() {
       ) {
         setSearchDropdownOpen(false);
       }
+      if (
+        searchBoxRef.current &&
+        !searchBoxRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchBox(false);
+      }
     };
 
-    if (shopDropdownOpen || searchDropdownOpen || categoriesDropdownOpen) {
+    if (shopDropdownOpen || searchDropdownOpen || categoriesDropdownOpen || showSearchBox) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [shopDropdownOpen, searchDropdownOpen, categoriesDropdownOpen]);
+  }, [shopDropdownOpen, searchDropdownOpen, categoriesDropdownOpen, showSearchBox]);
 
   // Handle search
   const handleSearch = (e: React.FormEvent) => {
@@ -175,11 +190,11 @@ function NavbarContent() {
 
   if (isLoading) {
     return (
-      <nav className="bg-[#050b2c] shadow-lg">
+      <nav className="bg-[#000000] shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="animate-pulse bg-[#ffa509]/20 h-8 w-32 rounded"></div>
-            <div className="animate-pulse bg-[#ffa509]/20 h-8 w-24 rounded"></div>
+            <div className="animate-pulse bg-[#F9629F]/20 h-8 w-32 rounded"></div>
+            <div className="animate-pulse bg-[#F9629F]/20 h-8 w-24 rounded"></div>
           </div>
         </div>
       </nav>
@@ -196,7 +211,7 @@ function NavbarContent() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="hidden lg:block bg-gradient-to-r from-[#ffa509] via-orange-500 to-[#ffa509] text-white sticky top-0 z-[60] shadow-lg"
+            className="hidden lg:block bg-gradient-to-r from-[#F9629F] via-[#FC9BC2] to-[#F9629F] text-white fixed left-0 right-0 top-0 z-[60] shadow-lg"
             style={{ margin: 0, padding: 0 }}
           >
             <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
@@ -236,7 +251,7 @@ function NavbarContent() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="bg-white text-[#ffa509] px-3 sm:px-4 py-1 rounded-lg font-bold text-[10px] sm:text-xs lg:text-sm hover:bg-gray-100 transition-colors whitespace-nowrap"
+                      className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 sm:px-4 py-1 rounded-lg font-bold text-[10px] sm:text-xs lg:text-sm hover:bg-[#FC9BC2] transition-colors whitespace-nowrap"
                     >
                       Shop Now
                     </motion.button>
@@ -256,493 +271,194 @@ function NavbarContent() {
       </AnimatePresence>
 
       <nav 
-        className={`bg-[#050b2c] shadow-xl sticky z-50 ${showFlashSaleBanner ? 'top-0 lg:top-[72px]' : 'top-0'}`}
-        style={{ margin: 0, padding: 0, marginTop: '-5px', width: '100%', maxWidth: '100%' }}
+        className={`bg-white shadow-md fixed left-0 right-0 top-0 z-50 ${showFlashSaleBanner ? 'lg:top-[72px]' : ''}`}
+        style={{ margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}
       >
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Search Bar Row */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 lg:gap-4 py-2 sm:py-3">
-          {/* Left Section - Shop By Categories */}
-            <div className="hidden lg:block relative w-full sm:w-auto" ref={shopDropdownRef}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setCategoriesDropdownOpen(!categoriesDropdownOpen)}
-                className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2 rounded-lg bg-[#ffa509] text-white font-semibold text-xs sm:text-sm lg:text-base hover:bg-[#ffa509]/90 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer whitespace-nowrap"
-            >
-                <FiGrid className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Shop By Categories</span>
-              <span className="sm:hidden">Categories</span>
-              <FiChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${categoriesDropdownOpen ? 'rotate-180' : ''}`} />
-            </motion.button>
+      <div ref={searchBoxRef} className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main Menu Bar - Hamburger | Logo | Search & Cart */}
+          <div className="grid grid-cols-3 items-center h-20 lg:h-24 py-2 relative">
+            {/* Left Section - Hamburger Menu */}
+            <div className="flex justify-start">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors"
+                aria-label="Menu"
+              >
+                <FiMenu className="w-6 h-6" />
+              </motion.button>
+            </div>
 
-            {/* Categories Dropdown */}
-            <AnimatePresence>
-              {categoriesDropdownOpen && (
+            {/* Center Section - Brand Logo ONLY */}
+            <div className="flex justify-center z-10">
+              <Link href="/">
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50 max-h-96 overflow-y-auto"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative"
                 >
-                  <div className="p-2">
-                    <Link
-                      href="/products"
-                      onClick={() => setCategoriesDropdownOpen(false)}
-                      className="block px-4 py-3 hover:bg-[#ffa509]/10 transition-colors rounded-lg text-gray-900 font-semibold border-b border-gray-200 mb-2"
-                    >
-                      All Categories
-                    </Link>
-                    {categories.map((category) => {
-                      const Icon = getCategoryIcon(category.name);
-                      return (
-                        <Link
-                          key={category._id}
-                          href={`/products?category=${encodeURIComponent(category.name)}`}
-                          onClick={() => setCategoriesDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-[#ffa509]/10 transition-colors rounded-lg group"
-                        >
-                          <Icon className="w-5 h-5 text-[#ffa509] group-hover:scale-110 transition-transform" />
-                          <span className="flex-1 text-gray-900 font-medium group-hover:text-[#050b2c]">
-                            {category.name}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            </div>
-
-            {/* Search Bar with Category Dropdown */}
-            <div className="hidden lg:flex flex-1 w-full sm:max-w-2xl" ref={searchRef}>
-              <form onSubmit={handleSearch} className="relative">
-                <div className="flex items-stretch">
-                  {/* Category Dropdown */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setSearchDropdownOpen(!searchDropdownOpen)}
-                      className="h-10 sm:h-12 px-2 sm:px-3 lg:px-4 bg-white border-2 border-r-0 border-gray-300 rounded-l-lg hover:border-[#ffa509] transition-colors flex items-center gap-1 sm:gap-2 text-[#050b2c] font-medium text-xs sm:text-sm whitespace-nowrap"
-                    >
-                      <span className="hidden sm:inline">
-                        {selectedCategory || 'All Categories'}
-                      </span>
-                      <span className="sm:hidden">All</span>
-                      <FiChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${searchDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    
-                    {/* Category Dropdown Menu */}
-                    <AnimatePresence>
-                      {searchDropdownOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="absolute top-full left-0 mt-2 w-56 sm:w-64 lg:w-72 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50 max-h-96 overflow-y-auto"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedCategory('');
-                              setSearchDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-3 hover:bg-[#ffa509]/10 transition-colors ${
-                              !selectedCategory ? 'bg-[#ffa509]/10 font-semibold text-[#050b2c]' : 'text-gray-900'
-                            }`}
-                            style={{ color: !selectedCategory ? '#050b2c' : '#111827' }}
-                          >
-                            All Categories
-                          </button>
-                          {categories.map((category) => (
-                            <button
-                              key={category._id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedCategory(category.name);
-                                setSearchDropdownOpen(false);
-                              }}
-                              className={`w-full text-left px-4 py-3 hover:bg-[#ffa509]/10 transition-colors ${
-                                selectedCategory === category.name ? 'bg-[#ffa509]/10 font-semibold text-[#050b2c]' : 'text-gray-900'
-                              }`}
-                              style={{ color: selectedCategory === category.name ? '#050b2c' : '#111827' }}
-                            >
-                              {category.name}
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Search Input */}
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="flex-1 h-10 sm:h-12 px-2 sm:px-3 lg:px-4 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] text-gray-900 placeholder-gray-400 text-xs sm:text-sm bg-white"
-                    style={{ color: '#111827' }}
+                  <Image
+                    src="/teezee-logo.png"
+                    alt="Teezee - Adorn Yourself With The Radiance Of 18K Gold"
+                    width={200}
+                    height={85}
+                    className="h-16 lg:h-20 w-auto object-contain"
+                    priority
+                    suppressHydrationWarning
                   />
-
-                  {/* Search Button */}
-                  <button
-                    type="submit"
-                    className="h-10 sm:h-12 px-3 sm:px-4 lg:px-6 bg-[#ffa509] text-white rounded-r-lg hover:bg-[#ff8c00] transition-colors flex items-center justify-center"
-                  >
-                    <FiSearch className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-              </form>
+                </motion.div>
+              </Link>
             </div>
 
-            {/* Right Section - User Actions */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-4 w-full sm:w-auto justify-between sm:justify-end">
-            {/* Auth Section */}
-            {isAuthenticated ? (
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* Home Icon */}
-                <Link href="/">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
-                      isActive('/')
-                        ? 'bg-[#ffa509]/20 text-[#ffa509]'
-                        : 'bg-white/10 hover:bg-white/20 text-white'
-                    }`}
-                  >
-                    <FiHome className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </motion.div>
-                </Link>
+            {/* Right Section - Search & Cart */}
+            <div className="flex items-center justify-end gap-2 sm:gap-4 relative">
+              {/* Search Icon - Toggles search box */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowSearchBox(!showSearchBox)}
+                className={`p-2 rounded-lg transition-colors ${showSearchBox ? 'bg-gray-100 text-[#ffa509]' : 'text-[#000000] hover:bg-gray-100'}`}
+                aria-label="Search products"
+              >
+                <FiSearch className="w-5 h-5 sm:w-6 sm:h-6" />
+              </motion.button>
 
-                {/* Cart Icon */}
-                <Link href="/dashboard/cart">
-                  <motion.div
-                    data-cart-icon
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
-                      isActive('/dashboard/cart')
-                        ? 'bg-[#ffa509]/20 text-[#ffa509]'
-                        : 'bg-white/10 hover:bg-white/20 text-white'
-                    }`}
-                  >
-                    <FiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
-                    {cartItemCount > 0 && (
-                      <motion.span
-                        data-cart-badge
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white text-[10px] sm:text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center border-2 border-[#050b2c]"
-                      >
-                        {cartItemCount > 99 ? '99+' : cartItemCount}
-                      </motion.span>
-                    )}
-                  </motion.div>
-                </Link>
-
-                {/* Wishlist Icon */}
-                <Link href="/dashboard/wishlist">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
-                      isActive('/dashboard/wishlist')
-                        ? 'bg-[#ffa509]/20 text-[#ffa509]'
-                        : 'bg-white/10 hover:bg-white/20 text-white'
-                    }`}
-                  >
-                    <FiHeart className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </motion.div>
-                </Link>
-
-                {/* Orders Icon */}
-                <Link href="/dashboard/orders">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
-                      isActive('/dashboard/orders')
-                        ? 'bg-[#ffa509]/20 text-[#ffa509]'
-                        : 'bg-white/10 hover:bg-white/20 text-white'
-                    }`}
-                  >
-                    <FiPackage className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </motion.div>
-                </Link>
-
-                {/* Profile Icon */}
-                <Link href="/dashboard/profile">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className={`relative p-1.5 sm:p-2 rounded-lg transition-colors ${
-                      isActive('/dashboard/profile')
-                        ? 'bg-[#ffa509]/20 text-[#ffa509]'
-                        : 'bg-white/10 hover:bg-white/20 text-white'
-                    }`}
-                  >
-                    <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </motion.div>
-                </Link>
-
-                {/* User Profile */}
-                <div className="hidden sm:flex items-center gap-2">
-                  <Link href="/dashboard/profile">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-[#ffa509] flex items-center justify-center text-white font-semibold cursor-pointer shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm"
+              {/* Cart Icon with Badge */}
+              <Link href={isAuthenticated ? "/dashboard/cart" : "/login"}>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="relative p-2 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors"
+                >
+                  <FiShoppingCart className="w-6 h-6" />
+                  {cartItemCount > 0 && (
+                    <motion.span
+                      data-cart-badge
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                     >
-                      {user?.firstName && user?.lastName
-                        ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-                        : user?.email?.charAt(0).toUpperCase()}
-                    </motion.div>
-                  </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOut}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm px-2 sm:px-3"
-                >
-                  Sign Out
-                </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-                {/* Brand Logo */}
-                <Link href="/" className="flex items-center gap-2 group">
-                  {/* Shopping Bag Icon - Hidden on mobile/tablet, shown on desktop */}
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                    transition={{ duration: 0.3 }}
-                    className="hidden lg:flex w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-lg items-center justify-center shadow-lg group-hover:shadow-xl transition-all"
-                  >
-                    <FiShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#050b2c]" />
-                  </motion.div>
-                  {/* Teezee Text - Shown on mobile/tablet, also shown on desktop */}
-                  <motion.span
-                    whileHover={{ scale: 1.05 }}
-                    className="text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-white via-[#ffa509] to-white bg-clip-text text-transparent"
-                  >
-                    Teezee
-                  </motion.span>
-                </Link>
-                
-                <div className="h-6 w-px bg-white/20"></div>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => (window.location.href = '/login')}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs sm:text-sm px-2 sm:px-3"
-                >
-                  Sign In
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => (window.location.href = '/register')}
-                  className="bg-[#ffa509] hover:bg-[#ff8c00] text-white border-none text-xs sm:text-sm px-2 sm:px-3"
-                >
-                  Sign Up
-                </Button>
-              </div>
-            )}
-
-            {/* Mobile Menu Button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="sm:hidden p-2 rounded-lg text-white hover:bg-white/20 transition-colors"
-              aria-label="Menu"
-            >
-              {mobileMenuOpen ? (
-                <FiX className="w-5 h-5" />
-              ) : (
-                <FiMenu className="w-5 h-5" />
-              )}
-            </motion.button>
+                      {cartItemCount > 99 ? '99+' : cartItemCount}
+                    </motion.span>
+                  )}
+                </motion.div>
+              </Link>
             </div>
           </div>
 
-          {/* Navigation Links Row */}
-          <div className="hidden lg:flex items-center gap-1 xl:gap-3 border-t border-white/10 pt-2 sm:pt-3 pb-1 sm:pb-2">
-            {/* Home Link */}
-            <Link href="/">
+          {/* Search Box — appears when magnifying glass is clicked */}
+          <AnimatePresence>
+            {showSearchBox && (
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`relative px-3 py-2 rounded-lg transition-all duration-300 ${
-                isActive('/')
-                    ? 'text-[#ffa509]'
-                    : 'text-white hover:text-[#ffa509]'
-                }`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="overflow-visible border-t border-gray-100 bg-white"
               >
-                <div className="flex items-center gap-1">
-                  <FiHome className="w-4 h-4" />
-                  <span className="font-medium text-sm xl:text-base">Home</span>
-                  <FiChevronDown className="w-3 h-3" />
-                </div>
-                {isActive('/') && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffa509] rounded-full"
-                    initial={false}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </motion.div>
-            </Link>
-
-            {/* Flash Sales Link - Hidden on mobile/tablet (already hidden by parent container) */}
-            <Link href="/flash-sales">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`relative px-3 py-2 rounded-lg transition-all duration-300 ${
-                  isActive('/flash-sales')
-                    ? 'text-[#ffa509]'
-                    : 'text-white hover:text-[#ffa509]'
-                }`}
-              >
-                <div className="flex items-center gap-1">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                  >
-                    <FiZap className="w-4 h-4" />
-                  </motion.div>
-                  <span className="font-medium text-sm xl:text-base">Flash Sales</span>
-                </div>
-                {isActive('/flash-sales') && (
-                  <motion.div
-                    layoutId="activeIndicatorFlashSales"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffa509] rounded-full"
-                    initial={false}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </motion.div>
-            </Link>
-
-            {/* All Categories Dropdown */}
-            <div className="relative" ref={shopDropdownRef}>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShopDropdownOpen(!shopDropdownOpen)}
-                className={`relative px-3 py-2 rounded-lg transition-all duration-300 ${
-                  isActive('/products')
-                    ? 'text-[#ffa509]'
-                    : 'text-white hover:text-[#ffa509]'
-                }`}
-              >
-                <div className="flex items-center gap-1">
-                  <FiShoppingBag className="w-4 h-4" />
-                  <span className="font-medium text-sm xl:text-base">All Categories</span>
-                  <motion.div
-                    animate={{ rotate: shopDropdownOpen ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <FiChevronDown className="w-3 h-3" />
-                  </motion.div>
-                </div>
-                {isActive('/products') && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffa509] rounded-full"
-                    initial={false}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </motion.button>
-
-              {/* Categories Dropdown */}
-              <AnimatePresence>
-                {shopDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 mt-2 w-72 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50"
-                  >
-                    <div className="max-h-96 overflow-y-auto">
-                      {categories.length > 0 ? (
-                        categories.map((category, index) => {
-                          const Icon = getCategoryIcon(category.name);
-                          return (
-                            <motion.div
-                              key={category._id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                            >
-                              <Link
-                                href={`/products?category=${encodeURIComponent(category.name)}`}
-                                onClick={() => setShopDropdownOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-[#ffa509]/10 transition-colors group"
-                              >
-                                <Icon className="w-5 h-5 text-[#ffa509] group-hover:scale-110 transition-transform" />
-                                <span className="flex-1 text-gray-700 font-medium group-hover:text-[#050b2c]">
-                                  {category.name}
-                                </span>
-                                <FiChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
-              </Link>
-                            </motion.div>
-                          );
-                        })
-                      ) : (
-                        <div className="px-4 py-8 text-center text-gray-500">
-                          No categories available
-                        </div>
-                      )}
+                <div className="py-2 sm:py-3 px-2 sm:px-4">
+                  <div className="relative max-w-2xl mx-auto">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <FiSearch className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          placeholder="Search products..."
+                          value={searchInput}
+                          onChange={(e) => setSearchInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') setShowSearchBox(false);
+                            if (e.key === 'Enter') {
+                              if (searchInput.trim()) {
+                                router.push(`/products?search=${encodeURIComponent(searchInput.trim())}`);
+                                setSearchInput('');
+                                setShowSearchBox(false);
+                              }
+                            }
+                          }}
+                          className="w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffa509]/30 focus:border-[#ffa509] transition-all text-[#050b2c] placeholder:text-gray-500 font-medium"
+                          autoFocus
+                        />
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowSearchBox(false)}
+                        className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 shrink-0"
+                        aria-label="Close search"
+                      >
+                        <FiX className="w-5 h-5" />
+                      </motion.button>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
 
-            {/* Category Links - Show at least 4 categories (up to 6 for better UX) */}
-            {categories.slice(0, categories.length < 4 ? categories.length : Math.min(6, categories.length)).map((category) => {
-              const Icon = getCategoryIcon(category.name);
-              const categoryHref = `/products?category=${encodeURIComponent(category.name)}`;
-              const currentCategory = searchParams?.get('category');
-              const isCategoryActive = pathname === '/products' && 
-                currentCategory === category.name;
-              
-              return (
-                <Link key={category._id} href={categoryHref}>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`relative px-3 py-2 rounded-lg transition-all duration-300 ${
-                      isCategoryActive
-                        ? 'text-[#ffa509]'
-                        : 'text-white hover:text-[#ffa509]'
-                  }`}
-                >
-                    <div className="flex items-center gap-1">
-                      <Icon className="w-4 h-4" />
-                      <span className="font-medium text-sm xl:text-base">{category.name}</span>
-                      <FiChevronDown className="w-3 h-3" />
-                    </div>
-                    {isCategoryActive && (
+                    {/* Search suggestions overlay — products only */}
+                    {searchInput.trim().length > 0 && (
                       <motion.div
-                        layoutId={`activeIndicator-${category._id}`}
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ffa509] rounded-full"
-                        initial={false}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      />
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-[85vh] overflow-hidden z-[9999]"
+                      >
+                        <div className="max-h-80 sm:max-h-96 overflow-y-auto">
+                          {isSearching ? (
+                            <div className="px-4 py-8 text-center text-sm text-gray-500">Searching...</div>
+                          ) : searchResults.length === 0 ? (
+                            <div className="px-4 py-8 text-center text-sm text-gray-500">No products found</div>
+                          ) : (
+                            <div className="py-2">
+                              {searchResults.map((product: { _id?: string; name: string; price: number; coverImage?: string; images?: string[] }) => (
+                                <Link
+                                  key={product._id}
+                                  href={`/products/${product._id}`}
+                                  onClick={() => {
+                                    setSearchInput('');
+                                    setShowSearchBox(false);
+                                  }}
+                                  className="flex items-center gap-3 px-4 py-3 hover:bg-[#ffa509]/5 transition-colors border-b border-gray-50 last:border-0"
+                                >
+                                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                    {(product.coverImage || product.images?.[0]) ? (
+                                      <img
+                                        src={product.coverImage || product.images?.[0]}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                      />
+                                    ) : (
+                                      <FiPackage className="w-6 h-6 text-gray-400" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
+                                    <p className="text-sm font-medium text-[#050b2c]">${Number(product.price).toFixed(2)}</p>
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {/* Bottom bar: Search for "query" + arrow */}
+                        <Link
+                          href={`/products?search=${encodeURIComponent(searchInput.trim())}`}
+                          onClick={() => {
+                            setSearchInput('');
+                            setShowSearchBox(false);
+                          }}
+                          className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 hover:bg-gray-100 transition-colors"
+                        >
+                          <span className="text-sm font-medium text-gray-900">
+                            Search for &quot;{searchInput.trim()}&quot;
+                          </span>
+                          <FiArrowRight className="w-5 h-5 text-[#ffa509]" />
+                        </Link>
+                      </motion.div>
                     )}
-                  </motion.div>
-                </Link>
-              );
-            })}
-        </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
         {/* Mobile Menu */}
         <AnimatePresence>
@@ -752,7 +468,7 @@ function NavbarContent() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="lg:hidden border-t border-white/20 overflow-hidden"
+              className="lg:hidden border-t border-gray-200 overflow-hidden bg-white"
             >
               <div className="py-4 space-y-2">
                 {/* Home Link */}
@@ -761,8 +477,8 @@ function NavbarContent() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive('/')
-                      ? 'bg-[#ffa509] text-white'
-                      : 'text-white hover:bg-white/10'
+                      ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                      : 'text-[#000000] hover:bg-[#FDE8F0]/50'
                   }`}
                 >
                   <FiHome className="w-5 h-5" />
@@ -776,8 +492,8 @@ function NavbarContent() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive('/flash-sales')
-                          ? 'bg-[#ffa509] text-white'
-                          : 'text-white hover:bg-white/10'
+                          ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                          : 'text-[#000000] hover:bg-[#FDE8F0]/50'
                       }`}
                     >
                       <FiZap className="w-5 h-5" />
@@ -791,8 +507,8 @@ function NavbarContent() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive('/products')
-                      ? 'bg-[#ffa509] text-white'
-                      : 'text-white hover:bg-white/10'
+                      ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                      : 'text-[#000000] hover:bg-[#FDE8F0]/50'
                   }`}
                 >
                   <FiShoppingBag className="w-5 h-5" />
@@ -814,8 +530,8 @@ function NavbarContent() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isCategoryActive
-                          ? 'bg-[#ffa509] text-white'
-                          : 'text-white hover:bg-white/10'
+                          ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                          : 'text-[#000000] hover:bg-[#FDE8F0]/50'
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -823,12 +539,26 @@ function NavbarContent() {
                     </Link>
                   );
                 })}
+                {!isAuthenticated && (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    isActive('/login')
+                        ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                        : 'text-[#000000] hover:bg-[#FDE8F0]/50'
+                    }`}
+                  >
+                    <FiUser className="w-5 h-5" />
+                    <span className="font-medium">Sign In</span>
+                  </Link>
+                )}
                 {isAuthenticated && (
                   <>
                     <Link
                       href="/dashboard/cart"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors relative"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors relative"
                     >
                       <FiShoppingCart className="w-5 h-5" />
                       <span className="font-medium">Cart</span>
@@ -836,7 +566,7 @@ function NavbarContent() {
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="ml-auto bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center"
+                          className="ml-auto bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center"
                         >
                           {cartItemCount > 99 ? '99+' : cartItemCount}
                         </motion.span>
@@ -845,7 +575,7 @@ function NavbarContent() {
                     <Link
                       href="/dashboard/wishlist"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors"
                     >
                       <FiHeart className="w-5 h-5" />
                       <span className="font-medium">Wishlist</span>
@@ -855,8 +585,8 @@ function NavbarContent() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive('/dashboard/orders')
-                          ? 'bg-[#ffa509] text-white'
-                          : 'text-white hover:bg-white/10'
+                          ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                          : 'text-[#000000] hover:bg-[#FDE8F0]/50'
                       }`}
                     >
                       <FiPackage className="w-5 h-5" />
@@ -865,11 +595,23 @@ function NavbarContent() {
                     <Link
                       href="/dashboard/profile"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors"
                     >
                       <FiUser className="w-5 h-5" />
                       <span className="font-medium">Profile</span>
                     </Link>
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleSignOut();
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left text-[#000000] hover:bg-red-50 hover:text-red-600 transition-colors border-t border-gray-100 mt-2 pt-4"
+                    >
+                      <FiLogOut className="w-5 h-5" />
+                      <span className="font-medium">Sign Out</span>
+                    </motion.button>
                   </>
                 )}
               </div>
@@ -878,6 +620,11 @@ function NavbarContent() {
         </AnimatePresence>
       </div>
     </nav>
+      {/* Spacer so content starts below the fixed nav (and flash banner on lg when shown) */}
+      <div
+        className={`flex-shrink-0 ${showFlashSaleBanner ? 'h-20 lg:h-[10.5rem]' : 'h-20 lg:h-24'}`}
+        aria-hidden="true"
+      />
     </>
   );
 }

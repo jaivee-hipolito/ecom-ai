@@ -1,26 +1,31 @@
 'use client';
 
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import { FiFileText, FiShield, FiMail, FiPhone, FiArrowUp } from 'react-icons/fi';
 import Link from 'next/link';
 
-export default function TermsOfServicePage() {
+function TermsContent() {
+  const searchParams = useSearchParams();
+  const isEmbed = searchParams?.get('embed') === '1';
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <Navbar />
+    <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 ${isEmbed ? 'pt-4' : ''}`}>
+      {!isEmbed && <Navbar />}
       
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-gradient-to-r from-[#050b2c] via-[#0a1538] to-[#050b2c] py-16 sm:py-20"
+        className="bg-gradient-to-r from-[#000000] via-[#1a1a1a] to-[#000000] py-16 sm:py-20"
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center mb-6">
@@ -28,9 +33,9 @@ export default function TermsOfServicePage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring' }}
-              className="w-20 h-20 bg-gradient-to-br from-[#ffa509] to-[#ffb833] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ffa509]/50"
+              className="w-20 h-20 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50"
             >
-              <FiFileText className="w-10 h-10 text-[#050b2c]" />
+              <FiFileText className="w-10 h-10 text-[#000000]" />
             </motion.div>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-center text-white mb-4">
@@ -58,7 +63,7 @@ export default function TermsOfServicePage() {
             className="mb-8"
           >
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
-              This website is operated by <span className="font-bold text-[#050b2c]">Teezee</span> ("Company", "we", "us", or "our"). Throughout the site, the terms "we", "us" and "our" refer to Teezee. Teezee offers this website, including all information, tools and Services available from this site to you, the user, conditioned upon your acceptance of all terms, conditions, policies and notices stated here.
+              This website is operated by <span className="font-bold text-[#000000]">Teezee</span> ("Company", "we", "us", or "our"). Throughout the site, the terms "we", "us" and "our" refer to Teezee. Teezee offers this website, including all information, tools and Services available from this site to you, the user, conditioned upon your acceptance of all terms, conditions, policies and notices stated here.
             </p>
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg mt-4">
               By visiting our site and/or purchasing something from us, you engage in our "Service" and agree to be bound by the following terms and conditions ("Terms of Service", "Terms"), including those additional terms and conditions and policies referenced herein and/or available by hyperlink. These Terms of Service apply to all users of the site, including without limitation users who are browsers, vendors, customers, merchants, and/or contributors of content.
@@ -78,8 +83,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 0.5 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">1</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">1</span>
               ONLINE STORE TERMS
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -105,8 +110,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">2</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">2</span>
               GENERAL CONDITIONS
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -139,8 +144,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 0.7 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">3</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">3</span>
               ACCURACY, COMPLETENESS AND TIMELINESS OF INFORMATION
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -160,8 +165,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 0.8 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">4</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">4</span>
               MODIFICATIONS TO THE SERVICE AND PRICES
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -184,13 +189,13 @@ export default function TermsOfServicePage() {
             transition={{ delay: 0.9 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">5</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">5</span>
               PRODUCTS OR SERVICES
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                Certain products or Services may be available exclusively online through the website and may have limited quantities. These products are subject to return or exchange only according to our Refund Policy: <Link href="/refund" className="text-[#ffa509] hover:text-[#ffb833] font-semibold underline">[LINK TO REFUND POLICY]</Link>.
+                Certain products or Services may be available exclusively online through the website and may have limited quantities. These products are subject to return or exchange only according to our <Link href="/refund" className="text-[#F9629F] hover:text-[#FC9BC2] font-semibold underline">Refund Policy</Link>.
               </p>
               <p className="leading-relaxed">
                 We have made every effort to display our products as accurately as possible. We cannot guarantee that your device's display of any color will be accurate.
@@ -208,8 +213,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.0 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">6</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">6</span>
               ACCURACY OF BILLING AND ACCOUNT INFORMATION
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -220,7 +225,7 @@ export default function TermsOfServicePage() {
                 You agree to provide current, complete, and accurate purchase and account information and to promptly update your information as needed.
               </p>
               <p className="leading-relaxed">
-                For more details, please review our Refund Policy: <Link href="/refund" className="text-[#ffa509] hover:text-[#ffb833] font-semibold underline">[LINK TO REFUND POLICY]</Link>
+                For more details, please review our <Link href="/refund" className="text-[#F9629F] hover:text-[#FC9BC2] font-semibold underline">Refund Policy</Link>.
               </p>
             </div>
           </motion.section>
@@ -232,8 +237,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.1 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">7</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">7</span>
               OPTIONAL TOOLS
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -253,8 +258,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.2 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">8</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">8</span>
               THIRD-PARTY LINKS
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -271,8 +276,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.3 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">9</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">9</span>
               USER COMMENTS, FEEDBACK AND OTHER SUBMISSIONS
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -292,13 +297,13 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.4 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">10</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">10</span>
               PERSONAL INFORMATION
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                Your submission of personal information through the store is governed by our Privacy Policy: <Link href="/privacy" className="text-[#ffa509] hover:text-[#ffb833] font-semibold underline">[LINK TO PRIVACY POLICY]</Link>
+                Your submission of personal information through the store is governed by our Privacy Policy: <Link href="/privacy" className="text-[#F9629F] hover:text-[#FC9BC2] font-semibold underline">[LINK TO PRIVACY POLICY]</Link>
               </p>
             </div>
           </motion.section>
@@ -310,8 +315,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.5 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">11</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">11</span>
               ERRORS, INACCURACIES AND OMISSIONS
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -328,8 +333,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.6 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">12</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">12</span>
               PROHIBITED USES
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -346,8 +351,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.7 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">13</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">13</span>
               DISCLAIMER OF WARRANTIES; LIMITATION OF LIABILITY
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -367,8 +372,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.8 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">14</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">14</span>
               INDEMNIFICATION
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -385,8 +390,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 1.9 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">15</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">15</span>
               SEVERABILITY
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -403,8 +408,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 2.0 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">16</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">16</span>
               TERMINATION
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -421,8 +426,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 2.1 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">17</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">17</span>
               ENTIRE AGREEMENT
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -439,8 +444,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 2.2 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">18</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">18</span>
               GOVERNING LAW
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -457,8 +462,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 2.3 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">19</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">19</span>
               CHANGES TO TERMS OF SERVICE
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -475,8 +480,8 @@ export default function TermsOfServicePage() {
             transition={{ delay: 2.4 }}
             className="mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-4 flex items-center gap-3">
-              <span className="w-10 h-10 bg-[#ffa509] rounded-lg flex items-center justify-center text-white font-bold">20</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
+              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">20</span>
               CONTACT INFORMATION
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
@@ -484,13 +489,13 @@ export default function TermsOfServicePage() {
                 Questions about the Terms of Service should be sent to us at:
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <div className="flex items-center gap-2 text-[#050b2c]">
-                  <FiMail className="w-5 h-5 text-[#ffa509]" />
-                  <a href="mailto:support@teezee.com" className="font-semibold hover:text-[#ffa509] transition-colors">📧 support@teezee.com</a>
+                <div className="flex items-center gap-2 text-[#000000]">
+                  <FiMail className="w-5 h-5 flex-shrink-0 text-[#F9629F]" />
+                  <a href="mailto:teezeejewelry.official@gmail.com" className="font-semibold hover:text-[#F9629F] transition-colors break-all">teezeejewelry.official@gmail.com</a>
                 </div>
-                <div className="flex items-center gap-2 text-[#050b2c]">
-                  <FiPhone className="w-5 h-5 text-[#ffa509]" />
-                  <a href="tel:+1234567890" className="font-semibold hover:text-[#ffa509] transition-colors">📞 +1 (234) 567-890</a>
+                <div className="flex items-center gap-2 text-[#000000]">
+                  <FiPhone className="w-5 h-5 flex-shrink-0 text-[#F9629F]" />
+                  <a href="tel:+12504094574" className="font-semibold hover:text-[#F9629F] transition-colors">+1 (250) 409-4574</a>
                 </div>
               </div>
             </div>
@@ -498,7 +503,8 @@ export default function TermsOfServicePage() {
         </motion.div>
       </div>
 
-      {/* Scroll to Top Button */}
+      {/* Scroll to Top Button - hidden in embed mode */}
+      {!isEmbed && (
       <motion.button
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -506,13 +512,28 @@ export default function TermsOfServicePage() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={scrollToTop}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-[#ffa509] to-[#ffb833] text-white rounded-full shadow-2xl shadow-[#ffa509]/50 flex items-center justify-center z-50 hover:shadow-[#ffa509]/70 transition-all"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] text-white rounded-full shadow-2xl shadow-[#F9629F]/50 flex items-center justify-center z-50 hover:shadow-[#F9629F]/70 transition-all"
         aria-label="Scroll to top"
       >
         <FiArrowUp className="w-6 h-6" />
       </motion.button>
+      )}
 
-      <Footer />
+      {!isEmbed && <Footer />}
     </div>
+  );
+}
+
+export default function TermsOfServicePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex justify-center items-center min-h-[60vh]">Loading...</div>
+        <Footer />
+      </div>
+    }>
+      <TermsContent />
+    </Suspense>
   );
 }

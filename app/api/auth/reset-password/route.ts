@@ -9,11 +9,11 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { token, password } = body;
+    const { email, code, password } = body;
 
-    if (!token || !password) {
+    if (!email || !code || !password) {
       return NextResponse.json(
-        { success: false, error: 'Token and password are required' },
+        { success: false, error: 'Email, code, and password are required' },
         { status: 400 }
       );
     }
@@ -28,15 +28,16 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    // Find user by reset token and check if token is still valid
+    // Find user by email and validate reset code (6-digit code from email)
     const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordTokenExpires: { $gt: Date.now() }, // Token must not be expired
+      email: email.toLowerCase(),
+      resetPasswordToken: String(code).trim(),
+      resetPasswordTokenExpires: { $gt: new Date() },
     }).select('+resetPasswordToken +resetPasswordTokenExpires +password');
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Invalid or expired reset token' },
+        { success: false, error: 'Invalid or expired reset code. Please request a new one.' },
         { status: 400 }
       );
     }

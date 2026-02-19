@@ -126,8 +126,8 @@ export default function CategoryTable({
         className="flex justify-center items-center py-20"
       >
         <div className="relative">
-          <div className="w-16 h-16 border-4 border-[#ffa509] border-t-transparent rounded-full animate-spin"></div>
-          <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-[#ff8c00] rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+          <div className="w-16 h-16 border-4 border-[#F9629F] border-t-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-[#DB7093] rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
         </div>
       </motion.div>
     );
@@ -172,30 +172,30 @@ export default function CategoryTable({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden"
+        className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6 relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#ffa509]/10 to-transparent rounded-full blur-2xl"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#F9629F]/10 to-transparent rounded-full blur-2xl"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-4">
             <motion.div
               whileHover={{ scale: 1.1, rotate: 5 }}
-              className="p-3 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-xl shadow-lg"
+              className="p-3 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-xl shadow-lg"
             >
               <FiLayers className="w-6 h-6 text-white" />
             </motion.div>
             <div>
-              <h3 className="text-2xl font-bold text-[#050b2c]">
+              <h3 className="text-2xl font-bold text-[#000000]">
                 Categories
               </h3>
               <p className="text-gray-600 flex items-center gap-2 mt-1">
-                <span className="text-[#ffa509] font-bold text-lg">{categories.length}</span>
+                <span className="text-[#F9629F] font-bold text-lg">{categories.length}</span>
                 <span className="text-sm">total categories</span>
               </p>
             </div>
           </div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link href="/admin/categories/create">
-              <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-[#ff8c00] hover:to-[#ffa509]">
+              <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-[#DB7093] hover:to-[#F9629F]">
                 <FiPlus className="w-5 h-5" />
                 Add New Category
               </button>
@@ -209,23 +209,23 @@ export default function CategoryTable({
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-12 text-center relative overflow-hidden"
+          className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#F9629F]/20 p-12 text-center relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#ffa509]/5 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#F9629F]/5 to-transparent rounded-full blur-3xl"></div>
           <div className="relative z-10">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', delay: 0.2 }}
-              className="inline-block p-6 bg-gradient-to-br from-[#ffa509]/10 to-[#ff8c00]/10 rounded-full mb-6"
+              className="inline-block p-3 sm:p-4 md:p-6 bg-gradient-to-br from-[#F9629F]/10 to-[#DB7093]/10 rounded-full mb-3 sm:mb-4 md:mb-6"
             >
-              <FiTag className="w-16 h-16 text-[#ffa509]" />
+              <FiTag className="w-16 h-16 text-[#F9629F]" />
             </motion.div>
-            <h3 className="text-2xl font-bold text-[#050b2c] mb-2">No categories found</h3>
+            <h3 className="text-2xl font-bold text-[#000000] mb-2">No categories found</h3>
             <p className="text-gray-600 mb-6">Get started by creating your first category</p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link href="/admin/categories/create">
-                <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ffa509] to-[#ff8c00] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
                   <FiPlus className="w-5 h-5" />
                   Create First Category
                 </button>
@@ -234,7 +234,7 @@ export default function CategoryTable({
           </div>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           <AnimatePresence>
             {categories.map((category, index) => {
               const attributes = category.attributes || [];
@@ -256,7 +256,7 @@ export default function CategoryTable({
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ y: -5, scale: 1.02 }}
-                  className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border-2 border-[#ffa509]/20 p-6 relative overflow-hidden group cursor-pointer hover:border-[#ffa509]/40 transition-all duration-300"
+                  className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#F9629F]/20 p-3 sm:p-4 md:p-6 relative overflow-hidden group cursor-pointer hover:border-[#F9629F]/40 transition-all duration-300"
                 >
                   {/* Animated Background Gradient */}
                   <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradientColors[colorIndex]} opacity-10 rounded-full blur-2xl group-hover:opacity-20 transition-opacity`}></div>
@@ -273,11 +273,11 @@ export default function CategoryTable({
                           <FiTag className="w-6 h-6 text-white" />
                         </motion.div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-lg font-bold text-[#050b2c] mb-1 truncate">
+                          <h4 className="text-lg font-bold text-[#000000] mb-1 truncate">
                             {category.name}
                           </h4>
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 text-xs font-medium bg-[#050b2c]/10 text-[#050b2c] rounded-md">
+                            <span className="px-2 py-1 text-xs font-medium bg-[#000000]/10 text-[#000000] rounded-md">
                               {category.slug}
                             </span>
                           </div>
@@ -299,7 +299,7 @@ export default function CategoryTable({
                       {attributes.length > 0 ? (
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
-                            <FiInfo className="w-4 h-4 text-[#ffa509]" />
+                            <FiInfo className="w-4 h-4 text-[#F9629F]" />
                             {attributes.length} {attributes.length === 1 ? 'attribute' : 'attributes'}
                           </div>
                           <div className="flex flex-wrap gap-1.5">

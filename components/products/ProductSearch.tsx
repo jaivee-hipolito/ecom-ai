@@ -23,7 +23,7 @@ export default function ProductSearch() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(query.length > 0 && results.length > 0)}
-          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all shadow-sm hover:shadow-md"
+          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] transition-all shadow-sm hover:shadow-md"
         />
         <svg
           className="absolute left-4 top-3.5 h-5 w-5 text-gray-400"
@@ -58,7 +58,7 @@ export default function ProductSearch() {
                     setQuery('');
                     setIsOpen(false);
                   }}
-                  className="block px-4 py-3 hover:bg-[#ffa509]/10 transition-colors border-b border-gray-100 last:border-b-0"
+                  className="block px-4 py-3 hover:bg-[#F9629F]/10 transition-colors border-b border-gray-100 last:border-b-0"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 relative flex-shrink-0 bg-gray-100 rounded overflow-hidden">

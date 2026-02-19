@@ -209,7 +209,7 @@ export function useProduct(productId: string | null) {
   };
 }
 
-export function useProductSearch(query: string) {
+export function useProductSearch(query: string, limit = 8) {
   const [results, setResults] = useState<IProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,7 +224,7 @@ export function useProductSearch(query: string) {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&limit=${limit}`);
 
       if (!response.ok) {
         throw new Error('Failed to search products');
@@ -238,12 +238,12 @@ export function useProductSearch(query: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [query]);
+  }, [query, limit]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       search();
-    }, 300); // Debounce search
+    }, 250); // Debounce search for snappy suggestions
 
     return () => clearTimeout(timeoutId);
   }, [search]);

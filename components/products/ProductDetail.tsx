@@ -605,7 +605,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                       whileHover={{ scale: 1.1 }}
                       className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg"
                     >
-                      <FiMaximize2 className="w-6 h-6 text-[#050b2c]" />
+                      <FiMaximize2 className="w-6 h-6 text-[#000000]" />
                     </motion.div>
                   </div>
                 </>
@@ -637,9 +637,9 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer hover:border-blue-400 ${
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer hover:border-[#FC9BC2] ${
                         selectedImageIndex === index
-                          ? 'border-blue-600 ring-2 ring-blue-200'
+                          ? 'border-[#F9629F] ring-2 ring-[#F9629F]/30'
                           : 'border-gray-200'
                       }`}
                     >
@@ -722,7 +722,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                 {hasFlashSaleDiscount ? (
                   <>
                     <div className="flex items-baseline gap-3">
-                      <span className="text-4xl lg:text-5xl font-bold text-[#ffa509]">
+                      <span className="text-4xl lg:text-5xl font-bold text-[#F9629F]">
                         {formatCurrency(displayPrice)}
                       </span>
                       <span className="text-2xl lg:text-3xl text-gray-400 line-through">
@@ -733,7 +733,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', delay: 0.2 }}
-                      className="bg-gradient-to-br from-[#ffa509] via-orange-500 to-[#ff8c00] text-white rounded-full w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center shadow-xl border-2 border-white flex-shrink-0"
+                      className="bg-[#FDE8F0] text-[#000000] border border-gray-300 rounded-full w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center shadow-xl flex-shrink-0"
                     >
                       <div className="text-center">
                         <div className="text-sm lg:text-base font-black leading-tight">-{flashSaleDiscount}%</div>
@@ -742,7 +742,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                     </motion.div>
                   </>
                 ) : (
-                  <span className="text-4xl lg:text-5xl font-bold text-blue-600">
+                  <span className="text-4xl lg:text-5xl font-bold text-[#F9629F]">
                     {formatCurrency(displayPrice)}
                   </span>
                 )}
@@ -761,14 +761,18 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
               </p>
             </div>
 
-            {/* Variant Selection - Show if product has 2+ variants */}
-            {hasVariants && Object.keys(allAttributes).length > 0 && (
+            {/* Variant Selection - Show if product has 2+ variants (exclude spec-only attrs shown in Product Specifications) */}
+            {hasVariants && Object.keys(allAttributes).length > 0 && (() => {
+              const SPEC_ONLY_ATTR_KEYS = new Set(['Made_of', 'Origin', 'Size(inch)', 'Classification', 'With?', 'made_of', 'origin', 'size(inch)', 'classification', 'with?']);
+              const selectableAttributes = Object.entries(allAttributes).filter(([key]) => !SPEC_ONLY_ATTR_KEYS.has(key));
+              if (selectableAttributes.length === 0) return null;
+              return (
               <div className="border-b border-gray-200 pb-4">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">
                   Select Options
                 </h2>
                 <div className="space-y-4">
-                  {Object.entries(allAttributes).map(([key, values]) => {
+                  {selectableAttributes.map(([key, values]) => {
                     const attributeValues = Array.from(values);
                     const label = key
                       .replace(/([A-Z])/g, ' $1')
@@ -821,8 +825,8 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                                 disabled={!isAvailable}
                                 className={`px-4 py-2 text-sm rounded border transition-colors ${
                                   isSelected
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                                    ? 'bg-[#F9629F] text-white border-[#F9629F]'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#FC9BC2]'
                                 } ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 title={!isAvailable ? 'Out of stock' : String(value)}
                               >
@@ -836,13 +840,23 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                   })}
                 </div>
               </div>
-            )}
+            );
+            })()}
 
-            {/* Product Attributes Section - Show static attributes if no variants */}
-            {!hasVariants && product.attributes && Object.keys(product.attributes).length > 0 && (
+            {/* Product Attributes Section - Show for products without variants OR with variants (from selected variant) */}
+            {(!hasVariants && product.attributes && Object.keys(product.attributes).length > 0) && (
               <div>
                 <ProductAttributes
                   attributes={product.attributes}
+                  categoryAttributes={product.categoryAttributes}
+                />
+              </div>
+            )}
+            {/* Product Specifications for variant products - use selected variant attributes */}
+            {hasVariants && selectedVariant?.attributes && Object.keys(selectedVariant.attributes).length > 0 && (
+              <div>
+                <ProductAttributes
+                  attributes={{ ...(product.attributes || {}), ...selectedVariant.attributes }}
                   categoryAttributes={product.categoryAttributes}
                 />
               </div>
@@ -856,7 +870,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                 </span>
                 <Link
                   href={`/products?category=${encodeURIComponent(product.category)}`}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm text-[#F9629F] hover:text-[#DB7093] font-medium"
                 >
                   {product.category}
                 </Link>
@@ -890,7 +904,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                 <div className="flex items-center border border-gray-300 rounded-md w-fit mb-4">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="flex items-center justify-center w-10 h-10 text-lg font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent border-r border-gray-300"
+                    className="flex items-center justify-center w-10 h-10 text-lg font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent border-r border-gray-300"
                     aria-label="Decrease quantity"
                     disabled={quantity <= 1}
                   >
@@ -911,7 +925,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                     onClick={() =>
                       setQuantity(Math.min(maxCanAdd, quantity + 1))
                     }
-                    className="flex items-center justify-center w-10 h-10 text-lg font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent border-l border-gray-300"
+                    className="flex items-center justify-center w-10 h-10 text-lg font-medium text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent border-l border-gray-300"
                     aria-label="Increase quantity"
                     disabled={quantity >= maxCanAdd}
                   >

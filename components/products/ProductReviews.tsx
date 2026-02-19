@@ -113,19 +113,19 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#050b2c] via-[#0a1a4a] to-[#050b2c] p-8 mb-8"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#000000] via-[#1a1a1a] to-[#000000] p-8 mb-8"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,165,9,0.15),transparent_50%)]"></div>
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-                <span className="text-[#ffa509]">Customer Reviews</span>
+                <span className="text-[#F9629F]">Customer Reviews</span>
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring' }}
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#ffa509] text-[#050b2c] text-lg font-bold"
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#F9629F] text-[#000000] text-lg font-bold"
                 >
                   {numReviews}
                 </motion.span>
@@ -142,7 +142,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                       <FiStar
                         className={`w-6 h-6 ${
                           i < Math.round(averageRating)
-                            ? 'text-[#ffa509] fill-[#ffa509]'
+                            ? 'text-[#F9629F] fill-[#F9629F]'
                             : 'text-gray-400'
                         }`}
                       />
@@ -158,7 +158,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowReviewForm(!showReviewForm)}
-              className="px-6 py-3 bg-[#ffa509] text-[#050b2c] font-bold rounded-xl hover:bg-[#ffb833] transition-colors shadow-lg flex items-center gap-2"
+              className="px-6 py-3 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 font-bold rounded-xl hover:bg-[#FC9BC2] transition-colors shadow-lg flex items-center gap-2"
             >
               <FiSend className="w-5 h-5" />
               Write a Review
@@ -176,16 +176,16 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
             exit={{ opacity: 0, height: 0 }}
             className="mb-8 overflow-hidden"
           >
-            <div className="bg-white rounded-2xl shadow-xl border-2 border-[#ffa509]/20 p-6 md:p-8">
-              <h3 className="text-2xl font-bold text-[#050b2c] mb-6 flex items-center gap-2">
-                <span className="text-[#ffa509]">✍</span>
+            <div className="bg-white rounded-2xl shadow-xl border-2 border-[#F9629F]/20 p-6 md:p-8">
+              <h3 className="text-2xl font-bold text-[#000000] mb-6 flex items-center gap-2">
+                <span className="text-[#F9629F]">✍</span>
                 Share Your Experience
               </h3>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Rating Selection */}
                 <div>
-                  <label className="block text-sm font-semibold text-[#050b2c] mb-3">
-                    Rating <span className="text-[#ffa509]">*</span>
+                  <label className="block text-sm font-semibold text-[#000000] mb-3">
+                    Rating <span className="text-[#F9629F]">*</span>
                   </label>
                   <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -202,7 +202,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                         <FiStar
                           className={`w-10 h-10 transition-all duration-200 ${
                             star <= (hoveredRating || rating)
-                              ? 'text-[#ffa509] fill-[#ffa509]'
+                              ? 'text-[#F9629F] fill-[#F9629F]'
                               : 'text-gray-300'
                           }`}
                         />
@@ -212,7 +212,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                       <motion.span
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="ml-3 text-lg font-semibold text-[#050b2c]"
+                        className="ml-3 text-lg font-semibold text-[#000000]"
                       >
                         {rating} {rating === 1 ? 'star' : 'stars'}
                       </motion.span>
@@ -227,7 +227,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                     placeholder="Summarize your review"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20"
+                    className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20"
                     required
                   />
                 </div>
@@ -240,15 +240,15 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     rows={6}
-                    className="border-2 border-gray-200 focus:border-[#ffa509] focus:ring-[#ffa509]/20 resize-none"
+                    className="border-2 border-gray-200 focus:border-[#F9629F] focus:ring-[#F9629F]/20 resize-none"
                     required
                   />
                 </div>
 
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-sm font-semibold text-[#050b2c] mb-3">
-                    <FiImage className="inline w-5 h-5 mr-2 text-[#ffa509]" />
+                  <label className="block text-sm font-semibold text-[#000000] mb-3">
+                    <FiImage className="inline w-5 h-5 mr-2 text-[#F9629F]" />
                     Images (Optional)
                   </label>
                   <p className="text-sm text-gray-600 mb-3">
@@ -262,7 +262,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                             key={index}
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="relative group aspect-square rounded-lg overflow-hidden border-2 border-[#ffa509]/30"
+                            className="relative group aspect-square rounded-lg overflow-hidden border-2 border-[#F9629F]/30"
                           >
                             <Image
                               src={preview}
@@ -288,10 +288,10 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                       <motion.label
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#ffa509]/50 rounded-xl bg-gradient-to-br from-[#ffa509]/5 to-transparent cursor-pointer hover:border-[#ffa509] hover:bg-[#ffa509]/10 transition-all"
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#F9629F]/50 rounded-xl bg-gradient-to-br from-[#F9629F]/5 to-transparent cursor-pointer hover:border-[#F9629F] hover:bg-[#F9629F]/10 transition-all"
                       >
-                        <FiImage className="w-8 h-8 text-[#ffa509] mb-2" />
-                        <span className="text-sm font-medium text-[#050b2c]">
+                        <FiImage className="w-8 h-8 text-[#F9629F] mb-2" />
+                        <span className="text-sm font-medium text-[#000000]">
                           Click to upload images
                         </span>
                         <input
@@ -312,7 +312,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                     <Button
                       type="submit"
                       disabled={isSubmitting || rating === 0}
-                      className="w-full bg-gradient-to-r from-[#ffa509] to-[#ffb833] text-[#050b2c] font-bold py-3 text-lg hover:from-[#ffb833] hover:to-[#ffc966] border-0 shadow-lg"
+                      className="w-full bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] font-bold py-3 text-lg hover:from-[#FC9BC2] hover:to-[#ffc966] border-0 shadow-lg"
                       size="lg"
                       isLoading={isSubmitting}
                     >
@@ -357,7 +357,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowReviewForm(true)}
-              className="px-6 py-3 bg-[#ffa509] text-[#050b2c] font-bold rounded-xl hover:bg-[#ffb833] transition-colors shadow-lg"
+              className="px-6 py-3 bg-[#F9629F] text-[#000000] font-bold rounded-xl hover:bg-[#FC9BC2] transition-colors shadow-lg"
             >
               Write the First Review
             </motion.button>
@@ -383,8 +383,8 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                       className="rounded-full"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ffa509] to-[#ffb833] flex items-center justify-center">
-                      <FiUser className="w-6 h-6 text-[#050b2c]" />
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] flex items-center justify-center">
+                      <FiUser className="w-6 h-6 text-[#000000]" />
                     </div>
                   )}
                 </div>
@@ -393,7 +393,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h4 className="font-bold text-[#050b2c] text-lg">
+                      <h4 className="font-bold text-[#000000] text-lg">
                         {review.userName || 'Anonymous User'}
                       </h4>
                       <div className="flex items-center gap-2 mt-1">
@@ -402,7 +402,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                             key={i}
                             className={`w-4 h-4 ${
                               i < review.rating
-                                ? 'text-[#ffa509] fill-[#ffa509]'
+                                ? 'text-[#F9629F] fill-[#F9629F]'
                                 : 'text-gray-300'
                             }`}
                           />
@@ -417,7 +417,7 @@ export default function ProductReviews({ productId, reviews = [], numReviews = 0
                   </div>
 
                   {review.title && (
-                    <h5 className="font-semibold text-[#050b2c] mb-2">{review.title}</h5>
+                    <h5 className="font-semibold text-[#000000] mb-2">{review.title}</h5>
                   )}
 
                   <p className="text-gray-700 leading-relaxed mb-4">{review.comment}</p>

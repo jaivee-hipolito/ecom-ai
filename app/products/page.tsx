@@ -177,7 +177,7 @@ function ProductsContent() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-[#050b2c] via-[#0a1538] to-[#050b2c] text-white py-12 lg:py-16"
+        className="bg-gradient-to-r from-[#000000] via-[#1a1a1a] to-[#000000] text-white py-12 lg:py-16"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -221,7 +221,7 @@ function ProductsContent() {
                     setSearchQuery(e.target.value);
                     setFilters({ ...filters, search: e.target.value || undefined });
                   }}
-                  className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffa509] focus:border-[#ffa509] transition-all shadow-sm hover:shadow-md text-[#050b2c] placeholder-gray-400"
+                  className="w-full px-4 py-3 pl-12 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] transition-all shadow-sm hover:shadow-md text-[#050b2c] placeholder-gray-500 font-medium"
                 />
                 <FiSearch className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
               </div>
@@ -235,8 +235,8 @@ function ProductsContent() {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded transition-all duration-300 ${
                     viewMode === 'grid'
-                      ? 'bg-[#ffa509] text-white shadow-lg'
-                      : 'text-gray-600 hover:text-[#ffa509]'
+                      ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 shadow-lg'
+                      : 'text-gray-600 hover:bg-[#FDE8F0]/50'
                   }`}
                 >
                   <FiGrid className="w-5 h-5" />
@@ -245,8 +245,8 @@ function ProductsContent() {
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded transition-all duration-300 ${
                     viewMode === 'list'
-                      ? 'bg-[#ffa509] text-white shadow-lg'
-                      : 'text-gray-600 hover:text-[#ffa509]'
+                      ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 shadow-lg'
+                      : 'text-gray-600 hover:bg-[#FDE8F0]/50'
                   }`}
                 >
                   <FiList className="w-5 h-5" />
@@ -260,14 +260,14 @@ function ProductsContent() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg ${
                   showFilters
-                    ? 'bg-[#ffa509] text-white'
-                    : 'bg-white text-[#050b2c] hover:bg-[#ffa509] hover:text-white'
+                    ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
+                    : 'bg-white text-[#1a1a1a] border-2 border-gray-200 hover:bg-[#FDE8F0]'
                 }`}
               >
                 <FiFilter className="w-5 h-5" />
                 <span className="hidden sm:inline">Filters</span>
                 {hasActiveFilters && (
-                  <span className="bg-white text-[#ffa509] px-2 py-0.5 rounded-full text-xs font-bold">
+                  <span className="bg-white text-[#F9629F] px-2 py-0.5 rounded-full text-xs font-bold">
                     {Object.keys(filters).length}
                   </span>
                 )}
@@ -287,7 +287,7 @@ function ProductsContent() {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center gap-2 bg-[#ffa509] text-white px-3 py-1.5 rounded-full text-sm font-medium"
+                  className="flex items-center gap-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium"
                 >
                   <span>Category: {filters.category}</span>
                   <button
@@ -302,7 +302,7 @@ function ProductsContent() {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center gap-2 bg-[#ffa509] text-white px-3 py-1.5 rounded-full text-sm font-medium"
+                  className="flex items-center gap-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium"
                 >
                   <span>Min: ${filters.minPrice}</span>
                   <button
@@ -317,7 +317,7 @@ function ProductsContent() {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center gap-2 bg-[#ffa509] text-white px-3 py-1.5 rounded-full text-sm font-medium"
+                  className="flex items-center gap-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium"
                 >
                   <span>Max: ${filters.maxPrice}</span>
                   <button
@@ -332,7 +332,7 @@ function ProductsContent() {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center gap-2 bg-[#ffa509] text-white px-3 py-1.5 rounded-full text-sm font-medium"
+                  className="flex items-center gap-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium"
                 >
                   <span>Featured</span>
                   <button
@@ -347,7 +347,7 @@ function ProductsContent() {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center gap-2 bg-[#ffa509] text-white px-3 py-1.5 rounded-full text-sm font-medium"
+                  className="flex items-center gap-2 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium"
                 >
                   <span>Search: {filters.search}</span>
                   <button
@@ -407,11 +407,11 @@ function ProductsContent() {
               >
                 <p className="text-gray-600 font-medium">
                   Showing{' '}
-                  <span className="text-[#050b2c] font-bold">
+                  <span className="text-[#000000] font-bold">
                     {products.length}
                   </span>{' '}
                   of{' '}
-                  <span className="text-[#050b2c] font-bold">
+                  <span className="text-[#000000] font-bold">
                     {pagination.total}
                   </span>{' '}
                   products
@@ -448,6 +448,7 @@ function ProductsContent() {
                   products={products}
                   isLoading={false}
                   groupByName={viewMode === 'grid'}
+                  showAttributes={false}
                 />
               </motion.div>
             )}
@@ -476,10 +477,10 @@ function ProductsContent() {
                 className="text-center py-16 bg-white rounded-lg shadow-md"
               >
                 <div className="max-w-md mx-auto">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-[#ffa509] to-[#ff8c00] rounded-full flex items-center justify-center">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-[#F9629F] to-[#DB7093] rounded-full flex items-center justify-center">
                     <FiSearch className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-[#050b2c] mb-2">
+                  <h3 className="text-2xl font-bold text-[#000000] mb-2">
                     No products found
                   </h3>
                   <p className="text-gray-600 mb-6">
@@ -488,7 +489,7 @@ function ProductsContent() {
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
-                      className="px-6 py-3 bg-[#ffa509] text-white rounded-lg font-semibold hover:bg-[#ff8c00] transition-colors shadow-lg"
+                      className="px-6 py-3 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 rounded-lg font-semibold hover:bg-[#FC9BC2] transition-colors shadow-lg"
                     >
                       Clear Filters
                     </button>

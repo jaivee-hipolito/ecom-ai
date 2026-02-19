@@ -118,11 +118,11 @@ function CartPageContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="bg-gradient-to-br from-[#ffa509] to-[#ff8c00] p-3 rounded-xl shadow-lg">
-              <FiShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+            <div className="bg-[#FDE8F0] border border-gray-300 p-3 rounded-xl shadow-lg">
+              <FiShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 text-[#1a1a1a]" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#050b2c]">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#000000]">
                 Shopping Cart
               </h1>
               {items.length > 0 && (
@@ -158,11 +158,11 @@ function CartPageContent() {
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="inline-block mb-6"
             >
-              <div className="bg-gradient-to-br from-[#050b2c] to-[#0a1538] p-8 rounded-full">
-                <FiShoppingCart className="w-16 h-16 sm:w-20 sm:h-20 text-[#ffa509]" />
+              <div className="bg-[#FDE8F0] border border-gray-300 p-8 rounded-full">
+                <FiShoppingCart className="w-16 h-16 sm:w-20 sm:h-20 text-[#1a1a1a]" />
               </div>
             </motion.div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#050b2c] mb-3">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-3">
               Your cart is empty
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
@@ -173,7 +173,7 @@ function CartPageContent() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button className="bg-gradient-to-r from-[#ffa509] to-[#ff8c00] hover:from-[#ff8c00] hover:to-[#ffa509] text-white border-none shadow-lg hover:shadow-xl px-8 py-3 text-lg font-semibold">
+                <Button className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-lg hover:shadow-xl px-8 py-3 text-lg font-semibold">
                   Browse Products
                   <FiArrowRight className="ml-2 w-5 h-5" />
                 </Button>

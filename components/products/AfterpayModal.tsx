@@ -193,7 +193,7 @@ export default function AfterpayModal({ isOpen, onClose }: AfterpayModalProps) {
                       href="https://www.afterpay.com/en-CA/instalment-agreement"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-900 hover:text-[#ffa509] underline font-semibold transition-colors"
+                      className="text-gray-900 hover:text-[#F9629F] underline font-semibold transition-colors"
                     >
                       Instalment Agreement
                     </a>
