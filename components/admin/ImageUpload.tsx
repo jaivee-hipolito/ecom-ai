@@ -91,22 +91,34 @@ export default function ImageUpload({
 
         // Check if response is OK
         if (!response.ok) {
-          // Try to parse as JSON first
+          // Always read as text first to avoid JSON parse errors on HTML error pages
+          // (e.g. 500 body size limit returns HTML, not JSON)
           let errorMessage = 'Upload failed';
           try {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-              const errorData = await response.json();
-              errorMessage = errorData.error || `Upload failed with status ${response.status}`;
+            const textResponse = await response.text();
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+              try {
+                const errorData = JSON.parse(textResponse);
+                errorMessage = errorData.error || `Upload failed with status ${response.status}`;
+              } catch {
+                // Response claimed JSON but body wasn't valid JSON (e.g. HTML)
+                errorMessage = response.status === 500
+                  ? 'Image may be too large or upload failed. Try a smaller image (max 5MB) or check your connection.'
+                  : `Upload failed with status ${response.status}. Please try again.`;
+              }
             } else {
-              // If not JSON, read as text to see what we got
-              const textResponse = await response.text();
+              // HTML or other non-JSON (common when body size limit exceeded on mobile)
               console.error('Non-JSON error response:', textResponse.substring(0, 200));
-              errorMessage = `Server error (${response.status}). Please try again.`;
+              errorMessage = response.status === 500
+                ? 'Image may be too large or upload failed. Try a smaller image (max 5MB) or use a different device.'
+                : `Server error (${response.status}). Please try again.`;
             }
-          } catch (parseError: any) {
-            console.error('Error parsing error response:', parseError);
-            errorMessage = `Upload failed with status ${response.status}. Please try again.`;
+          } catch (readError: any) {
+            console.error('Error reading error response:', readError);
+            errorMessage = response.status === 500
+              ? 'Image may be too large or upload failed. Try a smaller image (max 5MB).'
+              : `Upload failed with status ${response.status}. Please try again.`;
           }
           throw new Error(errorMessage);
         }
