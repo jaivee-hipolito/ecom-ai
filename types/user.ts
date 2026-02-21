@@ -16,6 +16,8 @@ export interface IUser {
   phoneVerificationCode?: string;
   emailVerificationCodeExpires?: Date;
   phoneVerificationCodeExpires?: Date;
+  emailVerificationCodeSentAt?: Date;
+  phoneVerificationCodeSentAt?: Date;
   resetPasswordToken?: string;
   resetPasswordTokenExpires?: Date;
   createdAt?: Date;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { requireAuth } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB/Mongoose compatibility
 export const runtime = 'nodejs';
@@ -9,9 +10,13 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, phoneNumber, code, type } = body; // type: 'email' or 'phone'
+    const { email, phoneNumber, type } = body; // type: 'email' or 'phone'
+    // Normalize code to string and trim (avoid type/whitespace mismatch after resend)
+    const code = typeof body.code === 'string' || typeof body.code === 'number'
+      ? String(body.code).trim().replace(/\D/g, '')
+      : '';
 
-    if (!code || !type || (type !== 'email' && type !== 'phone')) {
+    if (!code || code.length !== 6 || !type || (type !== 'email' && type !== 'phone')) {
       return NextResponse.json(
         { success: false, error: 'Invalid verification data' },
         { status: 400 }
@@ -36,21 +41,54 @@ export async function POST(request: NextRequest) {
 
     let user;
     if (type === 'email') {
-      user = await User.findOne({ email: email.toLowerCase() }).select('+emailVerificationCode +phoneVerificationCode +emailVerificationCodeExpires +phoneVerificationCodeExpires');
-    } else {
-      // For phone verification, try normalized first, then original format as fallback
-      const normalizedPhone = normalizePhoneNumber(phoneNumber);
-      user = await User.findOne({ contactNumber: normalizedPhone }).select('+emailVerificationCode +phoneVerificationCode +emailVerificationCodeExpires +phoneVerificationCodeExpires');
-      
-      // If not found with normalized, try original format (for backward compatibility)
+      // Email verification: use session so we always update the logged-in user (persists across refresh)
+      const session = await requireAuth().catch(() => null);
+      if (!session) {
+        return NextResponse.json(
+          { success: false, error: 'You must be signed in to verify your email' },
+          { status: 401 }
+        );
+      }
+      const userId = (session.user as any).id;
+      const requestEmail = (email as string || '').toLowerCase().trim();
+      user = await User.findById(userId).select('+email +emailVerificationCode +phoneVerificationCode +emailVerificationCodeExpires +phoneVerificationCodeExpires');
       if (!user) {
-        user = await User.findOne({ contactNumber: phoneNumber }).select('+emailVerificationCode +phoneVerificationCode +emailVerificationCodeExpires +phoneVerificationCodeExpires');
-        
-        // If found with original format, update to normalized format for future queries
-        if (user) {
-          user.contactNumber = normalizedPhone;
-          await user.save();
-        }
+        return NextResponse.json(
+          { success: false, error: 'User not found' },
+          { status: 404 }
+        );
+      }
+      const userEmail = ((user as any).email || '').toLowerCase();
+      if (userEmail !== requestEmail) {
+        return NextResponse.json(
+          { success: false, error: 'Email does not match your account' },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Phone verification: use session so we always update the logged-in user (persists across refresh)
+      const session = await requireAuth().catch(() => null);
+      if (!session) {
+        return NextResponse.json(
+          { success: false, error: 'You must be signed in to verify your phone' },
+          { status: 401 }
+        );
+      }
+      const userId = (session.user as any).id;
+      const normalizedPhone = normalizePhoneNumber(phoneNumber);
+      user = await User.findById(userId).select('+contactNumber +emailVerificationCode +phoneVerificationCode +emailVerificationCodeExpires +phoneVerificationCodeExpires');
+      if (!user) {
+        return NextResponse.json(
+          { success: false, error: 'User not found' },
+          { status: 404 }
+        );
+      }
+      const userPhoneNormalized = normalizePhoneNumber((user as any).contactNumber || '');
+      if (userPhoneNormalized !== normalizedPhone) {
+        return NextResponse.json(
+          { success: false, error: 'Phone number does not match your account' },
+          { status: 400 }
+        );
       }
     }
 
@@ -62,8 +100,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (type === 'email') {
-      // Check if code matches
-      if (user.emailVerificationCode !== code) {
+      // Check if code matches (compare as strings, stored value may be string or number)
+      const storedEmailCode = user.emailVerificationCode != null ? String(user.emailVerificationCode).trim() : '';
+      if (storedEmailCode !== code) {
         return NextResponse.json(
           { success: false, error: 'Invalid verification code' },
           { status: 400 }
@@ -104,7 +143,8 @@ export async function POST(request: NextRequest) {
         });
       }
       
-      if (user.phoneVerificationCode !== code) {
+      const storedPhoneCode = user.phoneVerificationCode != null ? String(user.phoneVerificationCode).trim() : '';
+      if (storedPhoneCode !== code) {
         return NextResponse.json(
           { success: false, error: 'Invalid verification code' },
           { status: 400 }
@@ -133,7 +173,8 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       );
     }
-  } catch (error: any) {
+  }
+  catch (error: any) {
     console.error('Verify code error:', error);
     return NextResponse.json(
       {
@@ -144,3 +185,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

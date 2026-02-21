@@ -86,6 +86,7 @@ export default function AddressesPage() {
       const requestBody = {
         ...addressData,
         fullName: fullName,
+        phone: addressData.phone?.trim() || (user?.contactNumber as string)?.trim() || '',
         isDefault: addresses.length === 0, // Set as default if it's the first address
       };
       
@@ -162,6 +163,7 @@ export default function AddressesPage() {
         body: JSON.stringify({
           ...addressData,
           fullName: fullName,
+          phone: addressData.phone?.trim() || (user?.contactNumber as string)?.trim() || '',
         }),
       });
 
@@ -271,7 +273,7 @@ export default function AddressesPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <Link href="/dashboard/profile" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
+        <Link href="/dashboard/profile" className="text-[#F9629F] hover:text-[#e8558a] mb-4 inline-block font-medium transition-colors">
           ← Back to Profile
         </Link>
         <h1 className="text-3xl font-bold text-gray-900">My Addresses</h1>
@@ -306,6 +308,7 @@ export default function AddressesPage() {
             initialData={editingAddress || undefined}
             isLoading={isSaving}
             showFullName={false}
+            showPhone={!user?.contactNumber?.trim()}
             buttonText="Save"
             loadingButtonText="Saving..."
           />

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FiCreditCard } from 'react-icons/fi';
 import { formatCurrency } from '@/utils/currency';
 
-export type PaymentMethod = 'card' | 'afterpay' | 'klarna';
+export type PaymentMethod = 'card' | 'afterpay' | 'klarna' | 'affirm';
 
 interface PaymentMethodSelectorProps {
   selectedMethod: PaymentMethod;
@@ -97,7 +97,7 @@ export default function PaymentMethodSelector({
         <motion.button
           whileHover={{ backgroundColor: selectedMethod === 'klarna' ? '#f9fafb' : '#f9fafb' }}
           onClick={() => onMethodChange('klarna')}
-          className={`w-full flex items-center justify-between p-4 transition-colors ${
+          className={`w-full flex items-center justify-between p-4 border-b border-gray-200 transition-colors ${
             selectedMethod === 'klarna' ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'
           }`}
         >
@@ -111,10 +111,35 @@ export default function PaymentMethodSelector({
                 <div className="w-2 h-2 bg-[#1a1a1a] rounded-full" />
               )}
             </div>
-            <span className="text-sm font-medium text-gray-900">Klarna - Flexible payments</span>
+            <span className="text-sm font-medium text-gray-900">Klarna</span>
           </div>
           <div className="px-3 py-1.5 rounded-lg flex items-center" style={{ backgroundColor: '#ffb3c7' }}>
             <span className="font-bold text-white text-xs">Klarna</span>
+          </div>
+        </motion.button>
+
+        {/* Affirm */}
+        <motion.button
+          whileHover={{ backgroundColor: selectedMethod === 'affirm' ? '#f9fafb' : '#f9fafb' }}
+          onClick={() => onMethodChange('affirm')}
+          className={`w-full flex items-center justify-between p-4 transition-colors ${
+            selectedMethod === 'affirm' ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              selectedMethod === 'affirm' 
+                ? 'border-[#1a1a1a] bg-[#FDE8F0]' 
+                : 'border-gray-300'
+            }`}>
+              {selectedMethod === 'affirm' && (
+                <div className="w-2 h-2 bg-[#1a1a1a] rounded-full" />
+              )}
+            </div>
+            <span className="text-sm font-medium text-gray-900">Affirm</span>
+          </div>
+          <div className="px-3 py-1.5 rounded-lg flex items-center bg-black">
+            <span className="font-bold text-white text-xs">Affirm</span>
           </div>
         </motion.button>
       </div>
@@ -130,20 +155,11 @@ export default function PaymentMethodSelector({
             <p className="text-sm text-gray-700 mb-2">
               Select Afterpay in the payment form below to pay in 4 interest-free installments. You'll be redirected to Afterpay to complete your payment.
             </p>
-            {/* Installment amounts - total already includes 6% fee */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <p className="text-xs text-gray-600 mb-1">4 interest-free payments of:</p>
-              <p className="text-lg font-bold text-[#000000]">
-                {formatCurrency(total / 4)}
-                <span className="text-xs text-gray-500 ml-1 font-normal">(includes 6% BNPL fee)</span>
-              </p>
+              <p className="text-lg font-bold text-[#000000]">{formatCurrency(total / 4)}</p>
               <p className="text-xs text-gray-500 mt-1">Total: {formatCurrency(total)}</p>
             </div>
-          </div>
-          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-3">
-            <p className="text-xs text-yellow-800 font-semibold">
-              ⚠️ A 6% BNPL processing fee is included in the total amount above.
-            </p>
           </div>
         </motion.div>
       )}
@@ -158,20 +174,30 @@ export default function PaymentMethodSelector({
             <p className="text-sm text-gray-700 mb-2">
               You'll be redirected to Klarna to complete your purchase.
             </p>
-            {/* Installment amounts - total already includes 6% fee */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <p className="text-xs text-gray-600 mb-1">4 payments of:</p>
-              <p className="text-lg font-bold text-[#000000]">
-                {formatCurrency(total / 4)}
-                <span className="text-xs text-gray-500 ml-1 font-normal">(includes 6% BNPL fee)</span>
-              </p>
+              <p className="text-lg font-bold text-[#000000]">{formatCurrency(total / 4)}</p>
               <p className="text-xs text-gray-500 mt-1">Total: {formatCurrency(total)}</p>
             </div>
           </div>
-          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-3">
-            <p className="text-xs text-yellow-800 font-semibold">
-              ⚠️ A 6% BNPL processing fee is included in the total amount above.
+        </motion.div>
+      )}
+
+      {selectedMethod === 'affirm' && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-3"
+        >
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm text-gray-700 mb-2">
+              You'll be redirected to Affirm to complete your purchase.
             </p>
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs text-gray-600 mb-1">Pay over time with Affirm</p>
+              <p className="text-lg font-bold text-[#000000]">{formatCurrency(total)}</p>
+              <p className="text-xs text-gray-500 mt-1">Total: {formatCurrency(total)}</p>
+            </div>
           </div>
         </motion.div>
       )}

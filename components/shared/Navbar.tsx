@@ -32,7 +32,6 @@ import {
   FiZap,
   FiSearch,
   FiClock,
-  FiBell,
   FiLogOut,
   FiArrowRight,
 } from 'react-icons/fi';
@@ -77,13 +76,6 @@ function NavbarContent() {
   const [showSearchBox, setShowSearchBox] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const searchBoxRef = useRef<HTMLDivElement>(null);
-  const [showFlashSaleBanner, setShowFlashSaleBanner] = useState(true);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 2,
-    hours: 5,
-    minutes: 29,
-    seconds: 37,
-  });
   const shopDropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -109,35 +101,6 @@ function NavbarContent() {
       }
     };
     fetchCategories();
-  }, []);
-
-  // Timer countdown effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        
-        if (seconds > 0) {
-          seconds--;
-        } else if (minutes > 0) {
-          minutes--;
-          seconds = 59;
-        } else if (hours > 0) {
-          hours--;
-          minutes = 59;
-          seconds = 59;
-        } else if (days > 0) {
-          days--;
-          hours = 23;
-          minutes = 59;
-          seconds = 59;
-        }
-        
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
   }, []);
 
   // Close shop dropdown and search box when clicking outside
@@ -203,95 +166,28 @@ function NavbarContent() {
 
   return (
     <>
-      {/* Flash Sale Notification Banner - Hidden on mobile/tablet */}
-      <AnimatePresence>
-        {showFlashSaleBanner && (
-          <motion.div
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="hidden lg:block bg-gradient-to-r from-[#F9629F] via-[#FC9BC2] to-[#F9629F] text-white fixed left-0 right-0 top-0 z-[60] shadow-lg"
-            style={{ margin: 0, padding: 0 }}
-          >
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 relative w-full">
-                <div className="flex items-center gap-2 sm:gap-4 justify-center flex-1">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                    className="hidden sm:block"
-                  >
-                    <FiBell className="w-5 h-5 lg:w-6 lg:h-6" />
-                  </motion.div>
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
-                    <span className="font-bold text-xs sm:text-sm lg:text-base xl:text-lg">🔥 FLASH SALE!</span>
-                    <span className="hidden sm:inline text-xs sm:text-sm">Ends in:</span>
-                    <div className="flex items-center gap-0.5 sm:gap-1">
-                      <span className="bg-white/20 px-1.5 sm:px-2 py-0.5 rounded font-bold text-[10px] sm:text-xs lg:text-sm">
-                        {String(timeLeft.days).padStart(2, '0')}D
-                      </span>
-                      <span className="text-xs sm:text-sm">:</span>
-                      <span className="bg-white/20 px-1.5 sm:px-2 py-0.5 rounded font-bold text-[10px] sm:text-xs lg:text-sm">
-                        {String(timeLeft.hours).padStart(2, '0')}H
-                      </span>
-                      <span className="text-xs sm:text-sm">:</span>
-                      <span className="bg-white/20 px-1.5 sm:px-2 py-0.5 rounded font-bold text-[10px] sm:text-xs lg:text-sm">
-                        {String(timeLeft.minutes).padStart(2, '0')}M
-                      </span>
-                      <span className="text-xs sm:text-sm">:</span>
-                      <span className="bg-white/20 px-1.5 sm:px-2 py-0.5 rounded font-bold text-[10px] sm:text-xs lg:text-sm">
-                        {String(timeLeft.seconds).padStart(2, '0')}S
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <Link href="/flash-sales">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 sm:px-4 py-1 rounded-lg font-bold text-[10px] sm:text-xs lg:text-sm hover:bg-[#FC9BC2] transition-colors whitespace-nowrap"
-                    >
-                      Shop Now
-                    </motion.button>
-                  </Link>
-                  <button
-                    onClick={() => setShowFlashSaleBanner(false)}
-                    className="p-1 hover:bg-white/20 rounded transition-colors"
-                    aria-label="Close banner"
-                  >
-                    <FiX className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <nav 
-        className={`bg-white shadow-md fixed left-0 right-0 top-0 z-50 ${showFlashSaleBanner ? 'lg:top-[72px]' : ''}`}
+        className="bg-white shadow-md fixed left-0 right-0 top-0 z-50"
         style={{ margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}
       >
       <div ref={searchBoxRef} className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Menu Bar - Hamburger | Logo | Search & Cart */}
           <div className="grid grid-cols-3 items-center h-20 lg:h-24 py-2 relative">
-            {/* Left Section - Hamburger Menu */}
-            <div className="flex justify-start">
+            {/* Left Section - Hamburger Menu (z-20 so it stays clickable above center logo on widescreen) */}
+            <div className="relative z-20 flex justify-start">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-lg text-[#000000] hover:bg-gray-100 transition-colors touch-manipulation"
                 aria-label="Menu"
               >
                 <FiMenu className="w-6 h-6" />
               </motion.button>
             </div>
 
-            {/* Center Section - Brand Logo ONLY */}
-            <div className="flex justify-center z-10">
-              <Link href="/">
+            {/* Center Section - Brand Logo ONLY (w-fit so link doesn't overlap hamburger) */}
+            <div className="flex justify-center z-10 w-full min-w-0">
+              <Link href="/" className="inline-block max-w-full">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.3 }}
@@ -460,7 +356,7 @@ function NavbarContent() {
             )}
           </AnimatePresence>
 
-        {/* Mobile Menu */}
+        {/* Mobile / Hamburger Menu — visible on all screen sizes when open */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -468,7 +364,7 @@ function NavbarContent() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="lg:hidden border-t border-gray-200 overflow-hidden bg-white"
+              className="border-t border-gray-200 overflow-hidden bg-white"
             >
               <div className="py-4 space-y-2">
                 {/* Home Link */}
@@ -485,19 +381,19 @@ function NavbarContent() {
                   <span className="font-medium">Home</span>
                 </Link>
 
-                  {/* Flash Sales Link - Hidden on mobile/tablet */}
+                  {/* Deal of the Day Link - Hidden on mobile/tablet */}
                   <div className="hidden">
                     <Link
-                      href="/flash-sales"
+                      href="/deal-of-the-day"
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        isActive('/flash-sales')
+                        isActive('/deal-of-the-day')
                           ? 'bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300'
                           : 'text-[#000000] hover:bg-[#FDE8F0]/50'
                       }`}
                     >
                       <FiZap className="w-5 h-5" />
-                      <span className="font-medium">Flash Sales</span>
+                      <span className="font-medium">Deal of the Day</span>
                     </Link>
                   </div>
 
@@ -620,9 +516,9 @@ className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
         </AnimatePresence>
       </div>
     </nav>
-      {/* Spacer so content starts below the fixed nav (and flash banner on lg when shown) */}
+      {/* Spacer so content starts below the fixed nav */}
       <div
-        className={`flex-shrink-0 ${showFlashSaleBanner ? 'h-20 lg:h-[10.5rem]' : 'h-20 lg:h-24'}`}
+        className="flex-shrink-0 h-20 lg:h-24"
         aria-hidden="true"
       />
     </>

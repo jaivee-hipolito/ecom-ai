@@ -3,13 +3,15 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
-import { FiHeart, FiMapPin, FiMail, FiAward, FiShield, FiTruck } from 'react-icons/fi';
+import PageTopBanner from '@/components/shared/PageTopBanner';
+import { FiHeart, FiMapPin, FiMail, FiAward, FiShield, FiTruck, FiFacebook } from 'react-icons/fi';
 import Link from 'next/link';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Navbar />
+      <PageTopBanner />
 
       {/* Hero Section */}
       <motion.div
@@ -140,13 +142,22 @@ export default function AboutPage() {
               <p className="text-gray-700">
                 We&apos;d love to hear from you. Reach out anytime for support, feedback, or wholesale inquiries.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                 <a
                   href="mailto:teezeejewelry.official@gmail.com"
                   className="flex items-center gap-3 text-gray-700 hover:text-[#F9629F] transition-colors"
                 >
                   <FiMail className="w-5 h-5" />
                   <span>teezeejewelry.official@gmail.com</span>
+                </a>
+                <a
+                  href="https://www.facebook.com/TeezeeFacebookPage/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-gray-700 hover:text-[#F9629F] transition-colors"
+                >
+                  <FiFacebook className="w-5 h-5" />
+                  <span>Facebook page</span>
                 </a>
                 <div className="flex items-center gap-3 text-gray-700">
                   <FiMapPin className="w-5 h-5 flex-shrink-0" />

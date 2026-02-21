@@ -1,62 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import UsedCoupon from '@/models/UsedCoupon';
 import { requireAuth } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
-
-// Helper function to recalculate totalAmount for BNPL orders that include the fee
-function recalculateBNPLTotal(order: any): number {
-  const BNPL_FEE_RATE = 0.06; // 6%
-  
-  // Calculate items total
-  const itemsTotal = order.items.reduce((sum: number, item: any) => {
-    return sum + (item.price * item.quantity);
-  }, 0);
-
-  // If items total is 0 or invalid, return original
-  if (!itemsTotal || itemsTotal <= 0) {
-    return order.totalAmount;
-  }
-
-  // Check if stored totalAmount includes the BNPL fee (approximately itemsTotal * 1.06)
-  const expectedTotalWithFee = itemsTotal * (1 + BNPL_FEE_RATE);
-  const tolerance = 0.10; // Allow small rounding differences
-  
-  // Check if totalAmount matches the pattern of itemsTotal + 6% fee
-  const difference = Math.abs(order.totalAmount - expectedTotalWithFee);
-  const isLikelyWithFee = difference < tolerance;
-  
-  // Check payment method (also handle variations like 'afterpay_clearpay')
-  const paymentMethod = (order.paymentMethod || '').toLowerCase();
-  const isBNPL = paymentMethod === 'afterpay' || 
-                 paymentMethod === 'klarna' || 
-                 paymentMethod === 'affirm' ||
-                 paymentMethod === 'afterpay_clearpay' ||
-                 paymentMethod.includes('afterpay') ||
-                 paymentMethod.includes('klarna') ||
-                 paymentMethod.includes('affirm');
-  
-  // If total matches the 6% fee pattern, correct it (regardless of payment method)
-  // This ensures order totals never show the BNPL fee, even if paymentMethod wasn't set correctly
-  if (isLikelyWithFee) {
-    console.log('[orders/[id]/route] ✅ Recalculating order total (removing BNPL fee):', {
-      orderId: order._id.toString(),
-      paymentMethod: order.paymentMethod,
-      isBNPL,
-      storedTotal: order.totalAmount,
-      itemsTotal,
-      expectedWithFee: expectedTotalWithFee,
-      difference,
-      correctedTotal: itemsTotal,
-    });
-    return itemsTotal;
-  }
-
-  // Already correct or doesn't match expected pattern, return as-is
-  return order.totalAmount;
-}
 
 export async function GET(
   request: NextRequest,
@@ -95,16 +44,24 @@ export async function GET(
       );
     }
 
-    // Recalculate totalAmount for BNPL orders if needed
-    const correctedTotal = recalculateBNPLTotal(order);
-    const wasCorrected = correctedTotal !== order.totalAmount;
-    
-    if (wasCorrected) {
-      console.log('[orders/[id]/route] 📊 Order corrected:', {
-        orderId: order._id.toString(),
-        originalTotal: order.totalAmount,
-        correctedTotal,
-      });
+    // Fetch coupon used for this order
+    let couponInfo: { code: string; discount: number; discountType: string; discountAmount?: number } | null = null;
+    const usedCoupon = await UsedCoupon.findOne({ orderId: order._id }).lean();
+    if (usedCoupon) {
+      const subtotal = (order.items || []).reduce(
+        (sum: number, item: any) => sum + (item.price || 0) * (item.quantity || 0),
+        0
+      );
+      const discountAmount =
+        usedCoupon.discountType === 'percentage'
+          ? (subtotal * usedCoupon.discount) / 100
+          : Math.min(usedCoupon.discount, subtotal);
+      couponInfo = {
+        code: usedCoupon.couponCode,
+        discount: usedCoupon.discount,
+        discountType: usedCoupon.discountType,
+        discountAmount,
+      };
     }
 
     return NextResponse.json(
@@ -112,8 +69,10 @@ export async function GET(
         order: {
           ...order,
           _id: order._id.toString(),
+          shippingFee: order.shippingFee ?? 0,
+          ...(couponInfo && { coupon: couponInfo }),
           user: order.user.toString(),
-          totalAmount: correctedTotal,
+          totalAmount: order.totalAmount,
           createdAt: order.createdAt?.toISOString(),
           updatedAt: order.updatedAt?.toISOString(),
           items: order.items.map((item: any) => ({

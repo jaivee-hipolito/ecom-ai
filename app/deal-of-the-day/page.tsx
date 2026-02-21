@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FiZap, FiClock, FiSearch, FiArrowLeft, FiEye } from 'react-icons/fi';
+import { FiZap, FiSearch, FiArrowLeft, FiEye } from 'react-icons/fi';
 import Link from 'next/link';
 import Navbar from '@/components/shared/Navbar';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -19,18 +19,12 @@ import QuickView from '@/components/products/QuickView';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency } from '@/utils/currency';
 
-function FlashSalesContent() {
+function DealOfTheDayContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [timeLeft, setTimeLeft] = useState({
-    days: 2,
-    hours: 5,
-    minutes: 30,
-    seconds: 0,
-  });
   const [quickViewProductId, setQuickViewProductId] = useState<string | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const limit = 12;
@@ -49,35 +43,6 @@ function FlashSalesContent() {
     }
   }, [searchFromUrl, pageFromUrl]);
 
-  // Timer countdown effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        
-        if (seconds > 0) {
-          seconds--;
-        } else if (minutes > 0) {
-          minutes--;
-          seconds = 59;
-        } else if (hours > 0) {
-          hours--;
-          minutes = 59;
-          seconds = 59;
-        } else if (days > 0) {
-          days--;
-          hours = 23;
-          minutes = 59;
-          seconds = 59;
-        }
-        
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Update URL when search or page changes
   useEffect(() => {
     const params = new URLSearchParams();
@@ -89,18 +54,18 @@ function FlashSalesContent() {
     }
 
     const queryString = params.toString();
-    const newUrl = `/flash-sales${queryString ? `?${queryString}` : ''}`;
-    
+    const newUrl = `/deal-of-the-day${queryString ? `?${queryString}` : ''}`;
+
     router.replace(newUrl, { scroll: false });
   }, [searchQuery, currentPage, router]);
 
-  // Build filters for flash sales (using featured products)
+  // Build filters: only products with discount (flash sale)
   const filters: ProductFiltersType = {
-    featured: true,
+    isFlashSale: true,
     ...(searchQuery ? { search: searchQuery } : {}),
   };
 
-  // Fetch flash sale products
+  // Fetch deal of the day products (discounted)
   const { products, isLoading, error, pagination } = useProducts({
     filters,
     page: currentPage,
@@ -132,7 +97,6 @@ function FlashSalesContent() {
   };
 
   // Calculate flash sale discount and prices from product data
-  // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
   const calculateFlashSaleData = (product: IProduct) => {
     if (!product.isFlashSale || !product.flashSaleDiscount || product.flashSaleDiscount === 0) {
       return {
@@ -145,20 +109,17 @@ function FlashSalesContent() {
 
     const discount = product.flashSaleDiscount;
     const discountType = product.flashSaleDiscountType || 'percentage';
-    
+
     let displayedPrice: number;
     let crossedOutPrice: number;
     let discountPercentage: number;
 
-    // Displayed price is always the product.price
     displayedPrice = product.price;
 
     if (discountType === 'percentage') {
-      // Crossed out price = price * (percentage/100) + price
       crossedOutPrice = displayedPrice * (discount / 100) + displayedPrice;
       discountPercentage = discount;
     } else {
-      // Fixed amount: crossed out price = price + discount
       crossedOutPrice = displayedPrice + discount;
       discountPercentage = (discount / displayedPrice) * 100;
     }
@@ -171,7 +132,7 @@ function FlashSalesContent() {
     };
   };
 
-  // Calculate sold percentage for progress bar - deterministic based on product ID
+  // Calculate sold percentage for progress bar
   const calculateSoldPercentage = (product: IProduct): { percentage: number; sold: number } => {
     if (!product._id) {
       const defaultSold = 30;
@@ -181,18 +142,18 @@ function FlashSalesContent() {
         sold: defaultSold
       };
     }
-    
+
     let hash = 0;
     for (let i = 0; i < product._id.length; i++) {
       const char = product._id.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash;
     }
-    
+
     const sold = Math.abs(hash % 51) + 30;
     const totalStock = product.stock + sold;
     const percentage = (sold / totalStock) * 100;
-    
+
     return { percentage, sold };
   };
 
@@ -226,7 +187,6 @@ function FlashSalesContent() {
         transition={{ duration: 0.5 }}
         className="relative overflow-hidden"
       >
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, #F9629F 1px, transparent 0)`,
@@ -236,7 +196,6 @@ function FlashSalesContent() {
 
         <div className="relative z-10 py-12 lg:py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Back Button */}
             <Link href="/">
               <motion.button
                 whileHover={{ scale: 1.05, x: -5 }}
@@ -263,7 +222,7 @@ function FlashSalesContent() {
                   <FiZap className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-[#F9629F]" />
                 </motion.div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-                  Flash Sales
+                  Deal of the Day
                 </h1>
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
@@ -280,45 +239,14 @@ function FlashSalesContent() {
                 transition={{ delay: 0.4, duration: 0.5 }}
                 className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto mb-6 sm:mb-8 px-4"
               >
-                Don't miss out on these limited-time deals!
+                Don&apos;t miss out on these limited-time deals!
               </motion.p>
-
-              {/* Countdown Timer */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-sm px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-full border border-[#F9629F]/30 w-full sm:w-auto max-w-full mx-4 sm:mx-0"
-              >
-                <div className="flex items-center gap-2">
-                  <FiClock className="w-4 h-4 sm:w-5 sm:h-6 text-[#F9629F] flex-shrink-0" />
-                  <span className="text-white font-semibold text-xs sm:text-sm md:text-base lg:text-lg whitespace-nowrap">Sale Ends in:</span>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
-                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
-                    {String(timeLeft.days).padStart(2, '0')}D
-                  </div>
-                  <span className="text-white text-sm sm:text-base md:text-xl">:</span>
-                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
-                    {String(timeLeft.hours).padStart(2, '0')}H
-                  </div>
-                  <span className="text-white text-sm sm:text-base md:text-xl">:</span>
-                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
-                    {String(timeLeft.minutes).padStart(2, '0')}M
-                  </div>
-                  <span className="text-white text-sm sm:text-base md:text-xl">:</span>
-                  <div className="bg-[#F9629F] text-[#000000] px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm md:text-base lg:text-lg min-w-[45px] sm:min-w-[50px] md:min-w-[60px] text-center">
-                    {String(timeLeft.seconds).padStart(2, '0')}S
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </div>
         </div>
       </motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 w-full overflow-x-hidden">
-        {/* Search and View Controls */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -326,12 +254,11 @@ function FlashSalesContent() {
           className="mb-6 sm:mb-8"
         >
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between w-full">
-            {/* Search Bar */}
             <div className="w-full lg:w-auto lg:flex-1 max-w-full lg:max-w-md">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search flash sale products..."
+                  placeholder="Search deal of the day products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2.5 sm:py-3 pl-10 sm:pl-12 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] transition-all shadow-lg bg-white text-[#000000] placeholder-gray-400 text-sm sm:text-base"
@@ -339,11 +266,9 @@ function FlashSalesContent() {
                 <FiSearch className="absolute left-3 sm:left-4 top-3 sm:top-3.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               </div>
             </div>
-
           </div>
         </motion.div>
 
-        {/* Results Count */}
         {!isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -352,27 +277,21 @@ function FlashSalesContent() {
           >
             <p className="text-white font-medium text-sm sm:text-base">
               Showing{' '}
-              <span className="text-[#F9629F] font-bold">
-                {products.length}
-              </span>{' '}
+              <span className="text-[#F9629F] font-bold">{products.length}</span>{' '}
               of{' '}
-              <span className="text-[#F9629F] font-bold">
-                {pagination.total}
-              </span>{' '}
-              <span className="hidden sm:inline">flash sale products</span>
+              <span className="text-[#F9629F] font-bold">{pagination.total}</span>{' '}
+              <span className="hidden sm:inline">deal of the day products</span>
               <span className="sm:hidden">products</span>
             </p>
           </motion.div>
         )}
 
-        {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center min-h-[400px]">
-            <Loading size="lg" text="Loading flash sales..." />
+            <Loading size="lg" text="Loading deal of the day..." />
           </div>
         )}
 
-        {/* Error State */}
         {error && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -383,7 +302,6 @@ function FlashSalesContent() {
           </motion.div>
         )}
 
-        {/* Products Grid */}
         {!isLoading && !error && products.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -409,14 +327,11 @@ function FlashSalesContent() {
                   className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
                 >
                   <Link href={`/products/${product._id}`} className="block">
-                    {/* Product Image Container */}
                     <div className="relative aspect-square bg-gray-100 overflow-hidden">
-                      <ProductImage 
-                        product={product} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      <ProductImage
+                        product={product}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      
-                      {/* Quick View Overlay - Shows on Hover */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
@@ -433,8 +348,6 @@ function FlashSalesContent() {
                           <span className="sm:hidden">View</span>
                         </motion.button>
                       </motion.div>
-
-                      {/* Discount Badge */}
                       <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-30">
                         <motion.div
                           initial={{ scale: 0, rotate: -180 }}
@@ -449,15 +362,10 @@ function FlashSalesContent() {
                         </motion.div>
                       </div>
                     </div>
-
-                    {/* Product Info */}
                     <div className="p-3 sm:p-4 md:p-5">
-                      {/* Product Name */}
                       <h3 className="text-base sm:text-lg font-bold text-[#000000] mb-2 line-clamp-2 group-hover:text-[#F9629F] transition-colors">
                         {product.name}
                       </h3>
-
-                      {/* Rating */}
                       <div className="mb-2 sm:mb-3">
                         <ProductRating
                           rating={product.rating || 0}
@@ -465,8 +373,6 @@ function FlashSalesContent() {
                           showReviews={true}
                         />
                       </div>
-
-                      {/* Price */}
                       <div className="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
                         <span className="text-xl sm:text-2xl font-bold text-[#F9629F]">
                           {formatCurrency(displayedPrice)}
@@ -477,8 +383,6 @@ function FlashSalesContent() {
                           </span>
                         )}
                       </div>
-
-                      {/* Stock Progress Bar */}
                       <div className="mb-2">
                         <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-600 mb-1">
                           <span>Available: {product.stock}</span>
@@ -501,14 +405,12 @@ function FlashSalesContent() {
           </motion.div>
         )}
 
-        {/* Quick View Modal */}
         <QuickView
           productId={quickViewProductId}
           isOpen={isQuickViewOpen}
           onClose={handleCloseQuickView}
         />
 
-        {/* Pagination */}
         {!isLoading && !error && pagination.totalPages > 1 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -524,7 +426,6 @@ function FlashSalesContent() {
           </motion.div>
         )}
 
-        {/* Empty State */}
         {!isLoading && !error && products.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -536,12 +437,12 @@ function FlashSalesContent() {
                 <FiZap className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                No flash sale products found
+                No deal of the day products found
               </h3>
               <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                 {searchQuery
                   ? 'Try adjusting your search terms to find what you\'re looking for.'
-                  : 'Check back soon for amazing flash sale deals!'}
+                  : 'Check back soon for amazing deal of the day products!'}
               </p>
               {searchQuery && (
                 <button
@@ -561,19 +462,18 @@ function FlashSalesContent() {
   );
 }
 
-export default function FlashSalesPage() {
+export default function DealOfTheDayPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] w-full overflow-x-hidden">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loading size="lg" text="Loading flash sales..." />
+          <Loading size="lg" text="Loading deal of the day..." />
         </div>
         <Footer />
       </div>
     }>
-      <FlashSalesContent />
+      <DealOfTheDayContent />
     </Suspense>
   );
 }
-

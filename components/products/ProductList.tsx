@@ -28,7 +28,7 @@ export default function ProductList({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-stretch">
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
@@ -75,7 +75,7 @@ export default function ProductList({
   // If grouping is enabled and we have grouped products, show grouped view
   if (groupByName && groupedProducts && groupedProducts.length > 0) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-stretch">
         {groupedProducts.map((groupedProduct) => (
           <GroupedProductCard
             key={groupedProduct.name}
@@ -89,7 +89,7 @@ export default function ProductList({
 
   // Otherwise, show individual products
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
       {products.map((product) => (
         <ProductCard key={product._id} product={product} showAttributes={showAttributes} />
       ))}

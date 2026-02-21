@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const userId = (session.user as any).id;
-    const { amount, currency = 'usd', shippingAddress, paymentMethod, billingAddress, itemIds, couponCode, couponDiscount, couponType } = await request.json();
+    const { amount, currency = 'usd', shippingAddress, paymentMethod, billingAddress, itemIds, shippingFee, couponCode, couponDiscount, couponType } = await request.json();
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
       return NextResponse.json(
@@ -53,6 +53,9 @@ export async function POST(request: NextRequest) {
         }),
         ...(itemIds && Array.isArray(itemIds) && itemIds.length > 0 && {
           itemIds: JSON.stringify(itemIds),
+        }),
+        ...(shippingFee != null && shippingFee > 0 && {
+          shippingFee: shippingFee.toString(),
         }),
         ...(couponCode && {
           couponCode: couponCode,

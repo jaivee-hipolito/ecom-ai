@@ -16,7 +16,7 @@ import Image from 'next/image';
 import ColorSwatch from './ColorSwatch';
 import { findMatchingVariant } from '@/utils/productGrouping';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiChevronLeft, FiChevronRight, FiMaximize2, FiZap } from 'react-icons/fi';
+import { FiX, FiChevronLeft, FiChevronRight, FiMaximize2 } from 'react-icons/fi';
 import BNPLInstallments from './BNPLInstallments';
 import { formatCurrency } from '@/utils/currency';
 import ProductRating from './ProductRating';
@@ -684,23 +684,6 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 flex-1">
                   {product.name}
                 </h1>
-                {/* Flash Sale Badge */}
-                {hasFlashSaleDiscount && (
-                  <motion.div
-                    initial={{ scale: 0, rotate: -45 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
-                    className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-2 flex-shrink-0"
-                  >
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                    >
-                      <FiZap className="w-4 h-4" />
-                    </motion.div>
-                    <span className="text-xs font-black tracking-wide">FLASH</span>
-                  </motion.div>
-                )}
               </div>
               {/* Rating Display - Hidden for now, but kept for future use */}
               {false && (

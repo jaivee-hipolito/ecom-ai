@@ -130,26 +130,10 @@ export async function POST(request: NextRequest) {
                 });
               }
 
-              // IMPORTANT: Order totalAmount should NOT include BNPL fee
-              // BNPL fee (6%) is charged by Stripe in the payment intent, but order total should show subtotal only
-              const BNPL_FEE_RATE = 0.06; // 6%
-              const isBNPL = paymentMethod === 'afterpay' || paymentMethod === 'klarna' || paymentMethod === 'affirm';
-              
-              // Order total is subtotal only (without BNPL fee)
-              // Payment intent charges subtotal + 6% fee, but order total shows subtotal only
-              const orderTotalAmount = totalAmount; // Don't add BNPL fee to order total
-              
-              if (isBNPL) {
-                console.log('[webhook] BNPL payment - Order total without fee:', {
-                  paymentMethod,
-                  subtotal: totalAmount,
-                  bnplFee: totalAmount * BNPL_FEE_RATE,
-                  paymentIntentCharges: paymentIntentSucceeded.amount / 100, // What Stripe charges (includes fee)
-                  orderTotal: orderTotalAmount, // What order shows (without fee)
-                  paymentIntentId,
-                  note: 'BNPL fee is charged by Stripe but not included in order total',
-                });
-              }
+              const orderTotalAmount = paymentIntentSucceeded.amount
+                ? paymentIntentSucceeded.amount / 100
+                : totalAmount;
+              const shippingFee = metadata.shippingFee ? parseFloat(metadata.shippingFee) : 0;
 
               // Create order
               const orderData: any = {
@@ -161,6 +145,7 @@ export async function POST(request: NextRequest) {
                 paymentId: paymentIntentId,
                 paymentStatus: 'paid',
                 status: 'processing',
+                ...(shippingFee > 0 && { shippingFee }),
               };
 
               // Add billing address if available in metadata or payment intent

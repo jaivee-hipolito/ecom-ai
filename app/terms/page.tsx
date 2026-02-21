@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
+import PageTopBanner from '@/components/shared/PageTopBanner';
 import { FiFileText, FiShield, FiMail, FiPhone, FiArrowUp } from 'react-icons/fi';
 import Link from 'next/link';
 
@@ -19,7 +20,8 @@ function TermsContent() {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 ${isEmbed ? 'pt-4' : ''}`}>
       {!isEmbed && <Navbar />}
-      
+      {!isEmbed && <PageTopBanner />}
+
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

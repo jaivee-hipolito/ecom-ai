@@ -140,41 +140,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // IMPORTANT: Order totalAmount should NOT include BNPL fee
-    // BNPL fee (6%) is charged by Stripe in the payment intent, but order total should show subtotal only
-    const BNPL_FEE_RATE = 0.06; // 6%
-    const isBNPL = paymentMethod === 'afterpay' || paymentMethod === 'klarna' || paymentMethod === 'affirm';
-    
-    let finalTotalAmount: number;
-    
-    if (isBNPL) {
-      // For BNPL payments: Order total = subtotal (without BNPL fee)
-      // Payment intent charges subtotal + 6% fee, but order total shows subtotal only
-      finalTotalAmount = totalAmount; // Don't add BNPL fee to order total
-      
-      console.log('[create-from-intent] BNPL payment - Order total without fee:', {
-        paymentMethod,
-        subtotal: totalAmount,
-        bnplFee: totalAmount * BNPL_FEE_RATE,
-        paymentIntentCharges: paymentIntent.amount / 100, // What Stripe charges (includes fee)
-        orderTotal: finalTotalAmount, // What order shows (without fee)
-        paymentIntentId,
-        note: 'BNPL fee is charged by Stripe but not included in order total',
-      });
-    } else {
-      // For card payments, use the actual payment intent amount (which we corrected to remove BNPL fee)
-      // This ensures the order total matches what was actually charged
-      const paymentIntentAmountInDollars = paymentIntent.amount / 100;
-      finalTotalAmount = paymentIntentAmountInDollars;
-      
-      console.log('[create-from-intent] Using payment intent amount for card payment:', {
-        paymentMethod,
-        calculatedTotal: totalAmount,
-        paymentIntentAmount: paymentIntentAmountInDollars,
-        finalTotalAmount,
-        paymentIntentId,
-      });
-    }
+    const finalTotalAmount = paymentIntent.amount / 100;
+
+    const shippingFee = metadata.shippingFee ? parseFloat(metadata.shippingFee) : 0;
 
     // Create order
     const orderData: any = {
@@ -186,6 +154,7 @@ export async function POST(request: NextRequest) {
       paymentId: paymentIntentId,
       paymentStatus: paymentIntent.status === 'succeeded' ? 'paid' : 'pending',
       status: 'pending',
+      ...(shippingFee > 0 && { shippingFee }),
     };
 
     // Add billing address if available

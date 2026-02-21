@@ -12,6 +12,7 @@ import { IOrder } from '@/types/order';
 import { IProduct } from '@/types/product';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
+import PageTopBanner from '@/components/shared/PageTopBanner';
 import OrderTracking from '@/components/orders/OrderTracking';
 
 export default function OrderDetailPage() {
@@ -154,6 +155,7 @@ export default function OrderDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Navbar />
+      <PageTopBanner />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -278,15 +280,43 @@ export default function OrderDetailPage() {
                   );
                 })}
               </div>
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-semibold text-[#1a1a1a]">
-                    Total Amount
-                  </span>
-                  <span className="text-3xl font-bold text-[#FC9BC2]">
-                    {formatCurrency(order.totalAmount)}
-                  </span>
-                </div>
+              <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
+                {(() => {
+                  const subtotal = order.items.reduce(
+                    (sum, item) => sum + item.price * item.quantity,
+                    0
+                  );
+                  const shipping = order.shippingFee ?? 0;
+                  const discountAmount = order.coupon?.discountAmount ?? 0;
+                  return (
+                    <>
+                      <div className="flex justify-between items-center text-gray-600">
+                        <span>Subtotal</span>
+                        <span>{formatCurrency(subtotal)}</span>
+                      </div>
+                      {order.coupon && discountAmount > 0 && (
+                        <div className="flex justify-between items-center text-green-600">
+                          <span>Discount ({order.coupon.code})</span>
+                          <span>-{formatCurrency(discountAmount)}</span>
+                        </div>
+                      )}
+                      {shipping > 0 && (
+                        <div className="flex justify-between items-center text-gray-600">
+                          <span>Shipping</span>
+                          <span>{formatCurrency(shipping)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                        <span className="text-xl font-semibold text-[#1a1a1a]">
+                          Total Amount
+                        </span>
+                        <span className="text-3xl font-bold text-[#FC9BC2]">
+                          {formatCurrency(order.totalAmount)}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </motion.div>
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
 import { useProducts } from '@/hooks/useProducts';
-import { FiEye, FiTrendingUp, FiArrowRight, FiZap } from 'react-icons/fi';
+import { FiEye, FiTrendingUp, FiArrowRight } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import QuickView from '@/components/products/QuickView';
 import { formatCurrency } from '@/utils/currency';
@@ -158,7 +158,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
             <Loading size="lg" text="Loading most viewed products..." />
           </div>
         ) : displayProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {displayProducts.map((product, index) => {
               const viewCount = product.views || 0;
               const flashSaleData = calculateFlashSaleData(product);
@@ -198,26 +198,6 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                           <span>Quick View</span>
                         </motion.button>
                       </motion.div>
-
-                      {/* Flash Sale Badge */}
-                      {hasFlashSaleDiscount && (
-                        <div className="absolute top-3 left-3 z-30">
-                          <motion.div
-                            initial={{ scale: 0, rotate: -45 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                            className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1"
-                          >
-                            <motion.div
-                              animate={{ rotate: [0, 10, -10, 0] }}
-                              transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                            >
-                              <FiZap className="w-3 h-3" />
-                            </motion.div>
-                            <span className="text-[9px] font-black tracking-wide">FLASH</span>
-                          </motion.div>
-                        </div>
-                      )}
 
                       {/* Discount Badge */}
                       {hasFlashSaleDiscount && (

@@ -188,7 +188,7 @@ export default function AfterpayModal({ isOpen, onClose }: AfterpayModalProps) {
                   className="space-y-4"
                 >
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    You must be of the age of majority in your province or territory, a resident of Canada, and meet additional eligibility criteria to qualify. Estimated payment amounts shown on product pages include a 6% BNPL processing fee. Taxes and shipping charges are added at checkout. For complete terms see{' '}
+                    You must be of the age of majority in your province or territory, a resident of Canada, and meet additional eligibility criteria to qualify. Taxes and shipping charges are added at checkout. For complete terms see{' '}
                     <a
                       href="https://www.afterpay.com/en-CA/instalment-agreement"
                       target="_blank"
@@ -199,11 +199,6 @@ export default function AfterpayModal({ isOpen, onClose }: AfterpayModalProps) {
                     </a>
                     .
                   </p>
-                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-xs text-yellow-800 font-semibold">
-                      ⚠️ Note: A 6% BNPL processing fee will be added to your order total when using Afterpay.
-                    </p>
-                  </div>
                   <p className="text-xs text-gray-600 text-center pt-2">
                     © 2020 Afterpay Canada
                   </p>

@@ -10,6 +10,7 @@ import User from '@/models/User';
 import { sendVerificationEmail } from '@/lib/email';
 import { sendVerificationSMS } from '@/lib/sms';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { requireAuth } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB/Mongoose compatibility
 export const runtime = 'nodejs';
@@ -17,6 +18,14 @@ export const runtime = 'nodejs';
 // Generate a 6-digit verification code
 function generateVerificationCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+const RESEND_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCooldownRemainingMs(sentAt: Date | undefined): number {
+  if (!sentAt) return 0;
+  const elapsed = Date.now() - new Date(sentAt).getTime();
+  return Math.max(0, RESEND_COOLDOWN_MS - elapsed);
 }
 
 export async function POST(request: NextRequest) {
@@ -51,8 +60,8 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     if (type === 'email') {
-      // Find user by email
-      const user = await User.findOne({ email: email.toLowerCase() });
+      // Find user by email (include sent-at for cooldown)
+      const user = await User.findOne({ email: email.toLowerCase() }).select('+emailVerificationCodeSentAt');
 
       if (!user) {
         return NextResponse.json(
@@ -61,9 +70,23 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      const cooldownMs = getCooldownRemainingMs((user as any).emailVerificationCodeSentAt);
+      if (cooldownMs > 0) {
+        const minutesLeft = Math.ceil(cooldownMs / 60000);
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Please wait ${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} before requesting another code.`,
+            cooldownSeconds: Math.ceil(cooldownMs / 1000),
+          },
+          { status: 429 }
+        );
+      }
+
       // Update user with email verification code
       user.emailVerificationCode = verificationCode;
       user.emailVerificationCodeExpires = expiresAt;
+      (user as any).emailVerificationCodeSentAt = new Date();
       await user.save();
 
       // Send email with verification code
@@ -93,37 +116,54 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       );
     } else {
-      // Phone verification - normalize phone number before lookup
-      const normalizedPhoneNumber = normalizePhoneNumber(phoneNumber);
-      let user = await User.findOne({ contactNumber: normalizedPhoneNumber });
-
-      // If not found with normalized, try original format (for backward compatibility)
-      if (!user) {
-        user = await User.findOne({ contactNumber: phoneNumber });
-        
-        // If found with original format, update to normalized format for future queries
-        if (user) {
-          user.contactNumber = normalizedPhoneNumber;
-          await user.save();
-        }
+      // Phone verification: use session so we save the code to the logged-in user (same doc we check on verify)
+      const session = await requireAuth().catch(() => null);
+      if (!session) {
+        return NextResponse.json(
+          { success: false, error: 'You must be signed in to request a phone verification code.' },
+          { status: 401 }
+        );
       }
-
+      const userId = (session.user as any).id;
+      const user = await User.findById(userId);
       if (!user) {
         return NextResponse.json(
-          { success: false, error: 'User not found. Please register first.' },
+          { success: false, error: 'User not found.' },
           { status: 404 }
         );
       }
+      const userPhone = normalizePhoneNumber((user as any).contactNumber || '');
+      const requestedPhone = normalizePhoneNumber(phoneNumber);
+      if (userPhone !== requestedPhone) {
+        return NextResponse.json(
+          { success: false, error: 'Phone number does not match your account.' },
+          { status: 400 }
+        );
+      }
 
-      // Update user with phone verification code
+      const cooldownMs = getCooldownRemainingMs((user as any).phoneVerificationCodeSentAt);
+      if (cooldownMs > 0) {
+        const minutesLeft = Math.ceil(cooldownMs / 60000);
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Please wait ${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} before requesting another code.`,
+            cooldownSeconds: Math.ceil(cooldownMs / 1000),
+          },
+          { status: 429 }
+        );
+      }
+
+      // Save code to the logged-in user's document (same one verify-code will read)
       user.phoneVerificationCode = verificationCode;
       user.phoneVerificationCodeExpires = expiresAt;
+      (user as any).phoneVerificationCodeSentAt = new Date();
       await user.save();
 
-      const smsResult = await sendVerificationSMS(phoneNumber, verificationCode);
+      const smsResult = await sendVerificationSMS((user as any).contactNumber || phoneNumber, verificationCode);
 
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Phone verification code for ${phoneNumber}: ${verificationCode}`);
+        console.log(`Phone verification code for ${(user as any).contactNumber}: ${verificationCode}`);
       }
 
       if (!smsResult.success) {

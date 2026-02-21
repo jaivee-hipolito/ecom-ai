@@ -12,11 +12,13 @@ interface OrderSummaryProps {
   items: ICartItem[];
   subtotal: number;
   shipping?: number;
+  shippingLoading?: boolean;
   tax?: number;
   total: number;
-  bnplFee?: number;
   paymentMethod?: 'card' | 'afterpay' | 'klarna' | 'affirm';
   onCouponApplied?: (discount: number, couponCode?: string, couponType?: 'percentage' | 'fixed') => void;
+  /** When true, hide the "Order Summary" header (e.g. when used inside a collapsible that has its own header) */
+  compact?: boolean;
 }
 
 // Mock coupon codes - In production, this would come from an API
@@ -32,11 +34,12 @@ export default function OrderSummary({
   items,
   subtotal,
   shipping = 0,
+  shippingLoading = false,
   tax = 0,
   total,
-  bnplFee = 0,
   paymentMethod = 'card',
   onCouponApplied,
+  compact = false,
 }: OrderSummaryProps) {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; type: 'percentage' | 'fixed' } | null>(null);
@@ -122,12 +125,7 @@ export default function OrderSummary({
 
   const discount = calculateDiscount(appliedCoupon);
   const subtotalAfterDiscount = subtotal - discount;
-  
-  // IMPORTANT: For BNPL payments, the payment intent includes the 6% fee, but we DON'T show it in the UI
-  // Users should only see the product total, not the BNPL fee
-  // The fee is included in the payment intent sent to Stripe, but hidden from the user display
-  const effectiveBnplFee = 0; // Always 0 for UI display - fee is included in payment intent but not shown
-  
+
   // Tax is shouldered by owner/admin, so set to 0 for customers
   const taxBreakdown = {
     subtotal: subtotalAfterDiscount,
@@ -136,25 +134,25 @@ export default function OrderSummary({
     totalTax: 0,
     total: subtotalAfterDiscount,
   };
-  // Final total for display - does NOT include BNPL fee (even though payment intent does)
   const finalTotal = Math.max(0, subtotalAfterDiscount + shipping + taxBreakdown.totalTax);
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={compact ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-[#000000] to-[#1a1a1a] rounded-2xl shadow-2xl p-6 sm:p-8 sticky top-8 border border-white/10"
+      className={`bg-gradient-to-br from-[#000000] to-[#1a1a1a] ${compact ? 'rounded-none shadow-none border-0 p-4 sm:p-6 md:p-8 pt-2 sm:pt-4' : 'rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl p-4 sm:p-6 md:p-8 lg:sticky lg:top-6 border border-white/10'}`}
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] p-2 rounded-lg">
-          <FiShoppingBag className="w-5 h-5 text-white" />
+      {!compact && (
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+            <FiShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+          </div>
+          <h2 className="text-lg sm:text-2xl font-bold text-white">Order Summary</h2>
         </div>
-        <h2 className="text-2xl font-bold text-white">Order Summary</h2>
-      </div>
+      )}
 
       {/* Items List */}
-      <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
+      <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6 max-h-[280px] sm:max-h-[400px] overflow-y-auto pr-1 sm:pr-2">
         {items.map((item, index) => {
           const product = typeof item.product === 'object' ? item.product : null;
           const productId = typeof item.product === 'string' ? item.product : product?._id || '';
@@ -305,15 +303,13 @@ export default function OrderSummary({
             <span className="font-bold text-lg">-{formatCurrency(discount)}</span>
           </motion.div>
         )}
-        
-        {/* BNPL fee is NOT shown in UI - it's included in payment intent but hidden from users */}
-        
-        {shipping > 0 && (
-          <div className="flex justify-between items-center text-white/70">
-            <span className="text-sm sm:text-base">Shipping</span>
-            <span className="text-sm">{formatCurrency(shipping)}</span>
-          </div>
-        )}
+
+        <div className="flex justify-between items-center text-white/70">
+          <span className="text-sm sm:text-base">Shipping</span>
+          <span className="text-sm">
+            {shippingLoading ? 'Calculating...' : shipping > 0 ? formatCurrency(shipping) : 'Free'}
+          </span>
+        </div>
         
         
         <div className="border-t border-white/20 pt-4 mt-4">

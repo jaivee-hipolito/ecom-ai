@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/shared/Navbar';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import Footer from '@/components/shared/Footer';
+import PageTopBanner from '@/components/shared/PageTopBanner';
 import ProductDetail from '@/components/products/ProductDetail';
 import Loading from '@/components/ui/Loading';
 import { useProduct } from '@/hooks/useProducts';
@@ -45,6 +46,7 @@ function ProductDetailContent() {
       {isAuthenticated && <DashboardSidebar />}
       <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
         <Navbar />
+        <PageTopBanner />
 
         <main>
           {isLoading ? (

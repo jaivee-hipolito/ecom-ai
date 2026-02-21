@@ -10,58 +10,6 @@ import { getStripe } from '@/lib/stripe';
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
 
-// Helper function to recalculate totalAmount for BNPL orders that include the fee
-function recalculateBNPLTotal(order: any): number {
-  const BNPL_FEE_RATE = 0.06; // 6%
-  
-  // Calculate items total
-  const itemsTotal = order.items.reduce((sum: number, item: any) => {
-    return sum + (item.price * item.quantity);
-  }, 0);
-
-  // If items total is 0 or invalid, return original
-  if (!itemsTotal || itemsTotal <= 0) {
-    return order.totalAmount;
-  }
-
-  // Check if stored totalAmount includes the BNPL fee (approximately itemsTotal * 1.06)
-  const expectedTotalWithFee = itemsTotal * (1 + BNPL_FEE_RATE);
-  const tolerance = 0.10; // Allow small rounding differences
-  
-  // Check if totalAmount matches the pattern of itemsTotal + 6% fee
-  const difference = Math.abs(order.totalAmount - expectedTotalWithFee);
-  const isLikelyWithFee = difference < tolerance;
-  
-  // Check payment method (also handle variations like 'afterpay_clearpay')
-  const paymentMethod = (order.paymentMethod || '').toLowerCase();
-  const isBNPL = paymentMethod === 'afterpay' || 
-                 paymentMethod === 'klarna' || 
-                 paymentMethod === 'affirm' ||
-                 paymentMethod === 'afterpay_clearpay' ||
-                 paymentMethod.includes('afterpay') ||
-                 paymentMethod.includes('klarna') ||
-                 paymentMethod.includes('affirm');
-  
-  // If total matches the 6% fee pattern, correct it (regardless of payment method)
-  // This ensures order totals never show the BNPL fee, even if paymentMethod wasn't set correctly
-  if (isLikelyWithFee) {
-    console.log('[orders/route] ✅ Recalculating order total (removing BNPL fee):', {
-      orderId: order._id.toString(),
-      paymentMethod: order.paymentMethod,
-      isBNPL,
-      storedTotal: order.totalAmount,
-      itemsTotal,
-      expectedWithFee: expectedTotalWithFee,
-      difference,
-      correctedTotal: itemsTotal,
-    });
-    return itemsTotal;
-  }
-
-  // Already correct or doesn't match expected pattern, return as-is
-  return order.totalAmount;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const session = await requireAuth();
@@ -81,25 +29,12 @@ export async function GET(request: NextRequest) {
       .populate('items.product')
       .lean();
 
-    const correctedOrders = orders.map((order) => {
-      const correctedTotal = recalculateBNPLTotal(order);
-      const wasCorrected = correctedTotal !== order.totalAmount;
-      
-      if (wasCorrected) {
-        console.log('[orders/route] 📊 Order corrected:', {
-          orderId: order._id.toString(),
-          originalTotal: order.totalAmount,
-          correctedTotal,
-        });
-      }
-      
-      return {
-        ...order,
-        _id: order._id.toString(),
-        user: order.user.toString(),
-        totalAmount: correctedTotal,
-      };
-    });
+    const correctedOrders = orders.map((order) => ({
+      ...order,
+      _id: order._id.toString(),
+      user: order.user.toString(),
+      totalAmount: order.totalAmount,
+    }));
 
     return NextResponse.json(
       { orders: correctedOrders },
@@ -203,48 +138,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // IMPORTANT: Order totalAmount should NOT include BNPL fee
-    // BNPL fee (6%) is charged by Stripe in the payment intent, but order total should show subtotal only
-    const BNPL_FEE_RATE = 0.06; // 6%
-    const isBNPL = paymentMethod === 'afterpay' || paymentMethod === 'klarna' || paymentMethod === 'affirm';
-    
+      // No payment intent ID, use calculated amount
     let finalTotalAmount: number;
-    
-    if (isBNPL) {
-      // For BNPL payments: Order total = subtotal (without BNPL fee)
-      // Payment intent charges subtotal + 6% fee, but order total shows subtotal only
-      finalTotalAmount = totalAmount; // Don't add BNPL fee to order total
-      
-      console.log('[orders/route] BNPL payment - Order total without fee:', {
-        paymentMethod,
-        subtotal: totalAmount,
-        bnplFee: totalAmount * BNPL_FEE_RATE,
-        paymentIntentCharges: totalAmount * (1 + BNPL_FEE_RATE), // What Stripe charges
-        orderTotal: finalTotalAmount, // What order shows (without fee)
-        note: 'BNPL fee is charged by Stripe but not included in order total',
-      });
-    } else if (paymentIntentId) {
-      // For card payments with payment intent, retrieve and use the actual amount charged
+    if (paymentIntentId) {
       try {
         const stripe = getStripe();
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-        const paymentIntentAmountInDollars = paymentIntent.amount / 100;
-        finalTotalAmount = paymentIntentAmountInDollars;
-        
-        console.log('[orders/route] Using payment intent amount for card payment:', {
-          paymentMethod,
-          calculatedTotal: totalAmount,
-          paymentIntentAmount: paymentIntentAmountInDollars,
-          finalTotalAmount,
-          paymentIntentId,
-        });
+        finalTotalAmount = paymentIntent.amount / 100;
       } catch (error) {
-        // If we can't retrieve payment intent, fall back to calculated amount
         console.error('[orders/route] Failed to retrieve payment intent, using calculated amount:', error);
         finalTotalAmount = totalAmount;
       }
     } else {
-      // No payment intent ID, use calculated amount
       finalTotalAmount = totalAmount;
     }
 

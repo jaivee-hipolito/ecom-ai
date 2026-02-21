@@ -4,10 +4,10 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import PageTopBanner from '@/components/shared/PageTopBanner';
-import { FiShield, FiArrowUp } from 'react-icons/fi';
+import { FiTruck, FiArrowUp } from 'react-icons/fi';
 import Link from 'next/link';
 
-export default function RefundPolicyPage() {
+export default function ShippingPolicyPage() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -32,15 +32,12 @@ export default function RefundPolicyPage() {
               transition={{ delay: 0.2, type: 'spring' }}
               className="w-20 h-20 bg-gradient-to-br from-[#F9629F] to-[#FC9BC2] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50"
             >
-              <FiShield className="w-10 h-10 text-[#000000]" />
+              <FiTruck className="w-10 h-10 text-[#000000]" />
             </motion.div>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-center text-white mb-4">
-            Refund Policy
+            Shipping &amp; Delivery – Teezee
           </h1>
-          <p className="text-center text-white/80 text-lg sm:text-xl">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
         </div>
       </motion.div>
 
@@ -60,11 +57,11 @@ export default function RefundPolicyPage() {
             className="mb-8"
           >
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg">
-              At <span className="font-bold text-[#000000]">Teezee</span>, we are committed to delivering premium-quality gold jewelry crafted with precision and care. Due to the nature and value of our products, all purchases are considered final sale. We kindly ask that you review the following policy carefully before completing your order.
+              At Teezee, every piece is prepared with intention and care. From our hands to yours, we are committed to ensuring a seamless and secure delivery experience.
             </p>
           </motion.div>
 
-          {/* Section 1 */}
+          {/* Order Preparation */}
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -73,16 +70,19 @@ export default function RefundPolicyPage() {
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
               <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">1</span>
-              Final Sale Policy
+              Order Preparation
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                All items are sold as final sale. We do not accept returns, exchanges, or refunds under any circumstances, including but not limited to sizing concerns, changes of mind, or personal preference.
+                Each in-stock piece is carefully processed and dispatched within <strong>1–3 business days</strong>. During peak seasons or exclusive releases, additional time may be required to maintain our quality standards.
+              </p>
+              <p className="leading-relaxed">
+                All packaging is thoughtfully completed within this timeframe to ensure your jewelry arrives beautifully presented and protected.
               </p>
             </div>
           </motion.section>
 
-          {/* Section 2 */}
+          {/* Shipping Within Canada */}
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -91,16 +91,36 @@ export default function RefundPolicyPage() {
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
               <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">2</span>
-              Quality Assurance
+              Shipping Within Canada
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                Each piece undergoes a thorough inspection prior to shipment to ensure it meets our strict quality standards. We guarantee that your item will arrive in the condition described at the time of purchase.
+                All orders are dispatched from Victoria, British Columbia and we currently ship Canada-wide.
+              </p>
+              <p className="leading-relaxed">
+                Orders are processed and shipped on business days only.
+              </p>
+              <p className="leading-relaxed">
+                Every shipment is sent via Canada Post and includes:
+              </p>
+              <ul className="list-disc list-inside ml-4 space-y-2 leading-relaxed">
+                <li>$100 complimentary insurance coverage</li>
+                <li>Tracking information, delivered via email or SMS</li>
+                <li>Adult signature required upon delivery for added security</li>
+              </ul>
+              <p className="leading-relaxed">
+                If no one is available at the time of delivery, Canada Post will leave a notice card with instructions for pickup at your nearest outlet. Government-issued photo ID will be required to collect your parcel.
+              </p>
+              <p className="leading-relaxed">
+                Should you wish to purchase additional insurance coverage, please contact us prior to placing your order.
+              </p>
+              <p className="leading-relaxed">
+                Please note that delivery timelines may be affected by national, provincial, or territorial holidays, as well as carrier-related delays beyond our control.
               </p>
             </div>
           </motion.section>
 
-          {/* Section 3 */}
+          {/* Order Changes */}
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -109,16 +129,19 @@ export default function RefundPolicyPage() {
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
               <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">3</span>
-              Order Accuracy
+              Order Changes
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                Once an order has been placed, it cannot be canceled, modified, or refunded. Please ensure all details — including sizing, specifications, and shipping information — are accurate before finalizing your purchase.
+                Once an order has been dispatched, it cannot be modified or canceled.
+              </p>
+              <p className="leading-relaxed">
+                If multiple orders are placed, we will gladly combine them when possible.
               </p>
             </div>
           </motion.section>
 
-          {/* Section 4 */}
+          {/* Address Details */}
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -127,57 +150,38 @@ export default function RefundPolicyPage() {
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
               <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">4</span>
-              Shipping Damage Claims
+              Address Details
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                If your item arrives damaged due to shipping, you must provide a clear and continuous unboxing video as proof. Claims submitted without video evidence will not be considered. All damage-related claims are reviewed on a case-by-case basis.
+                To ensure a smooth delivery, please provide a complete and accurate shipping address, including any apartment or unit numbers.
+              </p>
+              <p className="leading-relaxed">
+                If a parcel is returned due to incomplete or incorrect address information, a reshipping fee will apply.
               </p>
             </div>
           </motion.section>
 
-          {/* Section 5 */}
+          {/* Delivery Concerns */}
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
+            transition={{ delay: 0.85 }}
             className="mb-8"
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
               <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">5</span>
-              Customer Support
+              Delivery Concerns
             </h2>
             <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                While we do not offer returns or exchanges, our team is happy to assist with any questions prior to purchase. For inquiries, please contact us at{' '}
-                <a href="mailto:teezeejewelry.official@gmail.com" className="font-semibold text-[#F9629F] hover:text-[#FC9BC2] transition-colors">teezeejewelry.official@gmail.com</a>
-                {' '}or through our official{' '}
-                <a
-                  href="https://www.facebook.com/TeezeeFacebookPage/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-[#F9629F] hover:text-[#FC9BC2] underline transition-colors"
-                >
-                  Facebook page
-                </a>.
+                If your tracking indicates that your parcel has been delivered but you have not received it, please allow 72 hours and check with neighbors, your concierge, or your community mailbox before contacting us.
               </p>
-            </div>
-          </motion.section>
-
-          {/* Section 6 */}
-          <motion.section
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="mb-8"
-          >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#000000] mb-4 flex items-center gap-3">
-              <span className="inline-flex w-11 h-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F9629F] text-white text-sm font-bold">6</span>
-              Legal Notice
-            </h2>
-            <div className="ml-14 space-y-4 text-gray-700">
               <p className="leading-relaxed">
-                By completing a purchase with Teezee, you acknowledge and agree to this Refund Policy. This policy forms part of our Terms and Conditions and is legally binding. Teezee reserves the right to update or modify this policy at any time without prior notice. Customers are responsible for reviewing the policy before making a purchase.
+                For security reasons, we are unable to offer refunds on parcels that have been signed for upon delivery.
+              </p>
+              <p className="leading-relaxed">
+                Teezee is not responsible for packages lost due to incorrect shipping information provided at checkout.
               </p>
             </div>
           </motion.section>
@@ -186,17 +190,17 @@ export default function RefundPolicyPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.1 }}
+            transition={{ delay: 0.9 }}
             className="pt-6 border-t border-gray-200"
           >
             <p className="text-gray-700 leading-relaxed text-base sm:text-lg font-medium">
-              Thank you for choosing Teezee. We value your trust and look forward to providing you with exceptional jewelry.
+              At Teezee, our goal is to provide a flawless, secure, and elevated delivery experience—ensuring your exquisite jewelry arrives safely and ready to be cherished.
             </p>
             <Link
-              href="/terms"
+              href="/"
               className="inline-block mt-6 text-[#F9629F] font-semibold hover:text-[#FC9BC2] transition-colors"
             >
-              ← Back to Terms & Conditions
+              ← Back to Home
             </Link>
           </motion.div>
         </motion.div>
@@ -206,7 +210,7 @@ export default function RefundPolicyPage() {
       <motion.button
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 2.5 }}
+        transition={{ delay: 1.5 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={scrollToTop}

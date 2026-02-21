@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import {
   FiHome,
@@ -20,7 +19,6 @@ import {
   FiCreditCard,
   FiShield,
   FiTruck,
-  FiArrowRight,
 } from 'react-icons/fi';
 import { useAuth } from '@/contexts/AuthContext';
 import ContactUsModal from './ContactUsModal';
@@ -34,7 +32,7 @@ export default function Footer() {
   const quickLinks = [
     { name: 'Home', href: '/', icon: FiHome },
     { name: 'Products', href: '/products', icon: FiShoppingBag },
-    { name: 'Flash Sales', href: '/flash-sales', icon: FiZap },
+    { name: 'Deal of the Day', href: '/deal-of-the-day', icon: FiZap },
     { name: 'Categories', href: '/products', icon: FiPackage },
   ];
 
@@ -56,7 +54,6 @@ export default function Footer() {
   const companyInfo = [
     { name: 'About Us', href: '/about' },
     { name: 'Careers', href: '/careers' },
-    { name: 'Blog', href: '/blog' },
     { name: 'Privacy Policy', href: '/privacy' },
     { name: 'Terms of Service', href: '/terms' },
   ];
@@ -74,69 +71,11 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] text-white relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-20 left-10 w-96 h-96 bg-[#F9629F]/5 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-[#F9629F]/5 rounded-full blur-3xl"
-          animate={{
-            x: [0, -50, 0],
-            y: [0, -30, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Main Footer Content */}
-        <div className="py-12 sm:py-16 lg:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            {/* Company Info & Logo */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="lg:col-span-1"
-            >
-              <Link href="/" className="inline-block mb-6">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center"
-                >
-                  <Image
-                    src="/teezee-logo.png"
-                    alt="Teezee - Adorn Yourself With The Radiance Of 18K Gold"
-                    width={200}
-                    height={85}
-                    className="h-12 lg:h-16 w-auto object-contain"
-                    suppressHydrationWarning
-                  />
-                </motion.div>
-              </Link>
-              <p className="text-white/70 text-sm mb-6 leading-relaxed">
-                Your trusted destination for quality products. Shop with confidence and enjoy amazing deals every day.
-              </p>
-            </motion.div>
-
+    <footer className="bg-[#0a0a0f] text-white border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Footer Content - 3 columns */}
+        <div className="py-8 sm:py-10 lg:py-12">
+          <div className="grid grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             {/* Quick Links */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -144,8 +83,8 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <h3 className="text-lg font-bold mb-6 text-[#F9629F]">Quick Links</h3>
-              <ul className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 text-[#F9629F]">Quick Links</h3>
+              <ul className="space-y-1.5 sm:space-y-2 lg:space-y-3">
                 {quickLinks.map((link, index) => {
                   const Icon = link.icon;
                   return (
@@ -158,7 +97,7 @@ export default function Footer() {
                     >
                       <Link
                         href={link.href}
-                        className="flex items-center gap-2 text-white/70 hover:text-[#F9629F] transition-colors group text-sm"
+                        className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm"
                       >
                         <Icon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         <span>{link.name}</span>
@@ -176,8 +115,8 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h3 className="text-lg font-bold mb-6 text-[#F9629F]">Customer Service</h3>
-              <ul className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 text-[#F9629F]">Customer Service</h3>
+              <ul className="space-y-1.5 sm:space-y-2 lg:space-y-3">
                 {customerService.map((link, index) => (
                   <motion.li
                     key={link.name}
@@ -189,18 +128,16 @@ export default function Footer() {
                     {(link as any).isModal ? (
                       <button
                         onClick={() => setIsContactModalOpen(true)}
-                        className="text-white/70 hover:text-[#F9629F] transition-colors text-sm flex items-center gap-2 group w-full text-left"
+                        className="text-white/60 hover:text-white transition-colors text-sm w-full text-left"
                       >
-                        <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                        <span>{link.name}</span>
+                        {link.name}
                       </button>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-white/70 hover:text-[#F9629F] transition-colors text-sm flex items-center gap-2 group"
+                        className="text-white/60 hover:text-white transition-colors text-sm"
                       >
-                        <FiArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                        <span>{link.name}</span>
+                        {link.name}
                       </Link>
                     )}
                   </motion.li>
@@ -208,46 +145,38 @@ export default function Footer() {
               </ul>
             </motion.div>
 
-            {/* Newsletter & Account */}
+            {/* Stay Connected */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <h3 className="text-lg font-bold mb-6 text-[#F9629F]">Stay Connected</h3>
-
-              {/* Account Links (if authenticated) */}
-              {isAuthenticated && (
-                <div>
-                  <h4 className="text-sm font-semibold mb-3 text-white/90">My Account</h4>
-                  <ul className="space-y-2">
-                    {accountLinks.map((link) => (
-                      <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          className="text-white/70 hover:text-[#F9629F] transition-colors text-xs flex items-center gap-2 group"
-                        >
-                          <FiArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                          <span>{link.name}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 text-[#F9629F]">Stay Connected</h3>
+              <ul className="space-y-1.5 sm:space-y-2">
+                  {accountLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-white/60 hover:text-white transition-colors text-sm"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
             </motion.div>
           </div>
 
-          {/* Company Info Links */}
+          {/* Company Info Links - 3 cols on mobile for compact browsing */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-6 pt-3 pb-3 border-t border-b border-white/10"
+            className="mt-4 sm:mt-6 pt-3 pb-3 border-t border-b border-white/10"
           >
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
               {companyInfo.map((link, index) => (
                 <motion.div
                   key={link.name}
@@ -258,7 +187,7 @@ export default function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-[#F9629F] transition-colors text-xs"
+                    className="text-white/60 hover:text-white transition-colors text-xs"
                   >
                     {link.name}
                   </Link>
@@ -268,9 +197,9 @@ export default function Footer() {
           </motion.div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-white/10 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Bottom Bar - compact on mobile */}
+        <div className="border-t border-white/10 py-4 sm:py-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
             {/* Copyright */}
             <motion.p
               initial={{ opacity: 0 }}
@@ -287,7 +216,7 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center"
             >
               {socialLinks.map((social, index) => {
                 const Icon = social.icon;
@@ -318,19 +247,19 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col items-center md:items-end gap-3"
+              className="flex flex-col items-center md:items-end gap-2 sm:gap-3"
             >
-              <div className="flex items-center gap-2 flex-wrap justify-center">
-                <div className="flex items-center gap-1 text-white/60 text-xs">
-                  <FiShield className="w-4 h-4 text-[#F9629F]" />
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
+                <div className="flex items-center gap-1 text-white/60 text-[10px] sm:text-xs">
+                  <FiShield className="w-4 h-4 text-white/80" />
                   <span>Secure</span>
                 </div>
-                <div className="flex items-center gap-1 text-white/60 text-xs">
-                  <FiTruck className="w-4 h-4 text-[#F9629F]" />
+                <div className="flex items-center gap-1 text-white/60 text-[10px] sm:text-xs">
+                  <FiTruck className="w-4 h-4 text-white/80" />
                   <span>Free Shipping</span>
                 </div>
-                <div className="flex items-center gap-1 text-white/60 text-xs">
-                  <FiCreditCard className="w-4 h-4 text-[#F9629F]" />
+                <div className="flex items-center gap-1 text-white/60 text-[10px] sm:text-xs">
+                  <FiCreditCard className="w-4 h-4 text-white/80" />
                   <span>Easy Payment</span>
                 </div>
               </div>
@@ -342,7 +271,7 @@ export default function Footer() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className="px-2 py-1 bg-white/10 rounded text-[10px] text-white/60"
+                    className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] text-white/60"
                   >
                     {method}
                   </motion.div>

@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import { RegisterData } from '@/types/auth';
+import { isValidPassword, getPasswordRequirementChecks, PASSWORD_REQUIREMENT_MESSAGE } from '@/lib/password';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -39,8 +40,8 @@ export default function RegisterForm() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!isValidPassword(formData.password)) {
+      setError(PASSWORD_REQUIREMENT_MESSAGE);
       return;
     }
 
@@ -139,7 +140,8 @@ export default function RegisterForm() {
     });
   };
 
-  const passwordStrength = formData.password.length >= 6 && formData.password === confirmPassword;
+  const passwordStrength = isValidPassword(formData.password) && formData.password === confirmPassword;
+  const requirementChecks = getPasswordRequirementChecks(formData.password);
 
   // Send email verification code (background, no UI feedback)
   const sendEmailVerificationCode = async (email: string) => {
@@ -389,24 +391,38 @@ export default function RegisterForm() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                placeholder="Minimum 6 characters"
+                placeholder="Create a secure password"
                 className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#F9629F] hover:text-[#F9629F] transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/60 hover:text-white transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
             </div>
+            <p className="mt-1.5 text-xs text-white/50">{PASSWORD_REQUIREMENT_MESSAGE}</p>
             {formData.password.length > 0 && (
-              <div className="mt-2 flex items-center gap-2">
-                <div className={`flex-1 h-1.5 rounded-full ${formData.password.length >= 6 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className={`text-xs ${formData.password.length >= 6 ? 'text-green-400' : 'text-red-400'}`}>
-                  {formData.password.length >= 6 ? 'Strong' : 'Weak'}
-                </span>
-              </div>
+              <ul className="mt-2 space-y-1 text-xs" aria-live="polite">
+                <li className={requirementChecks.length ? 'text-green-400' : 'text-white/50'}>
+                  {requirementChecks.length ? <FiCheck className="w-3.5 h-3.5 inline mr-1.5 shrink-0" aria-hidden /> : null}
+                  At least 12 characters {requirementChecks.length ? '' : `(${formData.password.length}/12)`}
+                </li>
+                <li className={requirementChecks.letter ? 'text-green-400' : 'text-white/50'}>
+                  {requirementChecks.letter ? <FiCheck className="w-3.5 h-3.5 inline mr-1.5 shrink-0" aria-hidden /> : null}
+                  At least 2 letters {requirementChecks.letter ? '' : `(${requirementChecks.letterCount}/2)`}
+                </li>
+                <li className={requirementChecks.number ? 'text-green-400' : 'text-white/50'}>
+                  {requirementChecks.number ? <FiCheck className="w-3.5 h-3.5 inline mr-1.5 shrink-0" aria-hidden /> : null}
+                  At least 2 numbers {requirementChecks.number ? '' : `(${requirementChecks.numberCount}/2)`}
+                </li>
+                <li className={requirementChecks.special ? 'text-green-400' : 'text-white/50'}>
+                  {requirementChecks.special ? <FiCheck className="w-3.5 h-3.5 inline mr-1.5 shrink-0" aria-hidden /> : null}
+                  At least 2 special characters {requirementChecks.special ? '' : `(${requirementChecks.specialCount}/2)`}
+                </li>
+              </ul>
             )}
           </motion.div>
 
@@ -418,7 +434,7 @@ export default function RegisterForm() {
           >
             <label className="block text-sm font-semibold text-white mb-2 flex items-center gap-2">
               <FiLock className="w-4 h-4 text-[#F9629F]" />
-              Confirm Password
+              Confirm password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -430,26 +446,27 @@ export default function RegisterForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                placeholder="Re-enter your password"
+                placeholder="Confirm your password"
                 className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#F9629F] hover:text-[#F9629F] transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/60 hover:text-white transition-colors"
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
               >
                 {showConfirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
             </div>
             {confirmPassword.length > 0 && (
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-1.5 text-xs">
                 {passwordStrength ? (
-                  <div className="flex items-center gap-2 text-green-400">
-                    <FiCheck className="w-4 h-4" />
-                    <span className="text-xs">Passwords match</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-green-400">
+                    <FiCheck className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                    Passwords match
+                  </span>
                 ) : (
-                  <span className="text-xs text-red-400">Passwords do not match</span>
+                  <span className="text-white/60">Passwords do not match</span>
                 )}
               </div>
             )}

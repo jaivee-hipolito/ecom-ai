@@ -306,6 +306,11 @@ export default function DashboardOrdersPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
+                    {order.shippingFee != null && order.shippingFee > 0 && (
+                      <p className="text-sm text-gray-600 mb-1">
+                        Shipping: {formatCurrency(order.shippingFee)}
+                      </p>
+                    )}
                     <p className="text-sm text-gray-600">Total Amount</p>
                     <p className="text-lg font-bold text-gray-900">
                       {formatCurrency(order.totalAmount)}

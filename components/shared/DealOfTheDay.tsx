@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
 import { useProducts } from '@/hooks/useProducts';
-import { FiZap, FiClock, FiEye } from 'react-icons/fi';
+import { FiEye, FiArrowRight } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import QuickView from '@/components/products/QuickView';
 import { formatCurrency } from '@/utils/currency';
@@ -47,24 +47,21 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
     fetchCategories();
   }, []);
 
-  // Fetch products based on selected category
-  // When null (All Products), fetch all products; otherwise filter by category
+  // Fetch only products that have a discount (marked as flash sale in admin)
+  // so "Deal of the Day" shows actual deals; optional filter by category
   const { products, isLoading } = useProducts({
-    filters: selectedCategory ? { category: selectedCategory } : {},
+    filters: selectedCategory
+      ? { category: selectedCategory, isFlashSale: true }
+      : { isFlashSale: true },
     page: 1,
     limit: 4,
-    autoFetch: true, // Always fetch to get fresh data
+    autoFetch: true,
   });
 
-  // Use fetched products, fallback to initial products if no products fetched yet
-  const displayProducts = products.length > 0 ? products : (selectedCategory === null ? initialProducts.slice(0, 4) : []);
-
-  const [timeLeft, setTimeLeft] = useState({
-    days: 11,
-    hours: 13,
-    minutes: 45,
-    seconds: 51,
-  });
+  // Use fetched products; fallback to initial products that are flash sale only when no category selected
+  const displayProducts = products.length > 0
+    ? products
+    : (selectedCategory === null ? (initialProducts.filter((p) => p.isFlashSale).slice(0, 4)) : []);
 
   // Handle category selection
   const handleCategorySelect = (category: string) => {
@@ -102,35 +99,6 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
     // Clear product ID after animation completes
     setTimeout(() => setQuickViewProductId(null), 300);
   };
-
-  // Timer countdown effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        
-        if (seconds > 0) {
-          seconds--;
-        } else if (minutes > 0) {
-          minutes--;
-          seconds = 59;
-        } else if (hours > 0) {
-          hours--;
-          minutes = 59;
-          seconds = 59;
-        } else if (days > 0) {
-          days--;
-          hours = 23;
-          minutes = 59;
-          seconds = 59;
-        }
-        
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Calculate flash sale discount and prices from product data
   // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
@@ -200,7 +168,6 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
           className="text-center mb-8"
         >
           <div className="flex items-center justify-center gap-2 mb-3">
-            <FiZap className="w-8 h-8 text-[#F9629F]" />
             <h2 className="text-3xl lg:text-4xl font-bold text-[#000000]">
               Deal of the Day
             </h2>
@@ -253,7 +220,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
             <Loading size="lg" text="Loading deals..." />
           </div>
         ) : displayProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {displayProducts.map((product, index) => {
               const flashSaleData = calculateFlashSaleData(product);
               const hasDiscount = flashSaleData.hasDiscount;
@@ -296,24 +263,6 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                         </motion.button>
                       </motion.div>
                       
-                      {/* Flash Sale Badge */}
-                      {hasDiscount && (
-                        <motion.div
-                          initial={{ scale: 0, rotate: -45 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                          className="absolute top-3 left-3 bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5 z-30"
-                        >
-                          <motion.div
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                          >
-                            <FiZap className="w-3 h-3" />
-                          </motion.div>
-                          <span className="text-[10px] font-black tracking-wide">FLASH</span>
-                        </motion.div>
-                      )}
-
                       {/* Discount Badge */}
                       {hasDiscount && (
                         <motion.div
@@ -326,21 +275,6 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                             <div className="text-xs font-black leading-tight">-{discount}%</div>
                             <div className="text-[7px] font-bold">OFF</div>
                           </div>
-                        </motion.div>
-                      )}
-
-                      {/* Timer Badge (for first product) */}
-                      {index === 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 }}
-                          className="absolute top-3 left-3 bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-3 py-2 rounded-lg shadow-lg z-30 flex items-center gap-2"
-                        >
-                          <FiClock className="w-4 h-4 text-[#F9629F]" />
-                          <span className="text-xs font-bold">
-                            {timeLeft.days}D : {timeLeft.hours}H : {timeLeft.minutes}M : {timeLeft.seconds}S
-                          </span>
                         </motion.div>
                       )}
                     </div>
@@ -387,6 +321,23 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
             </p>
           </motion.div>
         )}
+
+        {/* View all deals - bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-center mt-10"
+        >
+          <Link
+            href="/deal-of-the-day"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#F9629F] text-white font-semibold rounded-xl hover:bg-[#DB7093] transition-colors shadow-lg hover:shadow-[#F9629F]/30"
+          >
+            View all deals
+            <FiArrowRight className="w-4 h-4" />
+          </Link>
+        </motion.div>
 
         {/* Quick View Modal */}
         <QuickView

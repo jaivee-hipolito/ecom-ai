@@ -1,12 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { IProduct } from '@/types/product';
 import ProductImage from '@/components/products/ProductImage';
 import { useProducts } from '@/hooks/useProducts';
-import { FiZap, FiClock, FiEye, FiTrendingUp } from 'react-icons/fi';
+import { FiZap, FiEye, FiTrendingUp } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import QuickView from '@/components/products/QuickView';
 import { formatCurrency } from '@/utils/currency';
@@ -18,12 +18,6 @@ interface FlashSalesProps {
 export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
   const [quickViewProductId, setQuickViewProductId] = useState<string | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 2,
-    hours: 5,
-    minutes: 30,
-    seconds: 0,
-  });
 
   // Fetch flash sale products - only products marked as flash sale
   const { products, isLoading } = useProducts({
@@ -36,35 +30,6 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
   // Only use fetched flash sale products - don't use initialProducts fallback
   // This ensures we only show products that are actually marked as flash sale in the database
   const displayProducts = products;
-
-  // Timer countdown effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        
-        if (seconds > 0) {
-          seconds--;
-        } else if (minutes > 0) {
-          minutes--;
-          seconds = 59;
-        } else if (hours > 0) {
-          hours--;
-          minutes = 59;
-          seconds = 59;
-        } else if (days > 0) {
-          days--;
-          hours = 23;
-          minutes = 59;
-          seconds = 59;
-        }
-        
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Calculate flash sale discount and prices from product data
   // New logic: Displayed price = product.price, Crossed out price = price * (percentage/100) + price
@@ -201,49 +166,6 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
               <FiTrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-[#F9629F] relative z-10" />
             </motion.div>
           </div>
-          
-          {/* Countdown Timer - Enhanced */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 bg-gradient-to-r from-white/15 via-white/20 to-white/15 backdrop-blur-md px-6 sm:px-8 py-4 sm:py-5 rounded-2xl border-2 border-[#F9629F]/40 shadow-2xl"
-          >
-            <div className="flex items-center gap-2">
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              >
-                <FiClock className="w-5 h-5 sm:w-6 sm:h-6 text-[#F9629F]" />
-              </motion.div>
-              <span className="text-white font-bold text-sm sm:text-base">Ends in:</span>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              {[
-                { label: 'D', value: timeLeft.days },
-                { label: 'H', value: timeLeft.hours },
-                { label: 'M', value: timeLeft.minutes },
-                { label: 'S', value: timeLeft.seconds },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2 sm:gap-3">
-                  <motion.div
-                    key={item.value}
-                    initial={{ scale: 0.8, y: -10 }}
-                    animate={{ scale: 1, y: 0 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                    className="bg-gradient-to-br from-[#F9629F] to-[#DB7093] text-[#000000] px-3 sm:px-4 py-2 rounded-xl font-black text-sm sm:text-base shadow-lg min-w-[3rem] sm:min-w-[3.5rem] text-center"
-                  >
-                    {String(item.value).padStart(2, '0')}
-                    <div className="text-[8px] sm:text-[10px] font-bold opacity-80">{item.label}</div>
-                  </motion.div>
-                  {idx < 3 && (
-                    <span className="text-[#F9629F] font-bold text-lg sm:text-xl">:</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
         </motion.div>
 
         {/* Products Grid - Compact Layout */}
@@ -252,7 +174,7 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
             <Loading size="lg" text="Loading flash sales..." />
           </div>
         ) : displayProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {displayProducts.map((product, index) => {
               const flashSaleData = calculateFlashSaleData(product);
               const { discountPercentage, displayedPrice, crossedOutPrice, hasDiscount } = flashSaleData;
@@ -269,24 +191,6 @@ export default function FlashSales({ initialProducts = [] }: FlashSalesProps) {
                 >
                   <Link href={`/products/${product._id}?flashSale=true`} className="block">
                     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-[#F9629F]/50 relative">
-                      {/* Flash Sale Badge - Top Left */}
-                      <div className="absolute top-2 left-2 z-30">
-                        <motion.div
-                          initial={{ scale: 0, rotate: -45 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                          className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5"
-                        >
-                          <motion.div
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                          >
-                            <FiZap className="w-3 h-3" />
-                          </motion.div>
-                          <span className="text-[10px] font-black tracking-wide">FLASH</span>
-                        </motion.div>
-                      </div>
-
                       {/* Discount Badge - Top Right */}
                       {hasDiscount && (
                         <div className="absolute top-2 right-2 z-30">

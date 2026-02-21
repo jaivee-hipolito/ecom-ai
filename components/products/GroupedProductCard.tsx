@@ -12,7 +12,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCartAnimation } from '@/contexts/CartAnimationContext';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { IProduct } from '@/types/product';
-import { FiZap } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '@/utils/currency';
 
@@ -291,26 +290,6 @@ export default function GroupedProductCard({ groupedProduct, showAttributes = tr
             </div>
           )}
           
-          {/* Flash Sale Badge */}
-          {hasFlashSaleDiscount && (
-            <div className="absolute top-2 left-2 z-30">
-              <motion.div
-                initial={{ scale: 0, rotate: -45 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="bg-gradient-to-r from-red-500 via-red-600 to-red-500 text-white px-2 py-1 rounded-lg shadow-lg flex items-center gap-1"
-              >
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                >
-                  <FiZap className="w-3 h-3" />
-                </motion.div>
-                <span className="text-[9px] font-black tracking-wide">FLASH</span>
-              </motion.div>
-            </div>
-          )}
-
           {/* Discount Badge */}
           {hasFlashSaleDiscount && (
             <div className="absolute top-2 right-2 z-30">

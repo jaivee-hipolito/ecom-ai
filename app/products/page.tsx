@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FiFilter, FiX, FiGrid, FiList, FiSearch } from 'react-icons/fi';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
+import PageTopBanner from '@/components/shared/PageTopBanner';
 import ProductList from '@/components/products/ProductList';
 import ProductFilters from '@/components/products/ProductFilters';
 import Pagination from '@/components/ui/Pagination';
@@ -171,13 +172,14 @@ function ProductsContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Navbar />
+      <PageTopBanner />
 
-      {/* Hero Section */}
+      {/* Hero Section - compact */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-[#000000] via-[#1a1a1a] to-[#000000] text-white py-12 lg:py-16"
+        className="bg-gradient-to-r from-[#000000] via-[#1a1a1a] to-[#000000] text-white py-6 lg:py-8"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -185,7 +187,7 @@ function ProductsContent() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-4xl lg:text-5xl font-bold mb-4"
+              className="text-2xl lg:text-3xl font-bold mb-2"
             >
               Discover Our Products
             </motion.h1>
@@ -193,7 +195,7 @@ function ProductsContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto"
+              className="text-base lg:text-lg text-gray-300 max-w-2xl mx-auto"
             >
               Explore our wide range of high-quality products
             </motion.p>

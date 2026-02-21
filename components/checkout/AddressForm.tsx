@@ -12,6 +12,8 @@ interface AddressFormProps {
   initialData?: ShippingAddress;
   isLoading?: boolean;
   showFullName?: boolean;
+  /** When false, phone field is hidden (e.g. user already has phone in profile) */
+  showPhone?: boolean;
   buttonText?: string;
   loadingButtonText?: string;
 }
@@ -21,6 +23,7 @@ export default function AddressForm({
   initialData,
   isLoading = false,
   showFullName = true,
+  showPhone = true,
   buttonText = 'Continue to Payment',
   loadingButtonText = 'Processing...',
 }: AddressFormProps) {
@@ -227,10 +230,12 @@ export default function AddressForm({
     if (!formData.country.trim()) {
       newErrors.country = 'Country is required';
     }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
-      newErrors.phone = 'Invalid phone number format';
+    if (showPhone) {
+      if (!formData.phone.trim()) {
+        newErrors.phone = 'Phone number is required';
+      } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
+        newErrors.phone = 'Invalid phone number format';
+      }
     }
 
     setErrors(newErrors);
@@ -267,10 +272,12 @@ export default function AddressForm({
     if (!formData.country.trim()) {
       newErrors.country = 'Country is required';
     }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
-      newErrors.phone = 'Invalid phone number format';
+    if (showPhone) {
+      if (!formData.phone.trim()) {
+        newErrors.phone = 'Phone number is required';
+      } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
+        newErrors.phone = 'Invalid phone number format';
+      }
     }
     
     // Update errors state
@@ -479,21 +486,23 @@ export default function AddressForm({
         </div>
       </div>
 
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-          Phone Number *
-        </label>
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          value={formData.phone}
-          onChange={handleChange}
-          required
-          error={errors.phone}
-          placeholder="+1 (555) 123-4567"
-        />
-      </div>
+      {showPhone && (
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number *
+          </label>
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+            error={errors.phone}
+            placeholder="+1 (555) 123-4567"
+          />
+        </div>
+      )}
 
       <motion.button
         type="submit"

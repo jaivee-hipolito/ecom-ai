@@ -6,7 +6,28 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Loading from '@/components/ui/Loading';
 import { useRouter } from 'next/navigation';
-import { FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiPhone, FiEdit2, FiX } from 'react-icons/fi';
+import { normalizePhoneNumber } from '@/lib/phone';
+
+const MIN_PHONE_DIGITS = 10;
+const MAX_PHONE_DIGITS = 15;
+
+function validatePhoneNumber(value: string): { valid: boolean; message?: string } {
+  const trimmed = value.trim();
+  if (!trimmed) return { valid: false, message: 'Please enter a phone number' };
+  const normalized = normalizePhoneNumber(trimmed);
+  const digitCount = (normalized.match(/\d/g) || []).length;
+  if (digitCount < MIN_PHONE_DIGITS) {
+    return { valid: false, message: `Phone number must have at least ${MIN_PHONE_DIGITS} digits` };
+  }
+  if (digitCount > MAX_PHONE_DIGITS) {
+    return { valid: false, message: `Phone number must have at most ${MAX_PHONE_DIGITS} digits` };
+  }
+  if (!/^\+?\d+$/.test(normalized)) {
+    return { valid: false, message: 'Phone number can only contain digits and an optional + at the start' };
+  }
+  return { valid: true };
+}
 
 interface UserProfile {
   _id: string;
@@ -36,6 +57,11 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [editContactNumber, setEditContactNumber] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [phoneSuccess, setPhoneSuccess] = useState('');
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -106,6 +132,53 @@ export default function ProfilePage() {
     }
   };
 
+  const startEditPhone = () => {
+    setEditContactNumber(userProfile?.contactNumber || '');
+    setPhoneError('');
+    setPhoneSuccess('');
+    setIsEditingPhone(true);
+  };
+
+  const cancelEditPhone = () => {
+    setIsEditingPhone(false);
+    setEditContactNumber('');
+    setPhoneError('');
+  };
+
+  const handleSavePhone = async (e: FormEvent) => {
+    e.preventDefault();
+    setPhoneError('');
+    setPhoneSuccess('');
+    const trimmed = editContactNumber.trim();
+    const validation = validatePhoneNumber(trimmed);
+    if (!validation.valid) {
+      setPhoneError(validation.message || 'Invalid phone number');
+      return;
+    }
+    setIsSavingPhone(true);
+    try {
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contactNumber: trimmed }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setPhoneError(data.error || 'Failed to update phone number');
+        return;
+      }
+      setUserProfile((prev) => (prev ? { ...prev, contactNumber: data.user?.contactNumber ?? trimmed, phoneVerified: data.user?.phoneVerified ?? false } : null));
+      setPhoneSuccess('Phone number updated. Please verify your new number in the Verify page.');
+      setIsEditingPhone(false);
+      setEditContactNumber('');
+      setTimeout(() => setPhoneSuccess(''), 8000);
+    } catch {
+      setPhoneError('An error occurred. Please try again.');
+    } finally {
+      setIsSavingPhone(false);
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="max-w-7xl mx-auto">
@@ -138,17 +211,79 @@ export default function ProfilePage() {
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Contact Number</p>
-              <p className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                {userProfile?.contactNumber || 'N/A'}
-                {userProfile?.contactNumber && (
-                  userProfile?.phoneVerified ? (
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Verified</span>
-                  ) : (
-                    <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Not Verified</span>
-                  )
-                )}
+              <p className="text-sm text-gray-600 flex items-center gap-2">
+                <FiPhone className="w-4 h-4" />
+                Contact Number
               </p>
+              {!isEditingPhone ? (
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <p className="text-lg font-medium text-gray-900 flex items-center gap-2 flex-wrap">
+                    {userProfile?.contactNumber || 'Not set'}
+                    {userProfile?.contactNumber && (
+                      userProfile?.phoneVerified ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Verified</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Not Verified</span>
+                      )
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={startEditPhone}
+                    className="text-sm text-[#F9629F] hover:text-[#FC9BC2] font-medium inline-flex items-center gap-1 shrink-0"
+                  >
+                    <FiEdit2 className="w-4 h-4" />
+                    Change
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSavePhone} className="mt-2 space-y-2">
+                  {phoneError && (
+                    <div className="p-2 bg-red-50 text-red-700 rounded-lg text-sm">{phoneError}</div>
+                  )}
+                  {phoneSuccess && (
+                    <div className="p-2 bg-green-50 text-green-700 rounded-lg text-sm">{phoneSuccess}</div>
+                  )}
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    value={editContactNumber}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setEditContactNumber(v.replace(/[^\d+\s\-()]/g, ''));
+                    }}
+                    placeholder="e.g. +1 234 567 8900"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#F9629F] focus:border-[#F9629F] text-gray-900 placeholder-gray-500 bg-white"
+                    autoFocus
+                    maxLength={20}
+                    aria-invalid={!!editContactNumber && !validatePhoneNumber(editContactNumber.trim()).valid}
+                    aria-describedby={editContactNumber.trim() && !validatePhoneNumber(editContactNumber.trim()).valid ? 'phone-helper' : undefined}
+                  />
+                  {editContactNumber.trim() && !validatePhoneNumber(editContactNumber.trim()).valid && (
+                    <p id="phone-helper" className="text-sm text-amber-600">
+                      Enter at least {MIN_PHONE_DIGITS} digits (e.g. +1 234 567 8900)
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={isSavingPhone || !validatePhoneNumber(editContactNumber.trim()).valid}
+                      className="flex-1 py-2.5 px-4 rounded-lg font-semibold text-white bg-[#F9629F] hover:bg-[#e8558a] focus:ring-2 focus:ring-[#F9629F] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#F9629F]"
+                    >
+                      {isSavingPhone ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditPhone}
+                      disabled={isSavingPhone}
+                      className="px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 inline-flex items-center gap-1"
+                    >
+                      <FiX className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-600">Email</p>

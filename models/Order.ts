@@ -20,6 +20,7 @@ export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   items: IOrderItem[];
   totalAmount: number;
+  shippingFee?: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   shippingAddress: {
@@ -87,6 +88,10 @@ const OrderSchema = new Schema<IOrder>(
       type: Number,
       required: true,
       min: 0,
+    },
+    shippingFee: {
+      type: Number,
+      default: 0,
     },
     status: {
       type: String,

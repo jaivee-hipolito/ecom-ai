@@ -78,27 +78,27 @@ async function geocodeAddress(address: ShippingAddress): Promise<{ lat: number; 
   }
 }
 
+const SHIPPING_BASE_FEE = 3; // Flat fee added to shipping (except Victoria area)
+
 /**
  * Calculate shipping fee based on distance
  * Pricing structure:
- * - Free shipping within Victoria area (within 10km)
- * - $5 for 10-25km
- * - $10 for 25-50km
- * - $15 for 50-100km
- * - $20 for 100km+
+ * - $0 for Victoria area (within 10km) – no base fee
+ * - $8 for 10-25km ($5 + $3)
+ * - $13 for 25-50km ($10 + $3)
+ * - $18 for 50-100km ($15 + $3)
+ * - $23 for 100km+ ($20 + $3)
  */
 function calculateShippingFee(distanceKm: number): number {
   if (distanceKm <= 10) {
     return 0; // Free shipping within Victoria area
-  } else if (distanceKm <= 25) {
-    return 5;
-  } else if (distanceKm <= 50) {
-    return 10;
-  } else if (distanceKm <= 100) {
-    return 15;
-  } else {
-    return 20; // Maximum shipping fee
   }
+  let base = 0;
+  if (distanceKm <= 25) base = 5;
+  else if (distanceKm <= 50) base = 10;
+  else if (distanceKm <= 100) base = 15;
+  else base = 20;
+  return base + SHIPPING_BASE_FEE;
 }
 
 export async function POST(request: NextRequest) {
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       // Default shipping fee if geocoding fails
       return NextResponse.json({
         distance: null,
-        shippingFee: 10,
+        shippingFee: 10 + SHIPPING_BASE_FEE,
         message: 'Unable to calculate exact distance. Standard shipping fee applied.',
       });
     }

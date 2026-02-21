@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { requireAuth } from '@/lib/auth';
+import { normalizePhoneNumber } from '@/lib/phone';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -119,11 +120,23 @@ export async function PUT(request: NextRequest) {
       user.lastName = '';
     }
 
-    // Update contactNumber if provided
-    if (contactNumber !== undefined && contactNumber !== null && contactNumber !== '') {
-      user.contactNumber = contactNumber.trim();
-    } else if (!user.contactNumber) {
-      user.contactNumber = '';
+    // Update contactNumber if provided (normalize and clear phone verification when number changes)
+    if (contactNumber !== undefined && contactNumber !== null) {
+      const trimmed = String(contactNumber).trim();
+      const normalized = normalizePhoneNumber(trimmed);
+      const previousNormalized = normalizePhoneNumber((user.contactNumber as string) || '');
+      if (trimmed !== '') {
+        user.contactNumber = normalized;
+        if (previousNormalized !== normalized) {
+          (user as any).phoneVerified = false;
+          (user as any).phoneVerificationCode = undefined;
+          (user as any).phoneVerificationCodeExpires = undefined;
+          (user as any).phoneVerificationCodeSentAt = undefined;
+        }
+      } else {
+        user.contactNumber = '';
+        (user as any).phoneVerified = false;
+      }
     }
 
     // Update email if provided

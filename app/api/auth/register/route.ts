@@ -4,6 +4,7 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { RegisterData, AuthResponse } from '@/types/auth';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { isValidPassword, PASSWORD_REQUIREMENT_MESSAGE } from '@/lib/password';
 
 // Force Node.js runtime for MongoDB/Mongoose compatibility
 export const runtime = 'nodejs';
@@ -39,11 +40,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 6) {
+    if (!isValidPassword(password)) {
       return NextResponse.json<AuthResponse>(
         {
           success: false,
-          message: 'Password must be at least 6 characters',
+          message: PASSWORD_REQUIREMENT_MESSAGE,
         },
         { status: 400 }
       );

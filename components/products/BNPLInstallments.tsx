@@ -14,19 +14,10 @@ interface BNPLInstallmentsProps {
 export default function BNPLInstallments({ price }: BNPLInstallmentsProps) {
   const [isAfterpayModalOpen, setIsAfterpayModalOpen] = useState(false);
   const [isKlarnaModalOpen, setIsKlarnaModalOpen] = useState(false);
-  
-  // Calculate 6% BNPL fee (admin wants customer to shoulder this charge)
-  const BNPL_FEE_RATE = 0.06; // 6%
-  const bnplFee = price * BNPL_FEE_RATE;
-  const priceWithFee = price + bnplFee;
-  
-  // Calculate installment amounts (based on price with fee)
-  // Afterpay: 4 interest-free payments
-  const afterpayInstallment = priceWithFee / 4;
-  
-  // Klarna: 4 payments or monthly (we'll show 4 payments)
-  const klarnaInstallment = priceWithFee / 4;
-  const klarnaMonthly = priceWithFee / 4; // Same as 4 payments for simplicity
+
+  const afterpayInstallment = price / 4;
+  const klarnaInstallment = price / 4;
+  const klarnaMonthly = price / 4;
 
   // Only show if price is at least $50 (minimum for most BNPL providers)
   if (price < 50) {
@@ -162,7 +153,7 @@ export default function BNPLInstallments({ price }: BNPLInstallmentsProps) {
       <KlarnaModal
         isOpen={isKlarnaModalOpen}
         onClose={() => setIsKlarnaModalOpen(false)}
-        price={priceWithFee}
+        price={price}
       />
     </motion.div>
   );

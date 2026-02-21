@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Image from 'next/image';
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
 import Loading from '@/components/ui/Loading';
+import PageTopBanner from '@/components/shared/PageTopBanner';
 
 export const metadata = {
   title: 'Reset Password | Teezee',
@@ -10,7 +11,9 @@ export const metadata = {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex">
+    <>
+      <PageTopBanner />
+      <div className="min-h-screen flex">
       {/* Left Side - Product Showcase */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] relative overflow-hidden">
         {/* Animated background elements */}
@@ -120,5 +123,6 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

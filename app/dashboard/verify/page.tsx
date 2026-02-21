@@ -30,6 +30,8 @@ export default function VerifyPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [emailCooldownRemaining, setEmailCooldownRemaining] = useState(0);
+  const [phoneCooldownRemaining, setPhoneCooldownRemaining] = useState(0);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -41,12 +43,12 @@ export default function VerifyPage() {
     const fetchUserProfile = async () => {
       if (!isAuthenticated) return;
       try {
-        const response = await fetch('/api/users/profile');
+        const response = await fetch('/api/users/profile', { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
           setUserProfile(data.user);
-          setEmailVerified(data.user?.emailVerified || false);
-          setPhoneVerified(data.user?.phoneVerified || false);
+          setEmailVerified(!!data.user?.emailVerified);
+          setPhoneVerified(!!data.user?.phoneVerified);
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -57,6 +59,22 @@ export default function VerifyPage() {
       fetchUserProfile();
     }
   }, [isAuthenticated]);
+
+  // Cooldown countdown (5 min after each send)
+  useEffect(() => {
+    if (emailCooldownRemaining <= 0 && phoneCooldownRemaining <= 0) return;
+    const t = setInterval(() => {
+      setEmailCooldownRemaining((s) => (s > 0 ? s - 1 : 0));
+      setPhoneCooldownRemaining((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [emailCooldownRemaining, phoneCooldownRemaining]);
+
+  const formatCooldown = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   // Send email verification code
   const sendEmailVerificationCode = async () => {
@@ -75,8 +93,12 @@ export default function VerifyPage() {
       if (response.ok && data.success) {
         setSuccess('Verification code sent to your email!');
         setTimeout(() => setSuccess(''), 15000);
+        setEmailCooldownRemaining(typeof data.cooldownSeconds === 'number' ? data.cooldownSeconds : 300);
       } else {
         setError(data.error || 'Failed to send verification code');
+        if (response.status === 429 && data.cooldownSeconds) {
+          setEmailCooldownRemaining(data.cooldownSeconds);
+        }
       }
     } catch (err: any) {
       setError('Failed to send verification code');
@@ -104,8 +126,12 @@ export default function VerifyPage() {
       if (response.ok && data.success) {
         setSuccess('Verification code sent to your phone!');
         setTimeout(() => setSuccess(''), 15000);
+        setPhoneCooldownRemaining(typeof data.cooldownSeconds === 'number' ? data.cooldownSeconds : 300);
       } else {
         setError(data.error || 'Failed to send verification code');
+        if (response.status === 429 && data.cooldownSeconds) {
+          setPhoneCooldownRemaining(data.cooldownSeconds);
+        }
       }
     } catch (err: any) {
       setError('Failed to send verification code');
@@ -131,15 +157,17 @@ export default function VerifyPage() {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        setEmailVerified(true);
         setEmailCode('');
         setSuccess('Email verified successfully!');
         setTimeout(() => setSuccess(''), 5000);
-        // Refresh user profile
-        const profileResponse = await fetch('/api/users/profile');
+        // Refetch profile from server so verified state persists on refresh/navigation
+        const profileResponse = await fetch('/api/users/profile', { cache: 'no-store' });
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
           setUserProfile(profileData.user);
+          setEmailVerified(!!profileData.user?.emailVerified);
+        } else {
+          setEmailVerified(true);
         }
       } else {
         setError(data.error || 'Invalid verification code');
@@ -170,15 +198,17 @@ export default function VerifyPage() {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        setPhoneVerified(true);
         setPhoneCode('');
         setSuccess('Phone number verified successfully!');
         setTimeout(() => setSuccess(''), 5000);
-        // Refresh user profile
-        const profileResponse = await fetch('/api/users/profile');
+        // Refetch profile from server so verified state persists on refresh
+        const profileResponse = await fetch('/api/users/profile', { cache: 'no-store' });
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
           setUserProfile(profileData.user);
+          setPhoneVerified(!!profileData.user?.phoneVerified);
+        } else {
+          setPhoneVerified(true);
         }
       } else {
         setError(data.error || 'Invalid verification code');
@@ -197,7 +227,6 @@ export default function VerifyPage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loading size="lg" text="Loading..." />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -210,22 +239,22 @@ export default function VerifyPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Navbar />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* Header */}
+      <div className="max-w-4xl mx-auto px-3 py-4 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
+        {/* Header - compact on mobile */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-6 sm:mb-8 lg:mb-12"
         >
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-[#F9629F] to-[#F9629F] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#F9629F]/50">
-              <FiShield className="w-10 h-10 text-[#000000]" />
+          <div className="flex items-center justify-center mb-3 sm:mb-5 lg:mb-6">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-[#F9629F] to-[#F9629F] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl sm:shadow-2xl shadow-[#F9629F]/50">
+              <FiShield className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-[#000000]" />
             </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-[#000000] mb-4">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#000000] mb-2 sm:mb-4">
             Verify Your Account
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-sm sm:text-base lg:text-lg px-1">
             Verify your email and phone number to secure your account
           </p>
         </motion.div>
@@ -237,7 +266,7 @@ export default function VerifyPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-800 flex items-center gap-3"
+              className="mb-3 sm:mb-6 p-3 sm:p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-800 flex items-center gap-3 text-sm sm:text-base"
             >
               <FiAlertCircle className="w-5 h-5 flex-shrink-0" />
               <span>{error}</span>
@@ -251,7 +280,7 @@ export default function VerifyPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl text-green-800 flex items-center gap-3"
+              className="mb-3 sm:mb-6 p-3 sm:p-4 bg-green-50 border-2 border-green-200 rounded-xl text-green-800 flex items-center gap-3 text-sm sm:text-base"
             >
               <FiCheckCircle className="w-5 h-5 flex-shrink-0" />
               <span>{success}</span>
@@ -262,27 +291,27 @@ export default function VerifyPage() {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Email Verification Card */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-2 border-gray-100"
+            className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border-2 border-gray-100"
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                   emailVerified ? 'bg-green-500' : 'bg-[#F9629F]'
                 }`}>
                   {emailVerified ? (
-                    <FiCheckCircle className="w-6 h-6 text-white" />
+                    <FiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   ) : (
-                    <FiMail className="w-6 h-6 text-white" />
+                    <FiMail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   )}
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-[#000000]">Email Verification</h2>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-[#000000]">Email Verification</h2>
                   <p className="text-sm text-gray-600">{userProfile?.email}</p>
                 </div>
               </div>
@@ -336,13 +365,16 @@ export default function VerifyPage() {
                   </motion.button>
                   <motion.button
                     onClick={sendEmailVerificationCode}
-                    disabled={sendingEmailCode}
+                    disabled={sendingEmailCode || emailCooldownRemaining > 0}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#000000] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
-                    title="Resend code"
+                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#000000] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[7rem] justify-center"
+                    title={emailCooldownRemaining > 0 ? `Resend in ${formatCooldown(emailCooldownRemaining)}` : 'Resend code'}
                   >
-                    <FiRefreshCw className={`w-5 h-5 ${sendingEmailCode ? 'animate-spin' : ''}`} />
+                    <FiRefreshCw className={`w-5 h-5 shrink-0 ${sendingEmailCode ? 'animate-spin' : ''}`} />
+                    {emailCooldownRemaining > 0 ? (
+                      <span className="text-sm">{formatCooldown(emailCooldownRemaining)}</span>
+                    ) : null}
                   </motion.button>
                 </div>
               </div>
@@ -426,13 +458,16 @@ export default function VerifyPage() {
                   </motion.button>
                   <motion.button
                     onClick={sendPhoneVerificationCode}
-                    disabled={sendingPhoneCode}
+                    disabled={sendingPhoneCode || phoneCooldownRemaining > 0}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#000000] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
-                    title="Resend code"
+                    className="px-4 py-3 bg-gray-100 border-2 border-gray-200 text-[#000000] rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[7rem] justify-center"
+                    title={phoneCooldownRemaining > 0 ? `Resend in ${formatCooldown(phoneCooldownRemaining)}` : 'Resend code'}
                   >
-                    <FiRefreshCw className={`w-5 h-5 ${sendingPhoneCode ? 'animate-spin' : ''}`} />
+                    <FiRefreshCw className={`w-5 h-5 shrink-0 ${sendingPhoneCode ? 'animate-spin' : ''}`} />
+                    {phoneCooldownRemaining > 0 ? (
+                      <span className="text-sm">{formatCooldown(phoneCooldownRemaining)}</span>
+                    ) : null}
                   </motion.button>
                 </div>
               </div>
@@ -444,12 +479,12 @@ export default function VerifyPage() {
           </motion.div>
         </div>
 
-        {/* Back to Profile Link */}
+        {/* Back to Profile | Shop now */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 text-center"
+          className="mt-4 sm:mt-6 lg:mt-8 flex items-center justify-between gap-4"
         >
           <a
             href="/dashboard/profile"
@@ -457,10 +492,14 @@ export default function VerifyPage() {
           >
             ← Back to Profile
           </a>
+          <a
+            href="/"
+            className="text-[#F9629F] hover:text-[#F9629F] font-semibold transition-colors inline-flex items-center gap-2"
+          >
+            Shop now →
+          </a>
         </motion.div>
       </div>
-
-      <Footer />
     </div>
   );
 }

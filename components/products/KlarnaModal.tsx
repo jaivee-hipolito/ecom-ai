@@ -215,11 +215,6 @@ export default function KlarnaModal({ isOpen, onClose, price }: KlarnaModalProps
                       </a>
                       .
                     </p>
-                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-xs text-yellow-800 font-semibold">
-                        ⚠️ Note: A 6% BNPL processing fee will be added to your order total when using Klarna.
-                      </p>
-                    </div>
                   </motion.div>
                 </div>
               </div>

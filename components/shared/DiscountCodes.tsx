@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { FiCopy, FiCheck, FiTag, FiZap, FiGift } from 'react-icons/fi';
+import { FiCopy, FiCheck } from 'react-icons/fi';
 
 interface DiscountCode {
   code: string;
@@ -44,12 +44,6 @@ const discountCodes: DiscountCode[] = [
   },
 ];
 
-const iconMap = {
-  tag: FiTag,
-  zap: FiZap,
-  gift: FiGift,
-};
-
 export default function DiscountCodes() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
@@ -64,9 +58,9 @@ export default function DiscountCodes() {
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-[#000000] via-[#1a1a1a] to-[#000000] relative overflow-hidden lg:overflow-visible">
+      {/* Animated Background Blobs - visible on md+ for professional mobile */}
+      <div className="hidden md:block absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-10 left-10 w-72 h-72 bg-[#F9629F]/10 rounded-full blur-3xl"
           animate={{
@@ -96,157 +90,100 @@ export default function DiscountCodes() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
+        {/* Section Header - compact & professional on mobile */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-12"
+          transition={{ duration: 0.4 }}
+          className="text-center mb-5 sm:mb-8 lg:mb-10"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="inline-block mb-4"
-          >
-            <div className="bg-gradient-to-r from-[#F9629F] to-[#DB7093] p-3 rounded-full">
-              <FiGift className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-            </div>
-          </motion.div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+          <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#F9629F] mb-1 sm:mb-2">
+            Member Offers
+          </p>
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white mb-1.5 sm:mb-2">
             🎉 Exclusive Discount Codes
           </h2>
-          <p className="text-white/80 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
-            Unlock amazing savings with our special discount codes. Copy and apply at checkout!
+          <p className="text-white/80 text-xs sm:text-sm lg:text-base max-w-xl mx-auto">
+            Unlock savings with our special codes. Copy and apply at checkout.
           </p>
         </motion.div>
 
-        {/* Discount Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        {/* Discount Cards Grid - code-focused professional layout */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {discountCodes.map((discount, index) => {
-            const IconComponent = iconMap[discount.icon || 'tag'];
             const isCopied = copiedCode === discount.code;
 
             return (
               <motion.div
                 key={discount.code}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="relative group"
+                transition={{ duration: 0.4, delay: index * 0.06 }}
+                className="group"
               >
-                {/* Card */}
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-[#F9629F]/50 transition-all duration-300 shadow-xl hover:shadow-2xl">
-                  {/* Icon Badge */}
-                  <motion.div
-                    whileHover={{ rotate: [0, -10, 10, 0] }}
-                    transition={{ duration: 0.5 }}
-                    className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#F9629F] to-[#DB7093] mb-4 shadow-lg"
-                  >
-                    <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                  </motion.div>
-
+                <div className="relative bg-gray-800/90 sm:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-gray-600/50 sm:border-gray-600/60 hover:border-gray-500/70 transition-all duration-200 h-full flex flex-col">
                   {/* Discount Amount */}
-                  <div className="mb-3">
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ type: 'spring', stiffness: 200, delay: index * 0.1 + 0.2 }}
-                      className="inline-block text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-[#F9629F] to-[#DB7093] bg-clip-text text-transparent"
-                    >
-                      ${discount.discount}
-                    </motion.span>
-                    <span className="text-white/60 text-lg sm:text-xl ml-2">OFF</span>
+                  <div className="mb-2 sm:mb-3">
+                    {discount.isFixedAmount ? (
+                      <>
+                        <span className="text-[#F9629F] font-bold text-lg sm:text-xl lg:text-2xl">${discount.discount}</span>
+                        <span className="text-gray-400 text-xs sm:text-sm ml-1">OFF</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-[#F9629F] font-bold text-lg sm:text-xl lg:text-2xl">{discount.discount}%</span>
+                        <span className="text-gray-400 text-xs sm:text-sm ml-1">OFF</span>
+                      </>
+                    )}
                   </div>
-
-                  {/* Description */}
-                  <p className="text-white/90 text-sm sm:text-base mb-4 font-medium">
-                    {discount.description}
-                  </p>
-
-                  {/* Code Section */}
-                  <div className="bg-[#000000]/50 rounded-lg p-3 sm:p-4 mb-4 border border-white/10">
+                  {/* Code Section - hero */}
+                  <div className="mb-3 sm:mb-4">
+                    <p className="text-gray-400 text-[10px] sm:text-xs mb-1 uppercase tracking-wider">Code</p>
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex-1">
-                        <p className="text-white/60 text-xs sm:text-sm mb-1">Discount Code</p>
-                        <motion.code
-                          className="text-[#F9629F] font-bold text-lg sm:text-xl lg:text-2xl tracking-wider font-mono"
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          {discount.code}
-                        </motion.code>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                      <code className="text-[#F9629F] font-bold text-sm sm:text-base lg:text-lg tracking-wider font-mono truncate flex-1">
+                        {discount.code}
+                      </code>
+                      <button
                         onClick={() => copyToClipboard(discount.code)}
-                        className={`p-2 sm:p-3 rounded-lg transition-all duration-300 border-2 ${
+                        className={`shrink-0 p-2 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
                           isCopied
-                            ? 'bg-green-100 border-green-400 text-green-700'
-                            : 'bg-[#FDE8F0] border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#FC9BC2]'
+                            ? 'bg-emerald-500/20 border-emerald-400/60 text-emerald-400'
+                            : 'bg-transparent border-gray-500/80 text-gray-400 hover:border-gray-400 hover:text-white'
                         }`}
                         aria-label={`Copy ${discount.code}`}
                       >
                         {isCopied ? (
-                          <FiCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+                          <FiCheck className="w-4 h-4 sm:w-5 sm:h-5" />
                         ) : (
-                          <FiCopy className="w-5 h-5 sm:w-6 sm:h-6" />
+                          <FiCopy className="w-4 h-4 sm:w-5 sm:h-5" />
                         )}
-                      </motion.button>
+                      </button>
                     </div>
                   </div>
 
                   {/* Details */}
-                  <div className="space-y-2 text-xs sm:text-sm">
+                  <div className="space-y-1 sm:space-y-1.5 text-[10px] sm:text-xs text-gray-400 mt-auto">
                     {discount.minPurchase && (
-                      <div className="flex items-center gap-2 text-white/70">
+                      <div className="flex items-center gap-2">
                         <span>💰</span>
-                        <span>Min. purchase: ${discount.minPurchase}</span>
+                        <span>Min. ${discount.minPurchase}</span>
                       </div>
                     )}
                     {discount.validUntil && (
-                      <div className="flex items-center gap-2 text-white/70">
+                      <div className="flex items-center gap-2">
                         <span>⏰</span>
-                        <span>Valid until: {new Date(discount.validUntil).toLocaleDateString()}</span>
+                        <span>Valid until {new Date(discount.validUntil).toLocaleDateString()}</span>
                       </div>
                     )}
                   </div>
-
-                  {/* Shine Effect */}
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100"
-                    initial={{ x: '-100%' }}
-                    whileHover={{ x: '100%' }}
-                    transition={{ duration: 0.6 }}
-                  />
                 </div>
               </motion.div>
             );
           })}
         </div>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-8 sm:mt-12"
-        >
-          <motion.a
-            href="/products"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-block bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base lg:text-lg shadow-lg hover:bg-[#FC9BC2] hover:shadow-xl transition-all duration-300"
-          >
-            Shop Now & Save! 🛒
-          </motion.a>
-        </motion.div>
       </div>
     </section>
   );

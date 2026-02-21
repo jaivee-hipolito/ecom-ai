@@ -17,11 +17,20 @@ export interface IOrderHistoryEntry {
   changedAt?: string;
 }
 
+export interface IOrderCoupon {
+  code: string;
+  discount: number;
+  discountType: 'percentage' | 'fixed';
+  discountAmount?: number;
+}
+
 export interface IOrder {
   _id?: string;
   user: string; // User ID
   items: IOrderItem[];
   totalAmount: number;
+  shippingFee?: number;
+  coupon?: IOrderCoupon;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   shippingAddress: ShippingAddress;

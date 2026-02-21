@@ -65,7 +65,7 @@ export default function PopularCategories({ categories, products = [] }: Popular
         </motion.h2>
 
         {/* 2x2 grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
           {displayCategories.map((category, index) => {
             const Icon = getCategoryIcon(category.name);
             const linkLabel = `${category.name} Collections`;

@@ -1,5 +1,6 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import { IUser } from '@/types/user';
+import { isValidPassword, PASSWORD_REQUIREMENT_MESSAGE } from '@/lib/password';
 
 const UserSchema = new Schema<IUser>(
   {
@@ -49,12 +50,11 @@ const UserSchema = new Schema<IUser>(
       type: String,
       required: false, // Make optional for OAuth users
       validate: {
-        validator: function(this: IUser, value?: string) {
-          // If password is provided, it must be at least 6 characters
-          // OAuth users can have empty password
-          return !value || value.length >= 6;
+        validator: function (this: IUser, value?: string) {
+          // OAuth users can have empty password; otherwise enforce policy
+          return !value || isValidPassword(value);
         },
-        message: 'Password must be at least 6 characters',
+        message: PASSWORD_REQUIREMENT_MESSAGE,
       },
       select: false, // Don't return password by default
     } as any,
@@ -88,6 +88,14 @@ const UserSchema = new Schema<IUser>(
       select: false,
     },
     phoneVerificationCodeExpires: {
+      type: Date,
+      select: false,
+    },
+    emailVerificationCodeSentAt: {
+      type: Date,
+      select: false,
+    },
+    phoneVerificationCodeSentAt: {
       type: Date,
       select: false,
     },
