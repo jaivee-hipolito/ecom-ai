@@ -73,78 +73,73 @@ export default function ImageUpload({
           return;
         }
 
-        // Upload to Cloudinary via API
-        const formData = new FormData();
-        formData.append('image', file);
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-        let response: Response;
-        try {
-          response = await fetch('/api/products/upload-image', {
+        // Direct upload to Cloudinary (bypasses Vercel 4.5MB body limit)
+        const useDirectUpload = cloudName && uploadPreset;
+
+        let imageUrl: string;
+
+        if (useDirectUpload) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', uploadPreset);
+          formData.append('folder', 'products');
+
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            { method: 'POST', body: formData }
+          );
+
+          const text = await response.text();
+          if (!response.ok) {
+            let errMsg = 'Upload failed';
+            try {
+              const err = JSON.parse(text);
+              errMsg = err?.error?.message || err?.error || errMsg;
+            } catch {
+              errMsg = response.status === 413
+                ? 'Image too large. Try a smaller image (max 5MB).'
+                : 'Upload failed. Please try again.';
+            }
+            throw new Error(errMsg);
+          }
+
+          const data = JSON.parse(text);
+          imageUrl = data.secure_url;
+        } else {
+          // Fallback: upload via API (subject to Vercel 4.5MB limit in production)
+          const formData = new FormData();
+          formData.append('image', file);
+
+          const response = await fetch('/api/products/upload-image', {
             method: 'POST',
             body: formData,
-            // Don't set Content-Type header - browser will set it with boundary for FormData
           });
-        } catch (networkError: any) {
-          console.error('Network error during upload:', networkError);
-          throw new Error('Network error. Please check your connection and try again.');
-        }
 
-        // Check if response is OK
-        if (!response.ok) {
-          // Always read as text first to avoid JSON parse errors on HTML error pages
-          // (e.g. 500 body size limit returns HTML, not JSON)
-          let errorMessage = 'Upload failed';
-          try {
+          if (!response.ok) {
             const textResponse = await response.text();
-            const contentType = response.headers.get('content-type') || '';
-            if (contentType.includes('application/json')) {
-              try {
-                const errorData = JSON.parse(textResponse);
-                errorMessage = errorData.error || `Upload failed with status ${response.status}`;
-              } catch {
-                // Response claimed JSON but body wasn't valid JSON (e.g. HTML)
-                errorMessage = response.status === 500
-                  ? 'Image may be too large or upload failed. Try a smaller image (max 5MB) or check your connection.'
-                  : `Upload failed with status ${response.status}. Please try again.`;
-              }
-            } else {
-              // HTML or other non-JSON (common when body size limit exceeded on mobile)
-              console.error('Non-JSON error response:', textResponse.substring(0, 200));
+            let errorMessage = 'Upload failed';
+            try {
+              const err = JSON.parse(textResponse);
+              errorMessage = err?.error || errorMessage;
+            } catch {
               errorMessage = response.status === 500
-                ? 'Image may be too large or upload failed. Try a smaller image (max 5MB) or use a different device.'
-                : `Server error (${response.status}). Please try again.`;
+                ? 'Image may be too large or upload failed. Try a smaller image (max 5MB).'
+                : `Upload failed (${response.status}). Please try again.`;
             }
-          } catch (readError: any) {
-            console.error('Error reading error response:', readError);
-            errorMessage = response.status === 500
-              ? 'Image may be too large or upload failed. Try a smaller image (max 5MB).'
-              : `Upload failed with status ${response.status}. Please try again.`;
+            throw new Error(errorMessage);
           }
-          throw new Error(errorMessage);
+
+          const data = await response.json();
+          imageUrl = data.imageUrl;
         }
 
-        // Parse successful response
-        let data: any;
-        try {
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            const textResponse = await response.text();
-            console.error('Non-JSON success response:', textResponse.substring(0, 200));
-            throw new Error('Invalid response format from server');
-          }
-          data = await response.json();
-        } catch (parseError: any) {
-          console.error('Error parsing success response:', parseError);
-          throw new Error('Failed to parse server response. Please try again.');
-        }
-
-        console.log('Upload response:', data);
-        if (data.imageUrl) {
-          newImages.push(data.imageUrl);
-          console.log('Added image URL:', data.imageUrl);
+        if (imageUrl) {
+          newImages.push(imageUrl);
         } else {
-          console.error('No imageUrl in response:', data);
-          throw new Error('Invalid response from server: missing image URL');
+          throw new Error('Invalid response: missing image URL');
         }
       }
 
