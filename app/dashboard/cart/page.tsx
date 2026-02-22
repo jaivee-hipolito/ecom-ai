@@ -7,7 +7,6 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import Loading from '@/components/ui/Loading';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
 import { useState, Suspense } from 'react';
 import { ShippingAddress } from '@/types/address';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -168,16 +167,18 @@ function CartPageContent() {
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Start shopping to add amazing products to your cart
             </p>
-            <Link href="/dashboard/products">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <Link
+              href="/dashboard/products"
+              className="block w-full sm:w-auto max-w-sm sm:max-w-none mx-auto sm:mx-0"
+            >
+              <motion.span
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center justify-center gap-2.5 sm:gap-2 w-full min-h-[48px] sm:min-h-[44px] py-3.5 sm:py-3 px-6 sm:px-8 text-base sm:text-lg font-semibold rounded-lg bg-gradient-to-r from-[#F9629F] to-[#DB7093] hover:from-[#FC9BC2] hover:to-[#F9629F] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
-                <Button className="bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-lg hover:shadow-xl px-8 py-3 text-lg font-semibold">
-                  Browse Products
-                  <FiArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </motion.div>
+                <span>Browse Products</span>
+                <FiArrowRight className="w-5 h-5 flex-shrink-0" />
+              </motion.span>
             </Link>
           </motion.div>
         ) : (

@@ -1,10 +1,10 @@
 'use client';
 
 import { ICartItem } from '@/types/cart';
-import Image from 'next/image';
+import Link from 'next/link';
 import ProductImage from '@/components/products/ProductImage';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiShoppingBag, FiPackage, FiTag, FiX, FiCheck } from 'react-icons/fi';
+import { FiShoppingBag, FiPackage, FiTag, FiX, FiCheck, FiHelpCircle } from 'react-icons/fi';
 import { useState } from 'react';
 import { formatCurrency } from '@/utils/currency';
 
@@ -45,6 +45,7 @@ export default function OrderSummary({
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; type: 'percentage' | 'fixed' } | null>(null);
   const [isApplying, setIsApplying] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [showShippingInfo, setShowShippingInfo] = useState(false);
 
   const calculateDiscount = (coupon: { discount: number; type: 'percentage' | 'fixed' } | null): number => {
     if (!coupon) return 0;
@@ -304,11 +305,69 @@ export default function OrderSummary({
           </motion.div>
         )}
 
-        <div className="flex justify-between items-center text-white/70">
-          <span className="text-sm sm:text-base">Shipping</span>
+        <div className="relative flex justify-between items-center text-white/70">
+          <span className="text-sm sm:text-base flex items-center gap-1.5">
+            Shipping
+            <button
+              type="button"
+              onClick={() => setShowShippingInfo((v) => !v)}
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 hover:bg-white/30 text-white/90 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9629F]"
+              aria-label="Shipping information"
+            >
+              <FiHelpCircle className="w-3.5 h-3.5" />
+            </button>
+          </span>
           <span className="text-sm">
             {shippingLoading ? 'Calculating...' : shipping > 0 ? formatCurrency(shipping) : 'Free'}
           </span>
+          <AnimatePresence>
+            {showShippingInfo && (
+              <>
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  type="button"
+                  onClick={() => setShowShippingInfo(false)}
+                  className="fixed inset-0 z-[100] bg-black/60 sm:hidden"
+                  aria-label="Close shipping info"
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed left-4 right-4 top-1/2 -translate-y-1/2 sm:absolute sm:left-0 sm:right-0 sm:top-full sm:mt-2 sm:translate-y-0 sm:w-80 z-[110] p-5 sm:p-4 bg-[#0d0d0d] border-2 border-white/30 rounded-xl shadow-2xl text-left"
+                >
+                  <p className="font-bold text-white text-lg sm:text-sm mb-3">Shipping &amp; delivery</p>
+                  <ul className="space-y-2.5 sm:space-y-1.5 text-white/95 text-base sm:text-sm leading-relaxed sm:leading-normal">
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#F9629F] mt-0.5">•</span>
+                      <span>Ships from Victoria, BC (Canada-wide)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#F9629F] mt-0.5">•</span>
+                      <span>1–3 business days processing</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#F9629F] mt-0.5">•</span>
+                      <span>Canada Post with tracking</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#F9629F] mt-0.5">•</span>
+                      <span>$100 complimentary insurance</span>
+                    </li>
+                  </ul>
+                  <Link
+                    href="/shipping"
+                    className="inline-flex items-center gap-1.5 mt-4 py-3 px-5 sm:py-2.5 sm:px-4 rounded-lg bg-[#F9629F]/20 text-[#F9629F] font-semibold text-base sm:text-sm hover:bg-[#F9629F]/30 transition-colors min-h-[44px] sm:min-h-0 items-center justify-center"
+                  >
+                    View full shipping info →
+                  </Link>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
         
         

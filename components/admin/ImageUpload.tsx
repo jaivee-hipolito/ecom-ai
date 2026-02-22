@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { FiImage, FiArrowUp, FiArrowDown, FiTrash2 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 
@@ -21,7 +22,21 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Close overlay when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (activeIndex === null) return;
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-image-upload-item]')) {
+        setActiveIndex(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeIndex]);
 
   // Set first image as cover if no cover is set
   const currentCoverImage = coverImage || (images.length > 0 ? images[0] : '');
@@ -220,13 +235,13 @@ export default function ImageUpload({
           {images.map((imageUrl, index) => {
             const isCover = imageUrl === currentCoverImage;
             return (
-              <div key={index} className="relative group">
+              <div key={index} className="relative group" data-image-upload-item>
                 {/* Image Container */}
                 <div
-                  className={`relative w-full h-24 sm:h-28 md:h-32 rounded-lg overflow-hidden border-2 ${
+                  className={`relative w-full h-24 sm:h-28 md:h-32 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
                     isCover
-                      ? 'border-blue-500 ring-2 ring-blue-200'
-                      : 'border-gray-300'
+                      ? 'border-[#F9629F] ring-2 ring-[#F9629F]/30 shadow-md'
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   {/* Image - Base Layer */}
@@ -236,120 +251,107 @@ export default function ImageUpload({
                     className="w-full h-full object-cover"
                     style={{ display: 'block', position: 'relative', zIndex: 1 }}
                     onError={(e) => {
-                      console.error('Image failed to load:', imageUrl);
                       const target = e.target as HTMLImageElement;
                       target.style.backgroundColor = '#f3f4f6';
                       target.alt = 'Failed to load image';
                     }}
-                    onLoad={(e) => {
-                      console.log('Image loaded successfully:', imageUrl);
-                    }}
                   />
-                  
+
                   {/* Cover Badge */}
                   {isCover && (
-                    <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs font-semibold px-2 py-0.5 rounded z-10 shadow-md">
+                    <div className="absolute top-2 left-2 z-10 px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white text-xs font-semibold shadow-lg flex items-center gap-1">
+                      <FiImage className="w-3.5 h-3.5" />
                       Cover
                     </div>
                   )}
 
-                  {/* Hover Overlay - Only appears on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-200 rounded-lg flex items-center justify-center z-20 pointer-events-none group-hover:pointer-events-auto">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
-                      {/* Set as Cover Button */}
-                      {!isCover && (
-                        <button
-                          type="button"
-                          onClick={() => setAsCover(imageUrl)}
-                          className="bg-blue-600 text-white rounded p-1.5 hover:bg-blue-700 transition-colors shadow-lg"
-                          title="Set as cover image"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                            />
-                          </svg>
-                        </button>
-                      )}
+                  {/* Position Badge */}
+                  <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded-md bg-black/60 text-white text-xs font-medium">
+                    #{index + 1}
+                  </div>
 
-                      {/* Move Up Button */}
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, 'up')}
-                          className="bg-gray-700 text-white rounded p-1.5 hover:bg-gray-800 transition-colors shadow-lg"
-                          title="Move up"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 15l7-7 7 7"
-                            />
-                          </svg>
-                        </button>
-                      )}
+                  {/* Overlay - appears on hover (desktop) or tap (mobile/tablet) */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveIndex(activeIndex === index ? null : index);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveIndex(activeIndex === index ? null : index);
+                      }
+                    }}
+                    className={`absolute inset-0 transition-all duration-200 rounded-xl flex items-end justify-center z-20 cursor-pointer
+                      ${activeIndex === index ? 'bg-black/70' : 'bg-black/0 group-hover:bg-black/70'}`}
+                  >
+                    <div
+                      className={`w-full p-2 sm:p-2.5 transition-opacity duration-200
+                        ${activeIndex === index ? 'opacity-100 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'}`}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                          <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
+                            {/* Set as Cover */}
+                            {!isCover && (
+                              <button
+                                type="button"
+                                onClick={() => { setAsCover(imageUrl); setActiveIndex(null); }}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-gradient-to-r from-[#F9629F] to-[#DB7093] text-white text-xs font-semibold hover:shadow-lg transition-all hover:scale-105 active:scale-95"
+                              >
+                                <FiImage className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="hidden sm:inline">Cover</span>
+                              </button>
+                            )}
 
-                      {/* Move Down Button */}
-                      {index < images.length - 1 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, 'down')}
-                          className="bg-gray-700 text-white rounded p-1.5 hover:bg-gray-800 transition-colors shadow-lg"
-                          title="Move down"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </button>
-                      )}
+                            {/* Move Up */}
+                            {index > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => moveImage(index, 'up')}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-white/90 text-gray-800 text-xs font-semibold hover:bg-white transition-all hover:scale-105 active:scale-95"
+                                title="Move up"
+                              >
+                                <FiArrowUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="hidden sm:inline">Up</span>
+                              </button>
+                            )}
 
-                      {/* Remove Button */}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="bg-red-600 text-white rounded p-1.5 hover:bg-red-700 transition-colors shadow-lg"
-                        title="Remove image"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                            {/* Move Down */}
+                            {index < images.length - 1 && (
+                              <button
+                                type="button"
+                                onClick={() => moveImage(index, 'down')}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-white/90 text-gray-800 text-xs font-semibold hover:bg-white transition-all hover:scale-105 active:scale-95"
+                                title="Move down"
+                              >
+                                <FiArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="hidden sm:inline">Down</span>
+                              </button>
+                            )}
+
+                            {/* Delete */}
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-red-500/90 text-white text-xs font-semibold hover:bg-red-500 transition-all hover:scale-105 active:scale-95"
+                              title="Remove image"
+                            >
+                              <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                              <span className="hidden sm:inline">Delete</span>
+                            </button>
+                          </div>
                     </div>
+                    {/* Fallback for group-hover when not using tap */}
+                    {activeIndex !== index && (
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <span className="text-white/90 text-xs font-medium px-3 py-1.5 rounded-lg bg-black/50">Tap for options</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

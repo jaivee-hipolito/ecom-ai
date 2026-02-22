@@ -24,9 +24,10 @@ import ProductRating from './ProductRating';
 interface ProductDetailProps {
   product: IProduct;
   isFlashSale?: boolean;
+  hideProductName?: boolean;
 }
 
-export default function ProductDetail({ product, isFlashSale: propFlashSale }: ProductDetailProps) {
+export default function ProductDetail({ product, isFlashSale: propFlashSale, hideProductName = false }: ProductDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
@@ -679,6 +680,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
           {/* Product Info */}
           <div className="space-y-6">
             {/* Product Title & Rating */}
+            {!hideProductName && (
             <div>
               <div className="flex items-start gap-3 mb-3">
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 flex-1">
@@ -698,6 +700,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale }: P
                 </div>
               )}
             </div>
+            )}
 
             {/* Price */}
             <div className="border-b border-gray-200 pb-4">

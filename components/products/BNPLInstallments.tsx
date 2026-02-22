@@ -100,9 +100,9 @@ export default function BNPLInstallments({ price }: BNPLInstallmentsProps) {
         </div>
       </motion.div>
 
-      {/* Interac e-Transfer - Pay (price * 0.97) only with Interac */}
+      {/* Interac e-Transfer - Pay (price * 0.94) only with Interac - 6% discount */}
       {(() => {
-        const interacPrice = price * (1 - 0.03); // product price - (product price * 0.03)
+        const interacPrice = price * (1 - 0.06); // product price - 6% discount
         return (
           <motion.div
             initial={{ opacity: 0, x: -10 }}

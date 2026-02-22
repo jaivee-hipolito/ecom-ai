@@ -590,7 +590,7 @@ export default function ProductTable({
         ) : (
           <>
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-5 md:mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-4 sm:mb-5 md:mb-6">
               {products.map((product, index) => {
                 const flashSaleData = calculateFlashSaleData(product);
                 const { discountPercentage, displayedPrice, crossedOutPrice, hasDiscount } = flashSaleData;
@@ -936,14 +936,6 @@ export default function ProductTable({
                   </motion.div>
                 )}
 
-                {/* Product Name */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-full text-base font-semibold"
-                >
-                  {imageGallery.product.name}
-                </motion.div>
               </motion.div>
 
               {/* Thumbnail Navigation */}

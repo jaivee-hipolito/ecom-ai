@@ -105,7 +105,7 @@ export default function QuickView({ productId, isOpen, onClose, isFlashSale = fa
                 </div>
               ) : product ? (
                 <div className="quick-view-container">
-                  <ProductDetail product={product} isFlashSale={isFlashSale} />
+                  <ProductDetail product={product} isFlashSale={isFlashSale} hideProductName />
                 </div>
               ) : null}
             </div>
