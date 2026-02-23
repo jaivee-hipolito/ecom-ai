@@ -19,9 +19,13 @@ interface Category {
 
 interface DealOfTheDayProps {
   initialProducts?: IProduct[];
+  /** When set (e.g. "/admin/products"), product links use this base path. */
+  productLinkPrefix?: string;
 }
 
-export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps) {
+export default function DealOfTheDay({ initialProducts = [], productLinkPrefix = '' }: DealOfTheDayProps) {
+  const productHref = (id: string, hasDiscount?: boolean) =>
+    productLinkPrefix ? `${productLinkPrefix}/${id}` : `/products/${id}${hasDiscount ? '?flashSale=true' : ''}`;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryFilterButtons, setCategoryFilterButtons] = useState<string[]>(['All Products']);
@@ -156,6 +160,11 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
     }
   }, [selectedCategory, products.length, isLoading]);
 
+  // Hide the entire section when there are no products to show
+  if (!isLoading && displayProducts.length === 0) {
+    return null;
+  }
+
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 py-12 lg:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -238,7 +247,7 @@ export default function DealOfTheDay({ initialProducts = [] }: DealOfTheDayProps
                   whileHover={{ y: -8 }}
                   className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group"
                 >
-                  <Link href={`/products/${product._id}${hasDiscount ? '?flashSale=true' : ''}`} className="block">
+                  <Link href={productHref(product._id!, hasDiscount)} className="block">
                     {/* Product Image Container */}
                     <div className="relative aspect-square bg-gray-100 overflow-hidden">
                       <ProductImage 

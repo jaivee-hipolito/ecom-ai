@@ -264,15 +264,50 @@ export default function AdminOrderDetailPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-900">
-                  Total Amount
-                </span>
-                <span className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(order.totalAmount)}
-                </span>
-              </div>
+            <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
+              {(() => {
+                const subtotal = order.items?.reduce(
+                  (sum, item) => sum + item.price * item.quantity,
+                  0
+                ) ?? 0;
+                const shipping = order.shippingFee ?? 0;
+                const couponAmount = order.coupon?.discountAmount ?? 0;
+                const verificationDiscount = order.verificationDiscount ?? 0;
+                return (
+                  <>
+                    <div className="flex justify-between items-center text-gray-600">
+                      <span>Subtotal</span>
+                      <span>{formatCurrency(subtotal)}</span>
+                    </div>
+                    {order.coupon && couponAmount > 0 && (
+                      <div className="flex justify-between items-center text-green-600">
+                        <span>Discount ({order.coupon.code})</span>
+                        <span>-{formatCurrency(couponAmount)}</span>
+                      </div>
+                    )}
+                    {verificationDiscount > 0 && (
+                      <div className="flex justify-between items-center text-emerald-600">
+                        <span>Verification discount</span>
+                        <span>-{formatCurrency(verificationDiscount)}</span>
+                      </div>
+                    )}
+                    {shipping > 0 && (
+                      <div className="flex justify-between items-center text-gray-600">
+                        <span>Shipping</span>
+                        <span>{formatCurrency(shipping)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                      <span className="text-lg font-semibold text-gray-900">
+                        Total Amount
+                      </span>
+                      <span className="text-2xl font-bold text-gray-900">
+                        {formatCurrency(order.totalAmount)}
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 

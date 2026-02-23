@@ -4,7 +4,7 @@ import { ICartItem } from '@/types/cart';
 import Link from 'next/link';
 import ProductImage from '@/components/products/ProductImage';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiShoppingBag, FiPackage, FiTag, FiX, FiCheck, FiHelpCircle } from 'react-icons/fi';
+import { FiShoppingBag, FiPackage, FiTag, FiX, FiCheck, FiHelpCircle, FiPhone, FiMail } from 'react-icons/fi';
 import { useState } from 'react';
 import { formatCurrency } from '@/utils/currency';
 
@@ -17,18 +17,17 @@ interface OrderSummaryProps {
   total: number;
   paymentMethod?: 'card' | 'afterpay' | 'klarna' | 'affirm';
   onCouponApplied?: (discount: number, couponCode?: string, couponType?: 'percentage' | 'fixed') => void;
+  /** $5 one-time discount for verified phone or email */
+  verificationDiscount?: number;
+  verificationDiscountSource?: 'phone' | 'email' | 'both' | null;
+  /** User can verify to get $5 off (not yet verified, not yet used) */
+  canBecomeVerificationEligible?: boolean;
+  verificationEligibilityLoading?: boolean;
   /** When true, hide the "Order Summary" header (e.g. when used inside a collapsible that has its own header) */
   compact?: boolean;
 }
 
-// Mock coupon codes - In production, this would come from an API
-const COUPON_CODES: Record<string, { discount: number; type: 'percentage' | 'fixed' }> = {
-  'SAVE10': { discount: 10, type: 'fixed' },
-  'FLASH10': { discount: 10, type: 'fixed' },
-  'NEWUSER10': { discount: 10, type: 'fixed' },
-  'SAVE50': { discount: 50, type: 'fixed' },
-  'WELCOME10': { discount: 10, type: 'fixed' },
-};
+// Coupon codes - validation is done via /api/coupons/validate (one-time per user)
 
 export default function OrderSummary({
   items,
@@ -39,6 +38,10 @@ export default function OrderSummary({
   total,
   paymentMethod = 'card',
   onCouponApplied,
+  verificationDiscount = 0,
+  verificationDiscountSource = null,
+  canBecomeVerificationEligible = false,
+  verificationEligibilityLoading = false,
   compact = false,
 }: OrderSummaryProps) {
   const [couponCode, setCouponCode] = useState('');
@@ -125,7 +128,8 @@ export default function OrderSummary({
   };
 
   const discount = calculateDiscount(appliedCoupon);
-  const subtotalAfterDiscount = subtotal - discount;
+  const subtotalAfterCoupon = subtotal - discount;
+  const subtotalAfterDiscount = subtotalAfterCoupon - verificationDiscount;
 
   // Tax is shouldered by owner/admin, so set to 0 for customers
   const taxBreakdown = {
@@ -200,6 +204,35 @@ export default function OrderSummary({
           );
         })}
       </div>
+
+      {/* Verification discount banner - user can verify to get $5 off (one-time) */}
+      {canBecomeVerificationEligible && !verificationEligibilityLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 p-4 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-2 border-emerald-400/50 rounded-xl"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-500/30 flex items-center justify-center">
+              <FiCheck className="w-5 h-5 text-emerald-300" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-white font-bold text-sm sm:text-base mb-1">
+                Get $5 off your first order!
+              </p>
+              <p className="text-white/80 text-xs sm:text-sm mb-3">
+                Verify both your phone number and email address to receive a one-time $5 discount at checkout.
+              </p>
+              <Link
+                href="/dashboard/verify"
+                className="inline-flex items-center gap-2 text-emerald-300 hover:text-emerald-200 font-semibold text-sm transition-colors"
+              >
+                Verify now →
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Coupon Code Section */}
       <div className="border-t border-white/20 pt-4 mb-4">
@@ -302,6 +335,32 @@ export default function OrderSummary({
               Discount ({appliedCoupon?.code})
             </span>
             <span className="font-bold text-lg">-{formatCurrency(discount)}</span>
+          </motion.div>
+        )}
+
+        {verificationDiscount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center justify-between gap-3 text-emerald-400"
+          >
+            <span className="flex items-center gap-1.5 min-w-0 text-xs sm:text-sm font-semibold">
+              {verificationDiscountSource === 'phone' ? (
+                <FiPhone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden />
+              ) : verificationDiscountSource === 'email' ? (
+                <FiMail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" aria-hidden />
+              ) : (
+                <span className="flex items-center gap-0.5 flex-shrink-0" aria-hidden>
+                  <FiPhone className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <FiMail className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                </span>
+              )}
+              <span className="leading-tight break-words">
+                <span className="sm:hidden">Verified account</span>
+                <span className="hidden sm:inline">Verification discount (phone & email verified)</span>
+              </span>
+            </span>
+            <span className="font-bold text-base sm:text-lg whitespace-nowrap flex-shrink-0">-{formatCurrency(verificationDiscount)}</span>
           </motion.div>
         )}
 

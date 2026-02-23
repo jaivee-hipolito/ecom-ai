@@ -120,14 +120,16 @@ export async function PUT(request: NextRequest) {
       user.lastName = '';
     }
 
-    // Update contactNumber if provided (normalize and clear phone verification when number changes)
+    // Update contactNumber if provided. Only clear phone verification when the number actually changed (compare digits only to avoid clearing due to format differences).
     if (contactNumber !== undefined && contactNumber !== null) {
       const trimmed = String(contactNumber).trim();
       const normalized = normalizePhoneNumber(trimmed);
       const previousNormalized = normalizePhoneNumber((user.contactNumber as string) || '');
+      const digitsOnly = (s: string) => s.replace(/\D/g, '');
+      const numberActuallyChanged = digitsOnly(normalized) !== digitsOnly(previousNormalized);
       if (trimmed !== '') {
         user.contactNumber = normalized;
-        if (previousNormalized !== normalized) {
+        if (numberActuallyChanged) {
           (user as any).phoneVerified = false;
           (user as any).phoneVerificationCode = undefined;
           (user as any).phoneVerificationCodeExpires = undefined;
@@ -139,7 +141,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Update email if provided
+    // Update email if provided. Clear email verification when email changes.
     if (email !== undefined && email !== user.email) {
       // Check if email is already taken
       const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -150,6 +152,7 @@ export async function PUT(request: NextRequest) {
         );
       }
       user.email = email.toLowerCase().trim();
+      (user as any).emailVerified = false;
     }
 
     // Update password if provided

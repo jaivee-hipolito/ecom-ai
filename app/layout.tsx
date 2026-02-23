@@ -8,6 +8,8 @@ import { WishlistProvider } from '@/contexts/WishlistContext';
 import { CartAnimationProvider } from '@/contexts/CartAnimationContext';
 import SessionSecurity from '@/components/security/SessionSecurity';
 import BrowserCloseDetector from '@/components/security/BrowserCloseDetector';
+import MaintenanceGuard from '@/components/MaintenanceGuard';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
 import './globals.css';
 
 const geistSans = Geist({
@@ -49,6 +51,8 @@ export default function RootLayout({
               <BrowserCloseDetector />
             </Suspense>
             <SessionSecurity />
+            <MaintenanceGuard />
+            <AnnouncementBanner />
             <CartProvider>
               <WishlistProvider>
                 <CartAnimationProvider>{children}</CartAnimationProvider>

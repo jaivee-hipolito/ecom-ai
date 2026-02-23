@@ -247,6 +247,7 @@ export default function AdminDeliveriesPage() {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
+    const rightMargin = pageWidth - margin;
     let yPos = margin;
 
     // Helper function to add a new page if needed
@@ -322,13 +323,6 @@ export default function AdminDeliveriesPage() {
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.text(`Order #${order._id?.slice(-8).toUpperCase() || 'N/A'}`, margin + 2, yPos);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(
-        `Status: ${order.status?.toUpperCase() || 'N/A'}`,
-        pageWidth - margin - 50,
-        yPos
-      );
       yPos += 10;
 
       // Order Items
@@ -336,27 +330,50 @@ export default function AdminDeliveriesPage() {
         checkPageBreak(15);
         doc.setFontSize(10);
         doc.text(`• ${item.name}`, margin + 5, yPos);
-        yPos += 6;
         doc.setFontSize(9);
         doc.setTextColor(100, 100, 100);
         doc.text(
-          `  Qty: ${item.quantity} × ${formatCurrency(item.price)} = ${formatCurrency(item.quantity * item.price)}`,
-          margin + 10,
-          yPos
+          `Qty: ${item.quantity} × ${formatCurrency(item.price)} = ${formatCurrency(item.quantity * item.price)}`,
+          rightMargin,
+          yPos,
+          { align: 'right' }
         );
         yPos += 7;
         doc.setTextColor(26, 26, 26);
       });
 
-      // Order Total
-      checkPageBreak(10);
-      doc.setFontSize(11);
+      // Order breakdown (subtotal, discounts, shipping, total) — labels left, amounts right
+      const subtotal = order.items?.reduce((sum, it) => sum + it.price * it.quantity, 0) ?? 0;
+      const couponAmount = order.coupon?.discountAmount ?? 0;
+      const verificationDiscount = order.verificationDiscount ?? 0;
+      const shipping = order.shippingFee ?? 0;
+      checkPageBreak(8 + (couponAmount > 0 ? 6 : 0) + (verificationDiscount > 0 ? 6 : 0) + (shipping > 0 ? 6 : 0) + 10);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80, 80, 80);
+      doc.text('Subtotal:', margin + 5, yPos);
+      doc.text(formatCurrency(subtotal), rightMargin, yPos, { align: 'right' });
+      yPos += 6;
+      if (couponAmount > 0) {
+        doc.text(`Discount (${order.coupon?.code || 'coupon'}):`, margin + 5, yPos);
+        doc.text(`-${formatCurrency(couponAmount)}`, rightMargin, yPos, { align: 'right' });
+        yPos += 6;
+      }
+      if (verificationDiscount > 0) {
+        doc.text('Verification discount:', margin + 5, yPos);
+        doc.text(`-${formatCurrency(verificationDiscount)}`, rightMargin, yPos, { align: 'right' });
+        yPos += 6;
+      }
+      if (shipping > 0) {
+        doc.text('Shipping:', margin + 5, yPos);
+        doc.text(formatCurrency(shipping), rightMargin, yPos, { align: 'right' });
+        yPos += 6;
+      }
+      doc.setTextColor(26, 26, 26);
       doc.setFont('helvetica', 'bold');
-      doc.text(
-        `Order Total: ${formatCurrency(order.totalAmount)}`,
-        pageWidth - margin - 50,
-        yPos - 5
-      );
+      doc.setFontSize(11);
+      doc.text('Order Total:', margin + 5, yPos);
+      doc.text(formatCurrency(order.totalAmount), rightMargin, yPos, { align: 'right' });
       yPos += 10;
 
       // Order Date
@@ -374,7 +391,7 @@ export default function AdminDeliveriesPage() {
       }
     });
 
-    // Total Summary (no fill - save ink)
+    // Total Summary (no fill - save ink) — amount right-aligned
     checkPageBreak(20);
     yPos += 5;
     doc.setDrawColor(0, 0, 0);
@@ -384,12 +401,8 @@ export default function AdminDeliveriesPage() {
     doc.setTextColor(26, 26, 26);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(
-      `TOTAL: ${formatCurrency(delivery.totalAmount)}`,
-      pageWidth / 2,
-      yPos,
-      { align: 'center' }
-    );
+    doc.text('TOTAL:', margin, yPos);
+    doc.text(formatCurrency(delivery.totalAmount), rightMargin, yPos, { align: 'right' });
     yPos += 8;
 
     // Footer
@@ -434,6 +447,7 @@ export default function AdminDeliveriesPage() {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
+    const rightMargin = pageWidth - margin;
     let yPos = margin;
 
     const checkPageBreak = (requiredSpace: number) => {
@@ -513,30 +527,56 @@ export default function AdminDeliveriesPage() {
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(26, 26, 26);
         doc.text(`Order #${order._id?.slice(-8).toUpperCase() || 'N/A'}`, margin + 2, yPos + 1);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Status: ${order.status?.toUpperCase() || 'N/A'}`, pageWidth - margin - 45, yPos + 1);
         yPos += 9;
 
         order.items?.forEach((item) => {
           checkPageBreak(12);
           doc.setFontSize(9);
           doc.text(`• ${item.name} × ${item.quantity}`, margin + 4, yPos);
-          yPos += 5;
           doc.setTextColor(100, 100, 100);
           doc.text(
-            `  ${formatCurrency(item.price)} each = ${formatCurrency(item.quantity * item.price)}`,
-            margin + 8,
-            yPos
+            `${formatCurrency(item.price)} each = ${formatCurrency(item.quantity * item.price)}`,
+            rightMargin,
+            yPos,
+            { align: 'right' }
           );
           yPos += 6;
           doc.setTextColor(26, 26, 26);
         });
 
+        const subtotal = order.items?.reduce((sum, it) => sum + it.price * it.quantity, 0) ?? 0;
+        const couponAmount = order.coupon?.discountAmount ?? 0;
+        const verificationDiscount = order.verificationDiscount ?? 0;
+        const shipping = order.shippingFee ?? 0;
+        checkPageBreak(6 + (couponAmount > 0 ? 5 : 0) + (verificationDiscount > 0 ? 5 : 0) + (shipping > 0 ? 5 : 0) + 8);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(80, 80, 80);
+        doc.text('Subtotal:', margin + 6, yPos);
+        doc.text(formatCurrency(subtotal), rightMargin, yPos, { align: 'right' });
+        yPos += 5;
+        if (couponAmount > 0) {
+          doc.text(`Discount (${order.coupon?.code || 'coupon'}):`, margin + 6, yPos);
+          doc.text(`-${formatCurrency(couponAmount)}`, rightMargin, yPos, { align: 'right' });
+          yPos += 5;
+        }
+        if (verificationDiscount > 0) {
+          doc.text('Verification discount:', margin + 6, yPos);
+          doc.text(`-${formatCurrency(verificationDiscount)}`, rightMargin, yPos, { align: 'right' });
+          yPos += 5;
+        }
+        if (shipping > 0) {
+          doc.text('Shipping:', margin + 6, yPos);
+          doc.text(formatCurrency(shipping), rightMargin, yPos, { align: 'right' });
+          yPos += 5;
+        }
+        doc.setTextColor(26, 26, 26);
         checkPageBreak(8);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9);
-        doc.text(`Order total: ${formatCurrency(order.totalAmount)}`, pageWidth - margin - 55, yPos - 2);
+        doc.text('Order total:', margin + 6, yPos);
+        doc.text(formatCurrency(order.totalAmount), rightMargin, yPos, { align: 'right' });
+        yPos += 6;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
@@ -551,7 +591,7 @@ export default function AdminDeliveriesPage() {
         }
       });
 
-      // Delivery total (no fill - save ink)
+      // Delivery total (no fill - save ink) — amount right-aligned
       checkPageBreak(14);
       yPos += 4;
       doc.setDrawColor(0, 0, 0);
@@ -561,12 +601,8 @@ export default function AdminDeliveriesPage() {
       doc.setTextColor(26, 26, 26);
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text(
-        `Delivery total: ${formatCurrency(delivery.totalAmount)}`,
-        pageWidth / 2,
-        yPos,
-        { align: 'center' }
-      );
+      doc.text('Delivery total:', margin, yPos);
+      doc.text(formatCurrency(delivery.totalAmount), rightMargin, yPos, { align: 'right' });
       yPos += 12;
 
       // Separator between deliveries

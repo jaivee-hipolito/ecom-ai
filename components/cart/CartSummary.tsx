@@ -173,7 +173,7 @@ export default function CartSummary({ selectedAddress, selectedItemIds }: CartSu
         <button
           onClick={handleProceedToCheckout}
           disabled={summary.totalItems === 0 || !selectedAddress || (selectedItemIds !== undefined && selectedItemIds.size === 0) || !termsAccepted}
-          className="w-full bg-[#FDE8F0] text-[#1a1a1a] border border-gray-300 hover:bg-[#FC9BC2] shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-[#FDE8F0] text-gray-900 border border-gray-300 hover:bg-[#FC9BC2] shadow-xl hover:shadow-2xl py-4 px-6 text-lg font-bold transition-all duration-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <span>Proceed to Checkout</span>
           <FiArrowRight className="w-5 h-5 flex-shrink-0" />

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { getStripe } from '@/lib/stripe';
+import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAuth } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB
@@ -12,7 +13,34 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const userId = (session.user as any).id;
-    const { amount, currency = 'usd', shippingAddress, paymentMethod, billingAddress, itemIds, shippingFee, couponCode, couponDiscount, couponType } = await request.json();
+    const {
+      amount,
+      currency = 'usd',
+      shippingAddress,
+      paymentMethod,
+      billingAddress,
+      itemIds,
+      shippingFee,
+      couponCode,
+      couponDiscount,
+      couponType,
+      verificationDiscount,
+      verificationDiscountSource,
+    } = await request.json();
+
+    // Security: $5 verification discount is one-time per user (by userId), even if they change phone/email and re-verify
+    if (verificationDiscount && Number(verificationDiscount) > 0) {
+      const alreadyUsed = await UsedVerificationDiscount.findOne({ user: userId });
+      if (alreadyUsed) {
+        return NextResponse.json(
+          {
+            error: 'Verification discount has already been used for this account. It cannot be applied again.',
+            code: 'VERIFICATION_DISCOUNT_ALREADY_USED',
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
       return NextResponse.json(
@@ -65,6 +93,10 @@ export async function POST(request: NextRequest) {
         }),
         ...(couponType && {
           couponType: couponType,
+        }),
+        ...(verificationDiscount && verificationDiscount > 0 && {
+          verificationDiscount: verificationDiscount.toString(),
+          verificationDiscountSource: verificationDiscountSource || '',
         }),
       },
     };

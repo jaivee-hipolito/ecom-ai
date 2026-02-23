@@ -302,9 +302,13 @@ export default function ProfilePage() {
             </div>
           </div>
           
-          {/* Verification Link */}
+          {/* Verification Link + $5 off offer */}
           {(!userProfile?.emailVerified || !userProfile?.phoneVerified) && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
+              <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+                <p className="text-emerald-800 font-semibold text-sm mb-1">Get $5 off your first order!</p>
+                <p className="text-emerald-700 text-xs">Verify both your phone number and email to receive a one-time $5 discount at checkout.</p>
+              </div>
               <Link
                 href="/dashboard/verify"
                 className="block w-full bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-[#000000] font-bold py-3 px-6 rounded-xl text-center hover:shadow-lg transition-all"

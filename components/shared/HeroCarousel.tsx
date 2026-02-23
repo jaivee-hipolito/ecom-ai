@@ -10,9 +10,12 @@ import { formatCurrency } from '@/utils/currency';
 
 interface HeroCarouselProps {
   products: IProduct[];
+  /** When set (e.g. "/admin/products"), product links use this base path so navigation stays in admin. */
+  productLinkPrefix?: string;
 }
 
-export default function HeroCarousel({ products }: HeroCarouselProps) {
+export default function HeroCarousel({ products, productLinkPrefix = '' }: HeroCarouselProps) {
+  const productHref = (id: string) => (productLinkPrefix ? `${productLinkPrefix}/${id}` : `/products/${id}`);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -97,7 +100,7 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                 className="flex flex-col justify-center space-y-4 sm:space-y-6 z-10 order-2 lg:order-1"
               >
                 {/* Product Name */}
-                <Link href={`/products/${currentProduct._id}`}>
+                <Link href={productHref(currentProduct._id ?? '')}>
                   <motion.h1
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -148,7 +151,7 @@ export default function HeroCarousel({ products }: HeroCarouselProps) {
                 className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-full flex items-center justify-center order-1 lg:order-2"
               >
                 <Link 
-                  href={`/products/${currentProduct._id}`}
+                  href={productHref(currentProduct._id ?? '')}
                   className="relative w-full h-full max-w-lg flex items-center justify-center px-4 group cursor-pointer"
                 >
                   <motion.div 

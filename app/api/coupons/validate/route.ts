@@ -5,12 +5,11 @@ import UsedCoupon from '@/models/UsedCoupon';
 import User from '@/models/User';
 
 // Available coupon codes - In production, this should come from a database
+// One-time discount per user (enforced via UsedCoupon)
 const COUPON_CODES: Record<string, { discount: number; type: 'percentage' | 'fixed' }> = {
-  'SAVE10': { discount: 10, type: 'fixed' },
-  'FLASH10': { discount: 10, type: 'fixed' },
-  'NEWUSER10': { discount: 10, type: 'fixed' },
-  'SAVE50': { discount: 50, type: 'fixed' },
-  'WELCOME10': { discount: 10, type: 'fixed' },
+  'SAVE5': { discount: 5, type: 'fixed' },
+  'FLASH5': { discount: 5, type: 'fixed' },
+  'NEWUSER5': { discount: 5, type: 'fixed' },
 };
 
 export async function POST(request: NextRequest) {

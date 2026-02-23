@@ -254,9 +254,19 @@ export default function VerifyPage() {
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#000000] mb-2 sm:mb-4">
             Verify Your Account
           </h1>
-          <p className="text-gray-600 text-sm sm:text-base lg:text-lg px-1">
+          <p className="text-gray-600 text-sm sm:text-base lg:text-lg px-1 mb-4">
             Verify your email and phone number to secure your account
           </p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-2 border-emerald-400/60 rounded-xl"
+          >
+            <span className="text-emerald-700 font-bold text-sm sm:text-base">
+              Get $5 off your first order! Verify both your phone and email for a one-time discount at checkout.
+            </span>
+          </motion.div>
         </motion.div>
 
         {/* Notifications */}

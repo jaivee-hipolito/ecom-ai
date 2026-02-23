@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import User from '@/models/User';
+import UsedCoupon from '@/models/UsedCoupon';
+import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAdmin } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB
@@ -140,6 +142,47 @@ export async function GET(request: NextRequest) {
 
     // Sort deliveries by customer name (ensures consistent ordering)
     deliveries.sort((a, b) => a.customerName.localeCompare(b.customerName));
+
+    // Enrich each order with coupon and verification discount for PDF breakdown
+    const allOrderIds = orders.map((o) => o._id);
+    const [usedCoupons, usedVerificationDiscounts] = await Promise.all([
+      UsedCoupon.find({ orderId: { $in: allOrderIds } }).lean(),
+      UsedVerificationDiscount.find({ orderId: { $in: allOrderIds } }).lean(),
+    ]);
+    const couponByOrderId: Record<string, { code: string; discount: number; discountType: string; discountAmount: number }> = {};
+    usedCoupons.forEach((uc: any) => {
+      if (uc.orderId) {
+        const oid = uc.orderId.toString();
+        const order = orders.find((o) => o._id.toString() === oid);
+        const subtotal = order?.items?.reduce((s: number, i: any) => s + (i.price || 0) * (i.quantity || 0), 0) ?? 0;
+        const discountAmount =
+          uc.discountType === 'percentage' ? (subtotal * uc.discount) / 100 : Math.min(uc.discount, subtotal);
+        couponByOrderId[oid] = {
+          code: uc.couponCode,
+          discount: uc.discount,
+          discountType: uc.discountType,
+          discountAmount,
+        };
+      }
+    });
+    const verificationDiscountByOrderId: Record<string, number> = {};
+    usedVerificationDiscounts.forEach((uv: any) => {
+      if (uv.orderId) verificationDiscountByOrderId[uv.orderId.toString()] = uv.discount || 0;
+    });
+
+    // Attach to each order in deliveries
+    deliveries.forEach((d) => {
+      d.orders = d.orders.map((ord: any) => {
+        const oid = ord._id?.toString?.() || ord._id;
+        const coupon = couponByOrderId[oid];
+        const verificationDiscount = verificationDiscountByOrderId[oid] ?? 0;
+        return {
+          ...ord,
+          ...(coupon && { coupon }),
+          ...(verificationDiscount > 0 && { verificationDiscount }),
+        };
+      });
+    });
 
     return NextResponse.json({
       deliveries,

@@ -64,8 +64,8 @@ export default function PopularCategories({ categories, products = [] }: Popular
           Curated Selections
         </motion.h2>
 
-        {/* 2x2 grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
+        {/* 2 cols on mobile/tablet, 4 cols on laptop/wide screen */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {displayCategories.map((category, index) => {
             const Icon = getCategoryIcon(category.name);
             const linkLabel = `${category.name} Collections`;
@@ -92,7 +92,7 @@ export default function PopularCategories({ categories, products = [] }: Popular
                           alt={category.name}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 640px) 100vw, 50vw"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                           unoptimized={imageUrl.startsWith('http') || imageUrl.startsWith('//')}
                         />
                       ) : (

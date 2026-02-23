@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock } from 'react-icons/fi';
+import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiPhone, FiMail } from 'react-icons/fi';
 import Loading from '@/components/ui/Loading';
 import Badge from '@/components/ui/Badge';
 import ProductImage from '@/components/products/ProductImage';
@@ -287,17 +287,28 @@ export default function OrderDetailPage() {
                     0
                   );
                   const shipping = order.shippingFee ?? 0;
-                  const discountAmount = order.coupon?.discountAmount ?? 0;
+                  const couponAmount = order.coupon?.discountAmount ?? 0;
+                  const verificationDiscount = order.verificationDiscount ?? 0;
                   return (
                     <>
                       <div className="flex justify-between items-center text-gray-600">
                         <span>Subtotal</span>
                         <span>{formatCurrency(subtotal)}</span>
                       </div>
-                      {order.coupon && discountAmount > 0 && (
+                      {order.coupon && couponAmount > 0 && (
                         <div className="flex justify-between items-center text-green-600">
                           <span>Discount ({order.coupon.code})</span>
-                          <span>-{formatCurrency(discountAmount)}</span>
+                          <span>-{formatCurrency(couponAmount)}</span>
+                        </div>
+                      )}
+                      {verificationDiscount > 0 && (
+                        <div className="flex justify-between items-center text-emerald-600">
+                          <span className="flex items-center gap-1.5">
+                            <FiPhone className="w-4 h-4" />
+                            <FiMail className="w-4 h-4" />
+                            Verification discount
+                          </span>
+                          <span>-{formatCurrency(verificationDiscount)}</span>
                         </div>
                       )}
                       {shipping > 0 && (

@@ -28,6 +28,8 @@ import {
   FiTruck,
   FiLogOut,
   FiUser,
+  FiSettings,
+  FiGlobe,
 } from 'react-icons/fi';
 
 interface NavItem {
@@ -143,6 +145,11 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
     {
       title: 'Overview',
       items: [
+        {
+          name: 'Home',
+          href: '/admin/home',
+          icon: <FiGlobe className="w-5 h-5" />,
+        },
         {
           name: 'Dashboard',
           href: '/admin/dashboard',
@@ -282,6 +289,17 @@ export default function AdminSidebar({ hideOnMobile = false }: AdminSidebarProps
         },
       ],
       collapsible: true,
+    },
+    {
+      title: 'Site',
+      items: [
+        {
+          name: 'Site Settings',
+          href: '/admin/site-settings',
+          icon: <FiSettings className="w-5 h-5" />,
+        },
+      ],
+      collapsible: false,
     },
   ];
 

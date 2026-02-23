@@ -88,6 +88,10 @@ export default function CheckoutForm() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponCode, setCouponCode] = useState<string | undefined>();
   const [couponType, setCouponType] = useState<'percentage' | 'fixed' | undefined>();
+  const [verificationDiscount, setVerificationDiscount] = useState(0);
+  const [verificationDiscountSource, setVerificationDiscountSource] = useState<'phone' | 'email' | 'both' | null>(null);
+  const [canBecomeVerificationEligible, setCanBecomeVerificationEligible] = useState(false);
+  const [verificationEligibilityLoading, setVerificationEligibilityLoading] = useState(true);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
@@ -97,6 +101,38 @@ export default function CheckoutForm() {
   useEffect(() => {
     const isWideScreen = typeof window !== 'undefined' && window.innerWidth >= 1024;
     if (isWideScreen) setOrderSummaryOpen(true);
+  }, []);
+
+  // Fetch verification discount eligibility (one-time $5 off for verified phone or email)
+  useEffect(() => {
+    let cancelled = false;
+    setVerificationEligibilityLoading(true);
+    setVerificationDiscount(0);
+    setVerificationDiscountSource(null);
+    setCanBecomeVerificationEligible(false);
+    const fetchEligibility = async () => {
+      try {
+        const res = await fetch('/api/verification-discount/eligibility', { cache: 'no-store' });
+        const data = await res.json();
+        if (!cancelled) {
+          if (data.eligible && data.discount > 0) {
+            setVerificationDiscount(data.discount);
+            setVerificationDiscountSource(data.source || null);
+          }
+          setCanBecomeVerificationEligible(data.canBecomeEligible === true);
+        }
+      } catch {
+        if (!cancelled) {
+          setVerificationDiscount(0);
+          setVerificationDiscountSource(null);
+          setCanBecomeVerificationEligible(false);
+        }
+      } finally {
+        if (!cancelled) setVerificationEligibilityLoading(false);
+      }
+    };
+    fetchEligibility();
+    return () => { cancelled = true; };
   }, []);
 
   // Fetch shipping fee when we have a shipping address
@@ -132,7 +168,7 @@ export default function CheckoutForm() {
   const subtotal = summary.totalPrice;
   const shipping = shippingFee ?? 0;
   const tax = 0;
-  const total = Math.max(0, subtotal - couponDiscount + shipping + tax);
+  const total = Math.max(0, subtotal - couponDiscount - verificationDiscount + shipping + tax);
 
   const handleAddressSelect = useCallback((address: ShippingAddress) => {
     setShippingAddress(address);
@@ -160,6 +196,10 @@ export default function CheckoutForm() {
           ...(shipping > 0 && { shippingFee: shipping }),
           ...(couponCode && { couponCode }),
           ...(couponDiscount > 0 && { couponDiscount, couponType }),
+          ...(verificationDiscount > 0 && {
+            verificationDiscount,
+            verificationDiscountSource: verificationDiscountSource || undefined,
+          }),
         }),
       });
       const data = await response.json();
@@ -171,13 +211,20 @@ export default function CheckoutForm() {
     } finally {
       setIsCreatingIntent(false);
     }
-  }, [shippingAddress, checkoutItems, total, paymentMethod, shipping, couponCode, couponDiscount, couponType]);
+  }, [shippingAddress, checkoutItems, total, paymentMethod, shipping, couponCode, couponDiscount, couponType, verificationDiscount, verificationDiscountSource]);
 
   useEffect(() => {
-    if (step === 'payment' && shippingAddress && shippingFee !== null && !clientSecret && !isCreatingIntent) {
+    if (
+      step === 'payment' &&
+      shippingAddress &&
+      shippingFee !== null &&
+      !clientSecret &&
+      !isCreatingIntent &&
+      !verificationEligibilityLoading
+    ) {
       handleCreateIntent();
     }
-  }, [step, shippingAddress, shippingFee, clientSecret, isCreatingIntent, handleCreateIntent]);
+  }, [step, shippingAddress, shippingFee, clientSecret, isCreatingIntent, verificationEligibilityLoading, handleCreateIntent]);
 
   const handlePaymentSuccess = useCallback(
     (paymentIntentId: string) => {
@@ -307,6 +354,10 @@ export default function CheckoutForm() {
                   total={total}
                   paymentMethod={paymentMethod}
                   onCouponApplied={handleCouponApplied}
+                  verificationDiscount={verificationDiscount}
+                  verificationDiscountSource={verificationDiscountSource}
+                  canBecomeVerificationEligible={canBecomeVerificationEligible}
+                  verificationEligibilityLoading={verificationEligibilityLoading}
                   compact
                 />
               </div>

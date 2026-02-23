@@ -16,10 +16,23 @@ export default function EditProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [availability, setAvailability] = useState<{ availableStock: number; orderedQuantity: number } | null>(null);
 
   useEffect(() => {
     fetchProduct();
   }, [productId]);
+
+  useEffect(() => {
+    if (!productId || !product) return;
+    fetch(`/api/products/${productId}/availability`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.availableStock !== undefined && data.orderedQuantity !== undefined) {
+          setAvailability({ availableStock: data.availableStock, orderedQuantity: data.orderedQuantity });
+        }
+      })
+      .catch(() => {});
+  }, [productId, product]);
 
   const fetchProduct = async () => {
     if (!productId) {
@@ -201,7 +214,7 @@ export default function EditProductPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-2">
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0 truncate">Stock</p>
+                <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0 truncate">Stock (total)</p>
                 <p className={`text-sm sm:text-lg md:text-2xl font-bold truncate tabular-nums ${
                   (product.stock as number) > 10
                     ? 'text-green-600'
@@ -211,6 +224,17 @@ export default function EditProductPage() {
                 }`}>
                   {product.stock}
                 </p>
+                {availability !== null && availability.orderedQuantity > 0 && (
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                    Available to customers: <span className="font-semibold text-gray-700">{availability.availableStock}</span>
+                    <span className="text-gray-400"> ({availability.orderedQuantity} in paid orders)</span>
+                  </p>
+                )}
+                {availability !== null && availability.orderedQuantity === 0 && (
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                    Available to customers: <span className="font-semibold text-gray-700">{availability.availableStock}</span>
+                  </p>
+                )}
               </div>
               <div className="hidden sm:flex w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-[#FC9BC2] to-[#F472B6] rounded-lg md:rounded-xl items-center justify-center flex-shrink-0">
                 <FiPackage className="w-4 h-4 md:w-6 md:h-6 text-[#1a1a1a]" />

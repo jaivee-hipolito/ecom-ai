@@ -31,6 +31,8 @@ export interface IOrder {
   totalAmount: number;
   shippingFee?: number;
   coupon?: IOrderCoupon;
+  /** $5 one-time discount for verified phone & email (from UsedVerificationDiscount) */
+  verificationDiscount?: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   shippingAddress: ShippingAddress;

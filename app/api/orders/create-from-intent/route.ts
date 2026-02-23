@@ -4,6 +4,7 @@ import { getStripe } from '@/lib/stripe';
 import Order from '@/models/Order';
 import Cart from '@/models/Cart';
 import UsedCoupon from '@/models/UsedCoupon';
+import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAuth } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB
@@ -203,6 +204,38 @@ export async function POST(request: NextRequest) {
         if (error.code === 11000) {
           console.warn(`[create-from-intent] Coupon ${couponCode} was already used by user ${userId}`);
         }
+      }
+    }
+
+    // Save used verification discount (one-time $5 off for phone/email verification)
+    // Security: only create record if user has not already used the discount (one per user, ever)
+    const verificationDiscount = metadata.verificationDiscount
+      ? parseFloat(metadata.verificationDiscount)
+      : 0;
+    const verificationDiscountSource = (metadata.verificationDiscountSource || '') as 'phone' | 'email' | 'both';
+
+    if (verificationDiscount > 0 && (verificationDiscountSource === 'phone' || verificationDiscountSource === 'email' || verificationDiscountSource === 'both')) {
+      const alreadyUsedDiscount = await UsedVerificationDiscount.findOne({ user: userId });
+      if (!alreadyUsedDiscount) {
+        try {
+          await UsedVerificationDiscount.create({
+            user: userId,
+            verificationType: verificationDiscountSource,
+            discount: verificationDiscount,
+            orderId: order._id,
+            usedAt: new Date(),
+          });
+          console.log(
+            `[create-from-intent] Saved used verification discount (${verificationDiscountSource}) for user ${userId}`
+          );
+        } catch (error: any) {
+          console.error('Error saving used verification discount:', error);
+          if (error.code === 11000) {
+            console.warn(`[create-from-intent] Verification discount was already used by user ${userId}`);
+          }
+        }
+      } else {
+        console.warn(`[create-from-intent] Verification discount already used by user ${userId}, skipping record`);
       }
     }
 

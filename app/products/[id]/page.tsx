@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/shared/Navbar';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import Footer from '@/components/shared/Footer';
 import PageTopBanner from '@/components/shared/PageTopBanner';
 import ProductDetail from '@/components/products/ProductDetail';
@@ -16,7 +17,7 @@ function ProductDetailContent() {
   const params = useParams();
   const productId = params?.id as string;
   const { product, isLoading, error } = useProduct(productId || null);
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading: authLoading } = useAuth();
 
   // Debug logging
   useEffect(() => {
@@ -27,11 +28,14 @@ function ProductDetailContent() {
     }
   }, [productId]);
 
+  const showSidebar = isAuthenticated;
+  const Sidebar = isAdmin ? AdminSidebar : DashboardSidebar;
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-        {isAuthenticated && <DashboardSidebar />}
-        <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
+        {showSidebar && <Sidebar />}
+        <div id="dashboard-content" className={`w-full transition-all duration-300 ${showSidebar ? 'lg:pl-64' : ''} overflow-x-hidden`}>
           <Navbar />
           <div className="flex items-center justify-center min-h-[60vh]">
             <Loading size="lg" text="Loading..." />
@@ -43,8 +47,8 @@ function ProductDetailContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-      {isAuthenticated && <DashboardSidebar />}
-      <div id="dashboard-content" className={`w-full transition-all duration-300 ${isAuthenticated ? 'lg:pl-64' : ''} overflow-x-hidden`}>
+      {showSidebar && <Sidebar />}
+      <div id="dashboard-content" className={`w-full transition-all duration-300 ${showSidebar ? 'lg:pl-64' : ''} overflow-x-hidden`}>
         <Navbar />
         <PageTopBanner />
 

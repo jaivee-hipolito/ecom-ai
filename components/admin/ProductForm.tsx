@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiZap } from 'react-icons/fi';
 import Input from '@/components/ui/Input';
+import CurrencyInput from '@/components/ui/CurrencyInput';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
@@ -28,9 +29,10 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
-    price: product?.price || '',
+    interacPrice: product?.price != null ? String(((Number(product.price) * 0.94) - 0.60).toFixed(2)) : '',
+    price: product?.price ?? '',
     category: product?.category || '',
-    stock: product?.stock || 0,
+    stock: product != null ? (product?.stock ?? 0) : ('' as string | number),
     featured: product?.featured || false,
     isFlashSale: product?.isFlashSale || false,
     flashSaleDiscount: product?.flashSaleDiscount || 0,
@@ -158,6 +160,13 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         return;
       }
 
+      const priceNum = parseFloat(String(formData.price || ''));
+      if (isNaN(priceNum) || priceNum < 0) {
+        setError('Please enter a valid price');
+        setIsLoading(false);
+        return;
+      }
+
       const url = product
         ? `/api/admin/products/${product._id}`
         : '/api/admin/products';
@@ -206,10 +215,11 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
       // Clear attribute errors if validation passes
       setAttributeErrors({});
 
+      const { interacPrice: _, ...restFormData } = formData;
       const requestBody: any = {
-        ...formData,
+        ...restFormData,
         price: parseFloat(formData.price as string),
-        stock: typeof formData.stock === 'string' ? parseInt(formData.stock) : formData.stock,
+        stock: typeof formData.stock === 'string' ? (parseInt(formData.stock) || 0) : (formData.stock ?? 0),
         images,
         coverImage: finalCoverImage,
         attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
@@ -272,7 +282,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    const updatedFormData = {
+    let updatedFormData = {
       ...formData,
       [name]:
         type === 'checkbox'
@@ -281,22 +291,34 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
           ? value
           : value,
     };
-    
+
+    // When Interac price changes, auto-compute regular price: price = interacPrice + (interacPrice * 0.06)
+    if (name === 'interacPrice') {
+      const interac = parseFloat(value);
+      if (!isNaN(interac) && interac >= 0) {
+        const computedPrice = interac + interac * 0.06;
+        updatedFormData = { ...updatedFormData, price: String(computedPrice.toFixed(2)) };
+      } else {
+        updatedFormData = { ...updatedFormData, price: '' };
+      }
+    }
+
     setFormData(updatedFormData);
-    
-    // Recalculate preview when price is directly edited
-    if (name === 'price' && updatedFormData.isFlashSale && updatedFormData.flashSaleDiscount > 0) {
-      const price = parseFloat(value);
-      if (!isNaN(price) && price > 0) {
+
+    // Recalculate preview when price changes
+    const priceVal = updatedFormData.price;
+    if (name === 'price' || name === 'interacPrice') {
+      const price = parseFloat(String(priceVal));
+      if (!isNaN(price) && price > 0 && updatedFormData.isFlashSale && updatedFormData.flashSaleDiscount > 0) {
         let crossedOutPrice: number;
         if (updatedFormData.flashSaleDiscountType === 'percentage') {
-          // Crossed out price = price * (percentage/100) + price
           crossedOutPrice = price * (updatedFormData.flashSaleDiscount / 100) + price;
         } else {
-          // For fixed amount, crossed out price = price + discount
           crossedOutPrice = price + updatedFormData.flashSaleDiscount;
         }
         setPreviewDiscountedPrice(crossedOutPrice);
+      } else if (!updatedFormData.isFlashSale || updatedFormData.flashSaleDiscount === 0) {
+        setPreviewDiscountedPrice(null);
       }
     }
   };
@@ -514,7 +536,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         />
       </motion.div>
 
-      {/* Price, Stock & Featured Section — 2x2 on mobile, 4 cols on desktop */}
+      {/* Interac Price, Price, Stock & Featured Section — 2x2 on mobile, 4 cols on desktop */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -522,16 +544,52 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-6"
       >
         <div className="space-y-1 sm:space-y-2">
-          <Input
+          <CurrencyInput
+            label="Interac Price (6% discount)"
+            name="interacPrice"
+            value={formData.interacPrice}
+            onChange={(value, numValue) => {
+              const price = (numValue + 0.60) / 0.94;
+              setFormData(prev => ({
+                ...prev,
+                interacPrice: value,
+                price: value ? String(price.toFixed(2)) : '',
+              }));
+              if (formData.isFlashSale && formData.flashSaleDiscount > 0 && price > 0) {
+                const crossedOutPrice = formData.flashSaleDiscountType === 'percentage'
+                  ? price * (formData.flashSaleDiscount / 100) + price
+                  : price + formData.flashSaleDiscount;
+                setPreviewDiscountedPrice(crossedOutPrice);
+              } else {
+                setPreviewDiscountedPrice(null);
+              }
+            }}
+            required
+            className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-[#000000] placeholder:text-gray-400 text-sm sm:text-base"
+          />
+        </div>
+
+        <div className="space-y-1 sm:space-y-2">
+          <CurrencyInput
             label="Price"
             name="price"
-            type="number"
-            step="0.01"
-            min="0"
             value={formData.price}
-            onChange={handleChange}
-            required
-            placeholder="0.00"
+            onChange={(value, numValue) => {
+              const interacPrice = (numValue * 0.94) - 0.60;
+              setFormData(prev => ({
+                ...prev,
+                price: value,
+                interacPrice: value ? String(Math.max(0, interacPrice).toFixed(2)) : '',
+              }));
+              if (formData.isFlashSale && formData.flashSaleDiscount > 0 && numValue > 0) {
+                const crossedOutPrice = formData.flashSaleDiscountType === 'percentage'
+                  ? numValue * (formData.flashSaleDiscount / 100) + numValue
+                  : numValue + formData.flashSaleDiscount;
+                setPreviewDiscountedPrice(crossedOutPrice);
+              } else {
+                setPreviewDiscountedPrice(null);
+              }
+            }}
             className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all text-[#000000] placeholder:text-gray-400 text-sm sm:text-base"
           />
         </div>
@@ -542,7 +600,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
             name="stock"
             type="number"
             min="0"
-            value={formData.stock}
+            value={formData.stock === '' ? '' : formData.stock}
             onChange={handleChange}
             required
             placeholder="0"

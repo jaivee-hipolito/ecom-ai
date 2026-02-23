@@ -739,7 +739,7 @@ export default function ProductTable({
 
                     {/* Actions */}
                     <div className="flex gap-1.5 sm:gap-2">
-                      <Link href={`/products/${product._id}`} className="flex-1 min-w-0 cursor-pointer" target="_blank" rel="noopener noreferrer">
+                      <Link href={`/products/${product._id}`} className="flex-1 min-w-0 cursor-pointer">
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}

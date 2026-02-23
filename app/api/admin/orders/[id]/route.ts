@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import UsedCoupon from '@/models/UsedCoupon';
+import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAdmin } from '@/lib/auth';
 
 // Force Node.js runtime for MongoDB
@@ -36,6 +38,31 @@ export async function GET(
       );
     }
 
+    // Attach coupon and verification discount for order summary (same as user order page)
+    let couponInfo: { code: string; discount: number; discountType: string; discountAmount?: number } | null = null;
+    const usedCoupon = await UsedCoupon.findOne({ orderId: order._id }).lean();
+    if (usedCoupon) {
+      const subtotal = (order.items || []).reduce(
+        (sum: number, item: any) => sum + (item.price || 0) * (item.quantity || 0),
+        0
+      );
+      const discountAmount =
+        usedCoupon.discountType === 'percentage'
+          ? (subtotal * usedCoupon.discount) / 100
+          : Math.min(usedCoupon.discount, subtotal);
+      couponInfo = {
+        code: usedCoupon.couponCode,
+        discount: usedCoupon.discount,
+        discountType: usedCoupon.discountType,
+        discountAmount,
+      };
+    }
+    let verificationDiscountAmount = 0;
+    const usedVerificationDiscount = await UsedVerificationDiscount.findOne({ orderId: order._id }).lean();
+    if (usedVerificationDiscount && usedVerificationDiscount.discount) {
+      verificationDiscountAmount = usedVerificationDiscount.discount;
+    }
+
     const history = (order as any).history || [];
     return NextResponse.json({
       order: {
@@ -48,6 +75,9 @@ export async function GET(
               email: (order.user as any).email,
             }
           : String(order.user || ''),
+        shippingFee: order.shippingFee ?? 0,
+        ...(couponInfo && { coupon: couponInfo }),
+        ...(verificationDiscountAmount > 0 && { verificationDiscount: verificationDiscountAmount }),
         createdAt: order.createdAt?.toISOString(),
         updatedAt: order.updatedAt?.toISOString(),
         history: history.map((h: any) => ({

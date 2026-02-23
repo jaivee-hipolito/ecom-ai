@@ -111,16 +111,16 @@ export default function LoginForm() {
               if (data?.user?.role === 'admin') {
                 router.push('/admin/dashboard');
               } else {
-                router.push('/dashboard/products');
+                router.push('/');
               }
             } else {
-              // Fallback to regular dashboard if API call fails
-              router.push('/dashboard/products');
+              // Fallback to home if API call fails
+              router.push('/');
             }
             router.refresh();
           } catch (err) {
-            // Fallback to regular dashboard on error
-            router.push('/dashboard/products');
+            // Fallback to home on error
+            router.push('/');
             router.refresh();
           }
         }, 300);
@@ -411,7 +411,7 @@ export default function LoginForm() {
             type="button"
             onClick={() => {
               signIn('google', { 
-                callbackUrl: '/dashboard/products',
+                callbackUrl: '/',
                 redirect: true 
               });
             }}

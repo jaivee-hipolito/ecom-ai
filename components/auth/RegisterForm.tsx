@@ -34,13 +34,15 @@ export default function RegisterForm() {
     setError('');
     setSuccess(false);
 
-    // Validation
-    if (formData.password !== confirmPassword) {
+    // Validation - trim to avoid false mismatch from accidental paste/autofill whitespace
+    const passwordTrimmed = formData.password.trim();
+    const confirmTrimmed = confirmPassword.trim();
+    if (passwordTrimmed !== confirmTrimmed) {
       setError('Passwords do not match');
       return;
     }
 
-    if (!isValidPassword(formData.password)) {
+    if (!isValidPassword(passwordTrimmed)) {
       setError(PASSWORD_REQUIREMENT_MESSAGE);
       return;
     }
@@ -63,7 +65,7 @@ export default function RegisterForm() {
         lastName: formData.lastName.trim(),
         contactNumber: formData.contactNumber.trim(),
         email: formData.email.trim(),
-        password: formData.password,
+        password: passwordTrimmed,
       };
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -81,25 +83,12 @@ export default function RegisterForm() {
         return;
       }
 
-      // Registration successful - send verification codes before redirect so requests complete (not cancelled by navigation)
-      if (data.requiresVerification) {
-        try {
-          await Promise.all([
-            sendEmailVerificationCode(formData.email),
-            sendPhoneVerificationCode(formData.contactNumber),
-          ]);
-        } catch (err) {
-          console.error('Failed to send verification codes:', err);
-          // Still proceed; user can request codes again on verify page
-        }
-      }
-
-      // Automatically sign in the user after successful registration
+      // Automatically sign in the user after successful registration (must be before sending phone code - phone API requires auth)
       setSuccess(true);
       try {
         const signInResult = await signIn('credentials', {
           email: formData.email,
-          password: formData.password,
+          password: passwordTrimmed,
           redirect: false,
         });
 
@@ -113,12 +102,27 @@ export default function RegisterForm() {
           return;
         }
 
-        // Update session and redirect to verify page so user can enter codes or resend
+        // Update session so the session cookie is available for the next requests
         await updateSession();
+
+        // Send verification codes after sign-in so phone endpoint (which requires auth) receives the session
+        if (data.requiresVerification) {
+          try {
+            await Promise.all([
+              sendEmailVerificationCode(formData.email),
+              sendPhoneVerificationCode(formData.contactNumber),
+            ]);
+          } catch (err) {
+            console.error('Failed to send verification codes:', err);
+            // Still proceed; user can request codes again on verify page
+          }
+        }
+
+        // Redirect to verify page; short delay so verification send requests can complete
         setTimeout(() => {
           router.push('/dashboard/verify');
           router.refresh();
-        }, 500);
+        }, 800);
       } catch (signInError: any) {
         // If sign-in fails, redirect to login page
         setError('Account created successfully! Please sign in.');
@@ -140,7 +144,7 @@ export default function RegisterForm() {
     });
   };
 
-  const passwordStrength = isValidPassword(formData.password) && formData.password === confirmPassword;
+  const passwordStrength = isValidPassword(formData.password) && formData.password.trim() === confirmPassword.trim();
   const requirementChecks = getPasswordRequirementChecks(formData.password);
 
   // Send email verification code (background, no UI feedback)
@@ -288,7 +292,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="John"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
+                className="input-dark-autofill w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -314,7 +318,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="Doe"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
+                className="input-dark-autofill w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -340,7 +344,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="+1 (555) 123-4567"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
+                className="input-dark-autofill w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -366,7 +370,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="your.email@example.com"
-                className="w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
+                className="input-dark-autofill w-full pl-12 pr-4 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
             </div>
           </motion.div>
@@ -392,7 +396,7 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 required
                 placeholder="Create a secure password"
-                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
+                className="input-dark-autofill w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
@@ -447,7 +451,7 @@ export default function RegisterForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="Confirm your password"
-                className="w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
+                className="input-dark-autofill w-full pl-12 pr-12 py-3.5 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
@@ -571,7 +575,7 @@ export default function RegisterForm() {
             type="button"
             onClick={() => {
               signIn('google', { 
-                callbackUrl: '/dashboard/products',
+                callbackUrl: '/',
                 redirect: true 
               });
             }}

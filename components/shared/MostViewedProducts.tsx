@@ -13,9 +13,13 @@ import { formatCurrency } from '@/utils/currency';
 
 interface MostViewedProductsProps {
   initialProducts?: IProduct[];
+  /** When set (e.g. "/admin/products"), product links use this base path. */
+  productLinkPrefix?: string;
 }
 
-export default function MostViewedProducts({ initialProducts = [] }: MostViewedProductsProps) {
+export default function MostViewedProducts({ initialProducts = [], productLinkPrefix = '' }: MostViewedProductsProps) {
+  const productHref = (id: string, hasFlashSale?: boolean) =>
+    productLinkPrefix ? `${productLinkPrefix}/${id}` : `/products/${id}${hasFlashSale ? '?flashSale=true' : ''}`;
   const [quickViewProductId, setQuickViewProductId] = useState<string | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
@@ -174,7 +178,7 @@ export default function MostViewedProducts({ initialProducts = [] }: MostViewedP
                   whileHover={{ y: -8 }}
                   className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group relative"
                 >
-                  <Link href={`/products/${product._id}${hasFlashSaleDiscount ? '?flashSale=true' : ''}`} className="block">
+                  <Link href={productHref(product._id!, hasFlashSaleDiscount)} className="block">
                     {/* Product Image Container */}
                     <div className="relative aspect-square bg-gray-100 overflow-hidden">
                       <ProductImage 

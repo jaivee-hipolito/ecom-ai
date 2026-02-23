@@ -36,3 +36,29 @@ export function formatCurrencyAmount(amount: number | string): string {
     maximumFractionDigits: 2,
   });
 }
+
+/**
+ * Format a value for display in a currency input (with $ and commas)
+ * @param value - The value (number or string)
+ * @returns Formatted string (e.g., "$1,234.56") or empty string
+ */
+export function formatCurrencyForInput(value: number | string | undefined | null): string {
+  if (value === '' || value === undefined || value === null) return '';
+  const num = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+  if (isNaN(num)) return '';
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * Parse a currency input string to a number
+ * @param value - The input string (e.g., "$1,234.56" or "1234.56")
+ * @returns Parsed number or NaN
+ */
+export function parseCurrencyInput(value: string): number {
+  if (!value || typeof value !== 'string') return NaN;
+  const cleaned = value.replace(/[$,]/g, '').trim();
+  return parseFloat(cleaned);
+}
