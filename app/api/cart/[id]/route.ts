@@ -68,11 +68,24 @@ export async function PUT(
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate('items.product');
+    const putValidItems = (populatedCart!.items as any[]).filter(
+      (item: any) => item.product != null
+    );
 
     return NextResponse.json({
       ...populatedCart!.toObject(),
       _id: populatedCart!._id.toString(),
       user: populatedCart!.user.toString(),
+      items: putValidItems.map((item: any) => {
+        const itemObj = item.toObject ? item.toObject() : item;
+        return {
+          ...itemObj,
+          selectedAttributes: itemObj.selectedAttributes ?? item.selectedAttributes ?? null,
+          product: typeof item.product === 'object' && item.product
+            ? { ...item.product.toObject(), _id: item.product._id.toString() }
+            : item.product,
+        };
+      }),
     });
   } catch (error: any) {
     console.error('Error updating cart item:', error);
@@ -120,15 +133,19 @@ export async function DELETE(
       ...populatedCart!.toObject(),
       _id: populatedCart!._id.toString(),
       user: populatedCart!.user.toString(),
-      items: validItems.map((item: any) => ({
-        ...item.toObject(),
-        product: typeof item.product === 'object' && item.product
-          ? {
-              ...item.product.toObject(),
-              _id: item.product._id.toString(),
-            }
-          : item.product,
-      })),
+      items: validItems.map((item: any) => {
+        const itemObj = item.toObject ? item.toObject() : item;
+        return {
+          ...itemObj,
+          selectedAttributes: itemObj.selectedAttributes ?? item.selectedAttributes ?? null,
+          product: typeof item.product === 'object' && item.product
+            ? {
+                ...item.product.toObject(),
+                _id: item.product._id.toString(),
+              }
+            : item.product,
+        };
+      }),
     });
   } catch (error: any) {
     console.error('Error removing cart item:', error);

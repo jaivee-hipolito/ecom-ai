@@ -6,6 +6,7 @@ export interface IOrderItem {
   quantity: number;
   price: number;
   image?: string;
+  selectedAttributes?: Record<string, unknown>;
 }
 
 export interface IOrderHistoryEntry {
@@ -42,6 +43,10 @@ export interface IOrder extends Document {
   };
   paymentMethod: string;
   paymentId?: string;
+  /** Set when inventory has been deducted for this order (paid). Prevents double deduction. */
+  stockDeducted?: boolean;
+  /** Set when inventory has been restored for this order (refund/cancel). Prevents double restore. */
+  stockRestored?: boolean;
   history?: IOrderHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;
@@ -71,6 +76,7 @@ const OrderItemSchema = new Schema<IOrderItem>({
     type: String,
     default: '',
   },
+  selectedAttributes: { type: Schema.Types.Mixed },
 });
 
 const OrderSchema = new Schema<IOrder>(
@@ -127,6 +133,14 @@ const OrderSchema = new Schema<IOrder>(
     paymentId: {
       type: String,
       default: '',
+    },
+    stockDeducted: {
+      type: Boolean,
+      default: false,
+    },
+    stockRestored: {
+      type: Boolean,
+      default: false,
     },
     history: {
       type: [

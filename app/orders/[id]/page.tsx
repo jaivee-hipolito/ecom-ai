@@ -14,6 +14,7 @@ import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import PageTopBanner from '@/components/shared/PageTopBanner';
 import OrderTracking from '@/components/orders/OrderTracking';
+import { getSizeAndColorFromAttributes } from '@/lib/orderItemAttributes';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -223,14 +224,15 @@ export default function OrderDetailPage() {
               </h2>
               <div className="space-y-4">
                 {order.items.map((item, index) => {
-                  const product = typeof item.product === 'object' ? item.product : null;
+                  const product = item.product != null && typeof item.product === 'object' ? item.product : null;
+                  const productId = product?._id ?? (typeof item.product === 'string' ? item.product : '');
                   // Use item.image first, then product coverImage/images, then empty string
                   const imageUrl = item.image || 
                     (product?.coverImage || (product?.images && product.images[0])) || 
                     '';
                   
                   const mockProduct: IProduct = product || {
-                    _id: typeof item.product === 'string' ? item.product : '',
+                    _id: productId,
                     name: item.name,
                     coverImage: imageUrl,
                     images: imageUrl ? [imageUrl] : [],
@@ -264,7 +266,7 @@ export default function OrderDetailPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link href={`/products/${typeof item.product === 'object' ? item.product._id : item.product}`}>
+                        <Link href={productId ? `/products/${productId}` : '#'}>
                           <h3 className="text-lg font-semibold text-[#1a1a1a] hover:text-[#FC9BC2] transition-colors mb-2">
                             {item.name}
                           </h3>
@@ -272,6 +274,26 @@ export default function OrderDetailPage() {
                         <p className="text-sm text-gray-600 mb-2">
                           Quantity: <span className="font-medium">{item.quantity}</span>
                         </p>
+                        {(() => {
+                          // Only show the size/color the customer selected and purchased. Never use product.attributes for size (variant has full list; first item = wrong “lowest” size).
+                          const attrs = (item.selectedAttributes || {}) as Record<string, unknown>;
+                          const { size: sizeStr, color: colorStr } = getSizeAndColorFromAttributes(attrs);
+                          const otherEntries = Object.entries(attrs).filter(
+                            ([k, v]) => v != null && v !== '' && !k.toLowerCase().includes('size') && k.toLowerCase() !== 'color' && k.toLowerCase() !== 'colour'
+                          );
+                          const label = (key: string) => key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim().split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                          const parts = [
+                            sizeStr && `Size: ${sizeStr}`,
+                            colorStr && `Color: ${colorStr}`,
+                            ...otherEntries.map(([k, v]) => `${label(k)}: ${Array.isArray(v) ? v[0] : v}`),
+                          ].filter(Boolean);
+                          if (parts.length === 0) return null;
+                          return (
+                            <p className="text-sm text-gray-500 mb-2">
+                              {parts.join(' · ')}
+                            </p>
+                          );
+                        })()}
                         <p className="text-lg font-bold text-[#FC9BC2]">
                           {formatCurrency(item.price * item.quantity)}
                         </p>

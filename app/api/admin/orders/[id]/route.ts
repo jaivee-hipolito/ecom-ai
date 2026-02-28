@@ -5,6 +5,7 @@ import Order from '@/models/Order';
 import UsedCoupon from '@/models/UsedCoupon';
 import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAdmin } from '@/lib/auth';
+import { restoreStockForOrder } from '@/lib/orderStock';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -89,12 +90,14 @@ export async function GET(
         })),
         items: order.items.map((item: any) => ({
           ...item,
+          selectedAttributes: item.selectedAttributes ?? undefined,
           product: item.product
             ? typeof item.product === 'object'
               ? {
                   _id: item.product._id.toString(),
                   name: item.product.name,
                   image: item.product.coverImage || item.product.images?.[0],
+                  attributes: item.product.attributes || undefined,
                 }
               : item.product.toString()
             : item.product,
@@ -226,6 +229,21 @@ export async function PUT(
       );
     }
 
+    const wasPaid = (existingOrder as any).paymentStatus === 'paid';
+    const hadStockDeducted = (existingOrder as any).stockDeducted === true || (existingOrder as any).stockDeducted === undefined;
+    const notYetRestored = (existingOrder as any).stockRestored !== true;
+    if (wasPaid && hadStockDeducted && notYetRestored && (status === 'cancelled' || paymentStatus === 'refunded')) {
+      try {
+        await restoreStockForOrder((existingOrder as any).items || []);
+        await Order.updateOne(
+          { _id: new mongoose.Types.ObjectId(orderId) },
+          { $set: { stockRestored: true } }
+        );
+      } catch (e) {
+        console.error('[admin order] Failed to restore stock:', e);
+      }
+    }
+
     const order = await Order.findById(orderId)
       .populate('user', 'name email')
       .populate('items.product')
@@ -262,12 +280,14 @@ export async function PUT(
         })),
         items: order.items.map((item: any) => ({
           ...item,
+          selectedAttributes: item.selectedAttributes ?? undefined,
           product: item.product
             ? typeof item.product === 'object'
               ? {
                   _id: item.product._id.toString(),
                   name: item.product.name,
                   image: item.product.coverImage || item.product.images?.[0],
+                  attributes: item.product.attributes || undefined,
                 }
               : item.product.toString()
             : item.product,

@@ -6,6 +6,8 @@ import Cart from '@/models/Cart';
 import UsedCoupon from '@/models/UsedCoupon';
 import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAuth } from '@/lib/auth';
+import { deductStockForOrder } from '@/lib/orderStock';
+import { getSelectedAttributesFromCartItem } from '@/lib/orderItemAttributes';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -132,12 +134,14 @@ export async function POST(request: NextRequest) {
       const itemTotal = product.price * item.quantity;
       totalAmount += itemTotal;
 
+      const selectedAttributes = getSelectedAttributesFromCartItem(item);
       orderItems.push({
         product: product._id,
         name: product.name,
         quantity: item.quantity,
         price: product.price,
         image: product.coverImage || (product.images && product.images[0]) || '',
+        ...(selectedAttributes && Object.keys(selectedAttributes).length > 0 && { selectedAttributes }),
       });
     }
 
@@ -180,6 +184,15 @@ export async function POST(request: NextRequest) {
     }
 
     const order = await Order.create(orderData) as any;
+
+    if (orderData.paymentStatus === 'paid' && !order.stockDeducted) {
+      try {
+        await deductStockForOrder(order.items || []);
+        await Order.updateOne({ _id: order._id }, { $set: { stockDeducted: true } });
+      } catch (e) {
+        console.error('[create-from-intent] Failed to deduct stock:', e);
+      }
+    }
 
     // Save used coupon if one was applied
     const couponCode = metadata.couponCode;

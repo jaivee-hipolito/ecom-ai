@@ -34,26 +34,30 @@ export default function CategoryAttributes({
     required: false,
     options: [],
   });
+  /** Display value for Attribute Name (with spaces); normalized to name (underscores) on save */
+  const [nameInput, setNameInput] = useState('');
   const [optionInput, setOptionInput] = useState('');
 
   const handleAdd = () => {
-    if (!formData.name || !formData.type) {
+    const trimmed = nameInput.trim();
+    if (!trimmed || !formData.type) {
       return;
     }
-
-    // Generate label from name (capitalize first letter of each word)
-    const label = formData.name
+    // Normalize name: lowercase, spaces -> underscores (for storage)
+    const name = trimmed.toLowerCase().replace(/\s+/g, '_');
+    // Label: capitalize first letter of each word
+    const label = trimmed
       .replace(/_/g, ' ')
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
 
     const newAttribute: CategoryAttribute = {
-      name: formData.name,
-      label: label,
+      name,
+      label,
       type: formData.type as CategoryAttribute['type'],
       required: formData.required || false,
-      options: formData.type === 'select' ? (formData.options || []) : undefined,
+      options: (formData.type === 'select' || formData.type === 'multiselect') ? (formData.options || []) : undefined,
       validation: formData.validation,
     };
 
@@ -83,6 +87,7 @@ export default function CategoryAttributes({
       required: false,
       options: [],
     });
+    setNameInput('');
     setShowAddForm(false);
     setOptionInput('');
   };
@@ -96,6 +101,8 @@ export default function CategoryAttributes({
       options: attr.options || [],
       validation: attr.validation,
     });
+    // Show label (with spaces) in the name field when editing
+    setNameInput(attr.label || attr.name.replace(/_/g, ' '));
     setEditingIndex(index);
     setShowAddForm(true);
   };
@@ -137,7 +144,12 @@ export default function CategoryAttributes({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setShowAddForm(true)}
+              onClick={() => {
+                setEditingIndex(null);
+                setFormData({ name: '', type: 'text', required: false, options: [] });
+                setNameInput('');
+                setShowAddForm(true);
+              }}
               className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 border-0 text-white font-semibold shadow-lg"
             >
               <FiPlus className="w-4 h-4 mr-2 inline" />
@@ -161,15 +173,9 @@ export default function CategoryAttributes({
                 <motion.div whileHover={{ scale: 1.01 }}>
                   <Input
                     label="Attribute Name"
-                    placeholder="e.g., brand, size, color"
-                    value={formData.name || ''}
-                    onChange={(e) =>
-                      setFormData({ 
-                        ...formData, 
-                        name: e.target.value.toLowerCase().replace(/\s+/g, '_'),
-                        label: e.target.value // Auto-set label same as name
-                      })
-                    }
+                    placeholder="e.g., brand, size, type of beads"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
                     required
                     className="border-2 border-purple-200 focus:border-purple-500 focus:ring-purple-500/20 bg-white"
                   />
@@ -183,7 +189,7 @@ export default function CategoryAttributes({
                       setFormData({
                         ...formData,
                         type,
-                        options: type === 'select' ? formData.options : undefined,
+                        options: (type === 'select' || type === 'multiselect') ? formData.options : undefined,
                       });
                     }}
                     options={[
@@ -191,6 +197,7 @@ export default function CategoryAttributes({
                       { value: 'number', label: 'Number' },
                       { value: 'textarea', label: 'Textarea' },
                       { value: 'select', label: 'Select (Dropdown)' },
+                      { value: 'multiselect', label: 'Multi-select' },
                       { value: 'boolean', label: 'Boolean (Checkbox)' },
                       { value: 'date', label: 'Date' },
                     ]}
@@ -218,14 +225,14 @@ export default function CategoryAttributes({
                 </label>
               </motion.div>
 
-              {formData.type === 'select' && (
+              {(formData.type === 'select' || formData.type === 'multiselect') && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3 bg-white p-4 rounded-lg border-2 border-purple-200"
                 >
                   <label className="block text-sm font-semibold text-[#000000]">
-                    Options
+                    Options {formData.type === 'multiselect' && '(e.g. 6, 7, 8 for size)'}
                   </label>
                   <div className="flex gap-2">
                     <Input
@@ -290,6 +297,7 @@ export default function CategoryAttributes({
                         required: false,
                         options: [],
                       });
+                      setNameInput('');
                     }}
                     className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold"
                   >
@@ -340,10 +348,10 @@ export default function CategoryAttributes({
                     )}
                   </div>
                   <div className="text-sm text-gray-600 ml-7">
-                    <span className="font-medium">{attr.name}</span> • <span className="capitalize">{attr.type}</span>
+                    <span className="font-medium">{attr.name}</span> • <span className="capitalize">{attr.type === 'multiselect' ? 'Multi-select' : attr.type}</span>
                     {attr.options && attr.options.length > 0 && (
                       <span className="ml-2 text-purple-600">
-                        ({attr.options.length} options)
+                        ({attr.options.join(', ')})
                       </span>
                     )}
                   </div>

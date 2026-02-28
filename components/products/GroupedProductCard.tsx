@@ -215,7 +215,10 @@ export default function GroupedProductCard({ groupedProduct, showAttributes = tr
 
     try {
       setIsAddingToCart(true);
-      await addToCart(selectedVariant.productId, 1);
+      // Pass selected attributes so cart stores and displays the chosen variant (e.g. size 7, color black)
+      const attrsToSend =
+        Object.keys(selectedAttributes).length > 0 ? selectedAttributes : undefined;
+      await addToCart(selectedVariant.productId, 1, attrsToSend);
     } catch (error: any) {
       alert(error.message || 'Failed to add to cart');
     } finally {
@@ -458,11 +461,18 @@ export default function GroupedProductCard({ groupedProduct, showAttributes = tr
           </div>
         </div>
 
-        {groupedProduct.variants.length > 1 && (
-          <div className="text-xs text-gray-500 mb-2">
-            {groupedProduct.variants.length} variants available
-          </div>
-        )}
+        {(() => {
+          const colorKey = Object.entries(groupedProduct.allAttributes).find(
+            ([key]) => key.toLowerCase().includes('color') || key.toLowerCase().includes('colour')
+          );
+          const colorCount = colorKey?.[1]?.size ?? 0;
+          if (colorCount <= 1) return null;
+          return (
+            <div className="text-xs text-gray-500 mb-2">
+              {colorCount} colors available
+            </div>
+          );
+        })()}
 
         <Button
           ref={addToCartButtonRef}

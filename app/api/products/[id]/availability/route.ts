@@ -8,7 +8,8 @@ export const runtime = 'nodejs';
 
 /**
  * GET /api/products/[id]/availability
- * Get product availability considering paid orders
+ * Stock is deducted when orders are paid and restored when cancelled/refunded.
+ * inPaidOrdersNotDelivered = quantity in paid orders that are not yet delivered (for admin note).
  */
 export async function GET(
   request: NextRequest,
@@ -26,7 +27,6 @@ export async function GET(
       );
     }
 
-    // Get product
     const product = await Product.findById(productId);
     if (!product) {
       return NextResponse.json(
@@ -35,40 +35,35 @@ export async function GET(
       );
     }
 
-    // Calculate total quantity in paid orders for this product
-    // Only count orders with paymentStatus = 'paid' and status != 'cancelled'
-    const paidOrders = await Order.find({
+    const totalStock = product.stock ?? 0;
+
+    // Quantity in paid orders that are not yet delivered (exclude delivered + cancelled)
+    const paidNotDeliveredOrders = await Order.find({
       'items.product': productId,
       paymentStatus: 'paid',
-      status: { $ne: 'cancelled' },
-    });
+      status: { $nin: ['delivered', 'cancelled'] },
+    })
+      .select('items')
+      .lean();
 
-    let totalOrderedQuantity = 0;
-    paidOrders.forEach((order) => {
-      order.items.forEach((item: any) => {
-        const itemProductId = typeof item.product === 'object' 
-          ? item.product._id?.toString() 
-          : item.product?.toString();
-        // Compare product IDs (handle both ObjectId and string)
-        const productIdStr = productId.toString();
-        if (itemProductId && itemProductId === productIdStr) {
-          totalOrderedQuantity += item.quantity || 0;
+    let inPaidOrdersNotDelivered = 0;
+    const productIdStr = productId.toString();
+    paidNotDeliveredOrders.forEach((order: any) => {
+      (order.items || []).forEach((item: any) => {
+        const id = item.product?.toString?.() ?? item.product;
+        if (id && id === productIdStr) {
+          inPaidOrdersNotDelivered += item.quantity || 0;
         }
       });
     });
 
-    console.log(`Product ${productId}: Total stock=${product.stock}, Ordered=${totalOrderedQuantity}, Available=${Math.max(0, product.stock - totalOrderedQuantity)}`);
-
-    // Calculate available stock
-    const totalStock = product.stock || 0;
-    const availableStock = Math.max(0, totalStock - totalOrderedQuantity);
-
     return NextResponse.json({
       productId,
       totalStock,
-      orderedQuantity: totalOrderedQuantity,
-      availableStock,
-      isOutOfStock: availableStock === 0,
+      orderedQuantity: 0,
+      availableStock: totalStock,
+      isOutOfStock: totalStock === 0,
+      inPaidOrdersNotDelivered,
     });
   } catch (error: any) {
     console.error('Error fetching product availability:', error);

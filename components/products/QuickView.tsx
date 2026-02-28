@@ -66,7 +66,7 @@ export default function QuickView({ productId, isOpen, onClose, isFlashSale = fa
             {/* Floating Close Button - Mobile Only (Always Visible) */}
             <button
               onClick={onClose}
-              className="lg:hidden fixed top-20 sm:top-24 right-4 z-[60] p-3 bg-[#FDE8F0] rounded-full shadow-xl border border-gray-300 hover:bg-[#FC9BC2] active:bg-[#DB7093] transition-all flex items-center justify-center group text-[#000000]"
+              className="lg:hidden fixed top-24 sm:top-28 right-4 z-[60] p-3 bg-[#FDE8F0] rounded-full shadow-xl border border-gray-300 hover:bg-[#FC9BC2] active:bg-[#DB7093] transition-all flex items-center justify-center group text-[#000000]"
               aria-label="Close quick view"
             >
               <FiX className="w-6 h-6 text-[#000000] group-hover:text-white transition-colors" />

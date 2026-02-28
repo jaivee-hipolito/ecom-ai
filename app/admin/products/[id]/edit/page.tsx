@@ -16,7 +16,7 @@ export default function EditProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [availability, setAvailability] = useState<{ availableStock: number; orderedQuantity: number } | null>(null);
+  const [inPaidOrdersNotDelivered, setInPaidOrdersNotDelivered] = useState<number>(0);
 
   useEffect(() => {
     fetchProduct();
@@ -27,8 +27,8 @@ export default function EditProductPage() {
     fetch(`/api/products/${productId}/availability`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.availableStock !== undefined && data.orderedQuantity !== undefined) {
-          setAvailability({ availableStock: data.availableStock, orderedQuantity: data.orderedQuantity });
+        if (typeof data.inPaidOrdersNotDelivered === 'number') {
+          setInPaidOrdersNotDelivered(data.inPaidOrdersNotDelivered);
         }
       })
       .catch(() => {});
@@ -212,9 +212,11 @@ export default function EditProductPage() {
             whileHover={{ scale: 1.02, y: -2 }}
             className="bg-gradient-to-br from-white to-gray-50 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-2 border-[#FC9BC2]/20 p-2.5 sm:p-4 md:p-6"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-600 mb-0 truncate">Stock (total)</p>
+                <p className="text-[10px] sm:text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1 truncate">
+                  In-stock
+                </p>
                 <p className={`text-sm sm:text-lg md:text-2xl font-bold truncate tabular-nums ${
                   (product.stock as number) > 10
                     ? 'text-green-600'
@@ -224,15 +226,9 @@ export default function EditProductPage() {
                 }`}>
                   {product.stock}
                 </p>
-                {availability !== null && availability.orderedQuantity > 0 && (
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                    Available to customers: <span className="font-semibold text-gray-700">{availability.availableStock}</span>
-                    <span className="text-gray-400"> ({availability.orderedQuantity} in paid orders)</span>
-                  </p>
-                )}
-                {availability !== null && availability.orderedQuantity === 0 && (
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                    Available to customers: <span className="font-semibold text-gray-700">{availability.availableStock}</span>
+                {inPaidOrdersNotDelivered > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {inPaidOrdersNotDelivered} in paid orders (not yet delivered)
                   </p>
                 )}
               </div>

@@ -4,6 +4,8 @@ import { getStripe } from '@/lib/stripe';
 import Order from '@/models/Order';
 import Cart from '@/models/Cart';
 import UsedCoupon from '@/models/UsedCoupon';
+import { deductStockForOrder, restoreStockForOrder } from '@/lib/orderStock';
+import { getSelectedAttributesFromCartItem } from '@/lib/orderItemAttributes';
 import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { STRIPE_CONFIG } from '@/config/stripe';
 
@@ -61,7 +63,8 @@ export async function POST(request: NextRequest) {
         let existingOrder = await Order.findOne({ paymentId: paymentIntentId });
 
         if (existingOrder) {
-          // Update existing order
+          const wasPaid = (existingOrder as any).paymentStatus === 'paid';
+          const alreadyDeducted = (existingOrder as any).stockDeducted === true;
           await Order.updateOne(
             { paymentId: paymentIntentId },
             {
@@ -71,6 +74,14 @@ export async function POST(request: NextRequest) {
               },
             }
           );
+          if (!wasPaid && !alreadyDeducted) {
+            try {
+              await deductStockForOrder((existingOrder as any).items || []);
+              await Order.updateOne({ paymentId: paymentIntentId }, { $set: { stockDeducted: true } });
+            } catch (e) {
+              console.error('[webhook] Failed to deduct stock for existing order:', e);
+            }
+          }
           console.log('Order updated - PaymentIntent succeeded:', paymentIntentId);
         } else if (userId && metadata.shippingAddress) {
           // Create order from metadata (for redirect-based payments like Afterpay)
@@ -122,12 +133,14 @@ export async function POST(request: NextRequest) {
                 const itemTotal = product.price * item.quantity;
                 totalAmount += itemTotal;
 
+                const selectedAttributes = getSelectedAttributesFromCartItem(item);
                 orderItems.push({
                   product: product._id,
                   name: product.name,
                   quantity: item.quantity,
                   price: product.price,
                   image: product.coverImage || (product.images && product.images[0]) || '',
+                  ...(selectedAttributes && Object.keys(selectedAttributes).length > 0 && { selectedAttributes }),
                 });
               }
 
@@ -168,6 +181,15 @@ export async function POST(request: NextRequest) {
               }
 
               const order = await Order.create(orderData) as any;
+
+              if (!order.stockDeducted) {
+                try {
+                  await deductStockForOrder(order.items || []);
+                  await Order.updateOne({ _id: order._id }, { $set: { stockDeducted: true } });
+                } catch (e) {
+                  console.error('[webhook] Failed to deduct stock for new order:', e);
+                }
+              }
 
               // Save used coupon if one was applied
               const couponCode = metadata.couponCode;
@@ -273,15 +295,25 @@ export async function POST(request: NextRequest) {
 
       case 'charge.refunded':
         const chargeRefunded = event.data.object as any;
-        // Update order payment status
+        const refundedOrder = await Order.findOne({ paymentId: chargeRefunded.payment_intent }).lean();
         await Order.updateOne(
           { paymentId: chargeRefunded.payment_intent },
-          {
-            $set: {
-              paymentStatus: 'refunded',
-            },
-          }
+          { $set: { paymentStatus: 'refunded' } }
         );
+        const wasPaidForRefund = refundedOrder && (refundedOrder as any).paymentStatus === 'paid';
+        const hadStockDeducted = refundedOrder && ((refundedOrder as any).stockDeducted === true || (refundedOrder as any).stockDeducted === undefined);
+        const notYetRestored = refundedOrder && (refundedOrder as any).stockRestored !== true;
+        if (refundedOrder && wasPaidForRefund && hadStockDeducted && notYetRestored) {
+          try {
+            await restoreStockForOrder((refundedOrder as any).items || []);
+            await Order.updateOne(
+              { paymentId: chargeRefunded.payment_intent },
+              { $set: { stockRestored: true } }
+            );
+          } catch (e) {
+            console.error('[webhook] Failed to restore stock on refund:', e);
+          }
+        }
         console.log('Charge refunded:', chargeRefunded.id);
         break;
 

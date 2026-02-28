@@ -7,6 +7,8 @@ import UsedCoupon from '@/models/UsedCoupon';
 import { requireAuth } from '@/lib/auth';
 import { getStripe } from '@/lib/stripe';
 
+import { getSelectedAttributesFromCartItem } from '@/lib/orderItemAttributes';
+
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
 
@@ -91,13 +93,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Filter items if itemIds is provided
+    // Filter items if itemIds is provided (use plain item for getSizeAndColorFromItem so we read all fields)
     let itemsToProcess = cart.items;
     if (itemIds && Array.isArray(itemIds) && itemIds.length > 0) {
       const itemIdsSet = new Set(itemIds.map((id: string) => id.toString()));
       itemsToProcess = cart.items.filter((item: any) => {
-        const productId = item.product._id ? item.product._id.toString() : item.product.toString();
-        return itemIdsSet.has(productId);
+        const productId = item.product && typeof item.product === 'object' ? item.product._id?.toString() : item.product?.toString();
+        return productId && itemIdsSet.has(productId);
       });
       
       if (itemsToProcess.length === 0) {
@@ -129,12 +131,14 @@ export async function POST(request: NextRequest) {
       const itemTotal = product.price * item.quantity;
       totalAmount += itemTotal;
 
+      const selectedAttributes = getSelectedAttributesFromCartItem(item);
       orderItems.push({
         product: product._id,
         name: product.name,
         quantity: item.quantity,
         price: product.price,
         image: product.coverImage || (product.images && product.images[0]) || '',
+        ...(selectedAttributes && Object.keys(selectedAttributes).length > 0 && { selectedAttributes }),
       });
     }
 

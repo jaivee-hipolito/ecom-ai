@@ -7,14 +7,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheckCircle, FiXCircle, FiInfo, FiAlertCircle, FiFileText, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useState } from 'react';
 
+const FACEBOOK_URL = 'https://www.facebook.com/TeezeeFacebookPage/';
+
 interface ProductAttributesProps {
   attributes: Record<string, any>;
   categoryAttributes?: CategoryAttribute[];
+  productCode?: string | null;
 }
 
 export default function ProductAttributes({
   attributes,
   categoryAttributes = [],
+  productCode,
 }: ProductAttributesProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
@@ -393,6 +397,99 @@ export default function ProductAttributes({
                           <span className="text-gray-600">Once payment is confirmed, your order will be processed and shipped promptly.</span>
                         </li>
                       </ol>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* In-House Layaway Program */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <button
+                onClick={() => toggleSection('layaway')}
+                className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left"
+              >
+                <FiFileText className="w-5 h-5 text-gray-700 flex-shrink-0" />
+                <span className="flex-1 text-sm font-medium text-[#1a1a1a]">
+                  In-House Layaway Program
+                </span>
+                <motion.div
+                  animate={{ rotate: expandedSections.has('layaway') ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FiChevronDown className="w-5 h-5 text-gray-700 flex-shrink-0" />
+                </motion.div>
+              </button>
+              <AnimatePresence>
+                {expandedSections.has('layaway') && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 pb-4 pl-12 text-sm text-gray-700 leading-relaxed space-y-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+                      <p>
+                        Enjoy the flexibility of owning your favorite piece by paying in convenient bi-weekly installments through our In-House Layaway Program.
+                      </p>
+                      <p className="text-sm font-semibold text-[#1a1a1a] bg-amber-50 border-l-4 border-amber-400 py-2 px-3 rounded-r mt-3">
+                        Note: This program only applies to products priced $200 or more.
+                      </p>
+                      <h5 className="font-bold text-[#1a1a1a] uppercase text-xs tracking-wide mt-4">How It Works</h5>
+                      <ol className="list-decimal list-inside space-y-3 pl-1">
+                        <li>
+                          <strong>Confirm the Price</strong>
+                          <br />
+                          <span className="text-gray-600">Locate the price displayed next to the Layaway icon on the product listing.</span>
+                        </li>
+                        <li>
+                          <strong>Contact Us (Official Channels Only)</strong>
+                          <br />
+                          <span className="text-gray-600">Please reach out to us through one of the following official channels:</span>
+                          <ul className="list-disc list-inside mt-1 ml-2 space-y-0.5">
+                            <li>
+                              Email: <a href="mailto:teezeejewelry.official@gmail.com" className="text-[#F9629F] hover:underline">teezeejewelry.official@gmail.com</a>
+                            </li>
+                            <li>
+                              Facebook: <Link href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="text-[#F9629F] hover:underline">Message us via our official Facebook page</Link>.
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>Provide the Following Information</strong>
+                          <br />
+                          <span className="text-gray-600">Include:</span>
+                          <ul className="list-disc list-inside mt-1 ml-2 space-y-0.5 text-gray-600">
+                            <li>Full Name</li>
+                            <li>Shipping Address</li>
+                            <li>Email Address</li>
+                            <li>Contact Number</li>
+                            <li>Product Code{productCode ? <span className="font-semibold text-[#1a1a1a]"> — {productCode}</span> : ''}</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>Receive Your Payment Plan</strong>
+                          <br />
+                          <span className="text-gray-600">We will issue an invoice outlining your personalized layaway schedule, payment amounts, and full terms and conditions.</span>
+                        </li>
+                        <li>
+                          <strong>Complete Your Payments</strong>
+                          <br />
+                          <span className="text-gray-600">Payments are made bi-weekly via Interac e-Transfer according to the agreed schedule.</span>
+                        </li>
+                        <li>
+                          <strong>Order Shipment</strong>
+                          <br />
+                          <span className="text-gray-600">Once your final payment (including shipping fees) has been received, your item will be carefully packaged and shipped to you.</span>
+                        </li>
+                      </ol>
+                      <div className="pt-2 border-t border-gray-100 mt-4">
+                        <h6 className="font-bold text-[#1a1a1a] uppercase text-xs tracking-wide mb-1">Early Payoff Option</h6>
+                        <p className="text-gray-600">
+                          You may pay off your remaining balance at any time to receive your item sooner.
+                        </p>
+                      </div>
                     </div>
                   </motion.div>
                 )}

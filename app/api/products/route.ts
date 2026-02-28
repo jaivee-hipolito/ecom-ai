@@ -78,13 +78,26 @@ export async function GET(request: NextRequest) {
     // Only show products with stock > 0 for customers
     filter.stock = { $gt: 0 };
 
-    // Build sort object
+    // Build sort object (views = highest first when sortOrder desc)
     const sort: any = {};
-    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    if (sortBy === 'views') {
+      sort.views = sortOrder === 'asc' ? 1 : -1;
+      sort.createdAt = sortOrder === 'asc' ? 1 : -1;
+    } else {
+      sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    }
 
     // Calculate pagination
     const skip = (page - 1) * limit;
-    const total = await Product.countDocuments(filter);
+    const [total, uniqueNameResult] = await Promise.all([
+      Product.countDocuments(filter),
+      Product.aggregate([
+        { $match: filter },
+        { $group: { _id: '$name' } },
+        { $count: 'value' },
+      ]).exec(),
+    ]);
+    const totalUniqueNames = uniqueNameResult?.[0]?.value ?? 0;
     const totalPages = Math.ceil(total / limit);
 
     // Fetch products
@@ -139,6 +152,7 @@ export async function GET(request: NextRequest) {
     const response: ProductListResponse = {
       products: productsWithCategoryNames,
       total,
+      totalUniqueNames,
       page,
       limit,
       totalPages,

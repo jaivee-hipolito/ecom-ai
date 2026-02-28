@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -15,7 +16,7 @@ interface Category {
   slug?: string;
 }
 
-/** Optional: products with category + coverImage to show one image per category */
+/** Optional: products with category + coverImage to show one image per category (fallback) */
 interface ProductWithCategory {
   category: string;
   coverImage?: string;
@@ -35,20 +36,61 @@ const getCategoryIcon = (categoryName: string) => {
   return FiPackage;
 };
 
-/** Get cover image URL for a category (first product in that category) */
-function getCategoryImageUrl(categoryName: string, products?: ProductWithCategory[]): string | null {
+/** Get cover image URL for a category from passed products (fallback when no fetched image) */
+function getCategoryImageFromProducts(categoryName: string, products?: ProductWithCategory[]): string | null {
   if (!products?.length) return null;
   const p = products.find((pr) => (pr.category || '').trim() === (categoryName || '').trim());
   return p?.coverImage && p.coverImage.trim() ? p.coverImage : null;
 }
 
 export default function PopularCategories({ categories, products = [] }: PopularCategoriesProps) {
-  if (categories.length === 0) {
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+  const [categoriesWithProducts, setCategoriesWithProducts] = useState<Set<string> | null>(null);
+
+  // Only show categories that have at least one product (hide 0 results)
+  const displayCategories =
+    categoriesWithProducts === null
+      ? categories
+      : categories.filter((cat) => categoriesWithProducts.has(cat.name));
+
+  // Fetch one product per category: get image and whether category has any products
+  useEffect(() => {
+    if (categories.length === 0) return;
+    const aborter = new AbortController();
+    const fetchImagesAndFilter = async () => {
+      const results: Record<string, string> = {};
+      const withProducts = new Set<string>();
+      await Promise.all(
+        categories.map(async (cat) => {
+          try {
+            const res = await fetch(
+              `/api/products?category=${encodeURIComponent(cat.name)}&limit=1`,
+              { signal: aborter.signal }
+            );
+            const data = await res.json();
+            const productList = data.products;
+            if (productList && productList.length > 0) {
+              withProducts.add(cat.name);
+              const first = productList[0];
+              const url = first?.coverImage || first?.images?.[0];
+              if (url && typeof url === 'string' && url.trim()) results[cat.name] = url.trim();
+            }
+          } catch {
+            // ignore per-category errors
+          }
+        })
+      );
+      setCategoryImages((prev) => ({ ...prev, ...results }));
+      setCategoriesWithProducts(withProducts);
+    };
+    fetchImagesAndFilter();
+    return () => aborter.abort();
+  }, [categories.map((c) => c._id).join(',')]);
+
+  // Early returns only after all hooks (React rules of hooks)
+  if (categories.length === 0 || displayCategories.length === 0) {
     return null;
   }
-
-  // Show first 4 categories in 2x2 grid (like the image)
-  const displayCategories = categories.slice(0, 4);
 
   return (
     <div className="bg-white py-8 lg:py-12">
@@ -64,13 +106,13 @@ export default function PopularCategories({ categories, products = [] }: Popular
           Curated Selections
         </motion.h2>
 
-        {/* 2 cols on mobile/tablet, 4 cols on laptop/wide screen */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Responsive grid: 2 cols mobile, 3 tablet, 4 lg, 5 xl */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
           {displayCategories.map((category, index) => {
             const Icon = getCategoryIcon(category.name);
             const linkLabel = `${category.name} Collections`;
             const href = `/products?category=${encodeURIComponent(category.name)}`;
-            const imageUrl = getCategoryImageUrl(category.name, products);
+            const imageUrl = categoryImages[category.name] || getCategoryImageFromProducts(category.name, products);
 
             return (
               <motion.div
@@ -92,7 +134,7 @@ export default function PopularCategories({ categories, products = [] }: Popular
                           alt={category.name}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
                           unoptimized={imageUrl.startsWith('http') || imageUrl.startsWith('//')}
                         />
                       ) : (

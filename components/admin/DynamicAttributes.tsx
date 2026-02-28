@@ -94,6 +94,62 @@ export default function DynamicAttributes({
           />
         );
 
+      case 'multiselect': {
+        const selectedArr = Array.isArray(value) ? value : (value ? String(value).split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+        const options = attr.options || [];
+        return (
+          <div key={attr.name} className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className="block text-sm font-medium text-gray-700">
+                {attr.label}
+                {attr.required && <span className="text-red-500 ml-1">*</span>}
+              </label>
+              {options.length > 0 && (
+                <span className="flex items-center gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => onChange(attr.name, [...options])}
+                    className="text-blue-600 hover:text-blue-800 font-medium underline focus:outline-none"
+                  >
+                    Select all
+                  </button>
+                  <span className="text-gray-400">|</span>
+                  <button
+                    type="button"
+                    onClick={() => onChange(attr.name, [])}
+                    className="text-gray-500 hover:text-gray-700 font-medium underline focus:outline-none"
+                  >
+                    Deselect all
+                  </button>
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {options.map((option) => {
+                const isChecked = selectedArr.includes(option);
+                return (
+                  <label key={option} className="inline-flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                          ? [...selectedArr, option]
+                          : selectedArr.filter((x) => x !== option);
+                        onChange(attr.name, next);
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-900">{option}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+          </div>
+        );
+      }
+
       case 'boolean':
         return (
           <div key={attr.name} className="flex items-center space-x-2">

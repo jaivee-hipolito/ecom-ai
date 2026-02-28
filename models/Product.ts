@@ -24,6 +24,12 @@ const ProductSchema = new Schema<IProduct>(
       required: [true, 'Please provide a product category'],
       trim: true,
     },
+    productCode: {
+      type: String,
+      trim: true,
+      sparse: true,
+      unique: true,
+    },
     images: {
       type: [String],
       default: [],

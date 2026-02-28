@@ -14,7 +14,7 @@ const CategoryAttributeSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['text', 'number', 'textarea', 'select', 'boolean', 'date'],
+    enum: ['text', 'number', 'textarea', 'select', 'multiselect', 'boolean', 'date'],
     required: true,
   },
   required: {

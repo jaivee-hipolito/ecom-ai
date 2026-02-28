@@ -14,8 +14,9 @@ const CartItemSchema = new Schema(
       min: [1, 'Quantity must be at least 1'],
       default: 1,
     },
+    selectedAttributes: { type: Schema.Types.Mixed },
   },
-  { _id: false }
+  { _id: false, strict: true }
 );
 
 const CartSchema = new Schema<ICart>(

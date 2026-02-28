@@ -13,6 +13,7 @@ import Pagination from '@/components/ui/Pagination';
 import Loading from '@/components/ui/Loading';
 import { useProducts } from '@/hooks/useProducts';
 import { ProductFilters as ProductFiltersType } from '@/types/product';
+import { groupProductsByName } from '@/utils/productGrouping';
 
 interface Category {
   _id: string;
@@ -168,6 +169,14 @@ function ProductsContent() {
   };
 
   const hasActiveFilters = Object.keys(filters).length > 0;
+
+  // In grid view we group by name: show count of groups and total unique products
+  const displayCount =
+    viewMode === 'grid' ? groupProductsByName(products).length : products.length;
+  const totalProducts =
+    viewMode === 'grid'
+      ? (pagination.totalUniqueNames ?? pagination.total)
+      : pagination.total;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -410,11 +419,11 @@ function ProductsContent() {
                 <p className="text-gray-600 font-medium">
                   Showing{' '}
                   <span className="text-[#000000] font-bold">
-                    {products.length}
+                    {displayCount}
                   </span>{' '}
                   of{' '}
                   <span className="text-[#000000] font-bold">
-                    {pagination.total}
+                    {totalProducts}
                   </span>{' '}
                   products
                 </p>

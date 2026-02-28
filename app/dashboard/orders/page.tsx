@@ -9,6 +9,7 @@ import { IOrder } from '@/types/order';
 import ProductImage from '@/components/products/ProductImage';
 import { IProduct } from '@/types/product';
 import { formatCurrency } from '@/utils/currency';
+import { getSizeAndColorFromAttributes } from '@/lib/orderItemAttributes';
 
 export default function DashboardOrdersPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -239,9 +240,10 @@ export default function DashboardOrdersPage() {
 
               <div className="space-y-4 mb-4">
                 {order.items.map((item, index) => {
-                  const product = typeof item.product === 'object' ? item.product : null;
+                  const product = item.product != null && typeof item.product === 'object' ? item.product : null;
+                  const productId = product?._id ?? (typeof item.product === 'string' ? item.product : '');
                   const mockProduct: IProduct = product || {
-                    _id: typeof item.product === 'string' ? item.product : '',
+                    _id: productId,
                     name: item.name,
                     coverImage: item.image,
                     images: item.image ? [item.image] : [],
@@ -250,8 +252,6 @@ export default function DashboardOrdersPage() {
                     category: '',
                     stock: 0,
                   };
-
-                  const productId = typeof item.product === 'object' ? item.product._id : item.product;
                   
                   return (
                     <div key={index} className="flex gap-4">
@@ -284,6 +284,25 @@ export default function DashboardOrdersPage() {
                           <h4 className="text-sm font-medium text-gray-900 hover:text-[#F9629F] transition-colors cursor-pointer">{item.name}</h4>
                         </Link>
                         <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                        {(() => {
+                          const attrs = (item.selectedAttributes || {}) as Record<string, unknown>;
+                          const { size: sizeStr, color: colorStr } = getSizeAndColorFromAttributes(attrs);
+                          const otherEntries = Object.entries(attrs).filter(
+                            ([k, v]) => v != null && v !== '' && !k.toLowerCase().includes('size') && k.toLowerCase() !== 'color' && k.toLowerCase() !== 'colour'
+                          );
+                          const label = (key: string) => key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim().split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                          const parts = [
+                            sizeStr && `Size: ${sizeStr}`,
+                            colorStr && `Color: ${colorStr}`,
+                            ...otherEntries.map(([k, v]) => `${label(k)}: ${Array.isArray(v) ? v[0] : v}`),
+                          ].filter(Boolean);
+                          if (parts.length === 0) return null;
+                          return (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {parts.join(' · ')}
+                            </p>
+                          );
+                        })()}
                         <p className="text-sm font-medium text-gray-900 mt-1">
                           ${(item.price * item.quantity).toFixed(2)}
                         </p>

@@ -91,6 +91,47 @@ export function groupProductsByName(products: IProduct[]): GroupedProduct[] {
 }
 
 /**
+ * Normalize attribute key for flexible matching (e.g. "Size(inch)" and "size_inch" match)
+ */
+export function normalizeAttrKey(key: string): string {
+  return key
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[()]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
+}
+
+/** Strip to letters/numbers only for loose match (e.g. "Size(inch)" and "size_inch" -> "sizeinch") */
+function normalizeAttrKeyStrict(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Get attribute value from a record with flexible key matching
+ */
+export function getAttributeValue(attributes: Record<string, any>, key: string): any {
+  if (attributes[key] !== undefined && attributes[key] !== null) {
+    return attributes[key];
+  }
+  const nkey = normalizeAttrKey(key);
+  let entry = Object.entries(attributes).find(
+    ([k]) => normalizeAttrKey(k) === nkey
+  );
+  if (!entry) {
+    const strictKey = normalizeAttrKeyStrict(key);
+    entry = Object.entries(attributes).find(
+      ([k]) => normalizeAttrKeyStrict(k) === strictKey
+    );
+  }
+  return entry ? entry[1] : undefined;
+}
+
+function getVariantAttr(variant: ProductVariant, key: string): any {
+  return getAttributeValue(variant.attributes, key);
+}
+
+/**
  * Finds a product variant matching the selected attributes
  */
 export function findMatchingVariant(
@@ -101,7 +142,6 @@ export function findMatchingVariant(
     return null;
   }
 
-  // Normalize string values for comparison (case-insensitive, trimmed)
   const normalizeValue = (val: any): string => {
     if (val === null || val === undefined) return '';
     return String(val).toLowerCase().trim();
@@ -110,34 +150,26 @@ export function findMatchingVariant(
   return (
     variants.find((variant) => {
       return Object.entries(selectedAttributes).every(([key, value]) => {
-        const variantValue = variant.attributes[key];
+        const variantValue = getVariantAttr(variant, key);
         const normalizedSelected = normalizeValue(value);
-        
+
         if (variantValue === null || variantValue === undefined) {
           return false;
         }
-        
-        // Handle exact match (case-insensitive)
+
         if (normalizeValue(variantValue) === normalizedSelected) {
           return true;
         }
-        
-        // Handle array values
         if (Array.isArray(variantValue)) {
-          return variantValue.some(v => normalizeValue(v) === normalizedSelected);
+          return variantValue.some((v) => normalizeValue(v) === normalizedSelected);
         }
-        
-        // Handle comma-separated strings (e.g., "Yellow, Green")
         if (typeof variantValue === 'string' && variantValue.includes(',')) {
-          const values = variantValue.split(',').map(v => normalizeValue(v));
+          const values = variantValue.split(',').map((v) => normalizeValue(v));
           return values.includes(normalizedSelected);
         }
-        
-        // Handle case-insensitive string comparison
         if (typeof variantValue === 'string' && typeof value === 'string') {
           return normalizeValue(variantValue) === normalizedSelected;
         }
-        
         return false;
       });
     }) || null

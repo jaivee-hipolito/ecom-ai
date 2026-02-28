@@ -32,7 +32,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
     interacPrice: product?.price != null ? String(((Number(product.price) * 0.94) - 0.60).toFixed(2)) : '',
     price: product?.price ?? '',
     category: product?.category || '',
-    stock: product != null ? (product?.stock ?? 0) : ('' as string | number),
+    stock: product != null && (product?.stock ?? 0) > 0 ? (product?.stock ?? 0) : ('' as string | number),
     featured: product?.featured || false,
     isFlashSale: product?.isFlashSale || false,
     flashSaleDiscount: product?.flashSaleDiscount || 0,
@@ -49,7 +49,6 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [attributeErrors, setAttributeErrors] = useState<Record<string, string>>({});
-  const [generatingDescription, setGeneratingDescription] = useState(false);
   const [previewDiscountedPrice, setPreviewDiscountedPrice] = useState<number | null>(null);
 
   useEffect(() => {
@@ -215,11 +214,23 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
       // Clear attribute errors if validation passes
       setAttributeErrors({});
 
+      if (formData.stock === '' || formData.stock === undefined || formData.stock === null) {
+        setError('In-stock is required');
+        setIsLoading(false);
+        return;
+      }
+      const stockToSend = typeof formData.stock === 'string' ? (parseInt(formData.stock, 10) ?? 0) : (formData.stock ?? 0);
+      if (Number.isNaN(stockToSend) || stockToSend < 0) {
+        setError('In-stock must be 0 or greater');
+        setIsLoading(false);
+        return;
+      }
+
       const { interacPrice: _, ...restFormData } = formData;
       const requestBody: any = {
         ...restFormData,
         price: parseFloat(formData.price as string),
-        stock: typeof formData.stock === 'string' ? (parseInt(formData.stock) || 0) : (formData.stock ?? 0),
+        stock: stockToSend,
         images,
         coverImage: finalCoverImage,
         attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
@@ -320,51 +331,6 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
       } else if (!updatedFormData.isFlashSale || updatedFormData.flashSaleDiscount === 0) {
         setPreviewDiscountedPrice(null);
       }
-    }
-  };
-
-  const handleGenerateDescription = async () => {
-    if (!formData.name) {
-      setError('Please enter a product name first');
-      return;
-    }
-
-    setGeneratingDescription(true);
-    setError('');
-
-    try {
-      const categoryName = selectedCategory?.name || formData.category;
-      
-      const response = await fetch('/api/admin/products/generate-description', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          productName: formData.name,
-          category: categoryName,
-          attributes: attributes,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate description');
-      }
-
-      if (data.description) {
-        setFormData({
-          ...formData,
-          description: data.description,
-        });
-        setSuccessMessage('Description generated successfully! You can edit it if needed.');
-        setTimeout(() => setSuccessMessage(''), 3000);
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate description. Please try again.');
-    } finally {
-      setGeneratingDescription(false);
     }
   };
 
@@ -501,36 +467,23 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
         </div>
       </motion.div>
 
-      {/* Description Section — stack label + button on mobile */}
+      {/* Description Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         className="space-y-2 sm:space-y-3"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-0 sm:mb-1">
-          <label className="block text-xs sm:text-sm font-semibold text-[#000000]">
-            Description
-            <span className="text-[#F9629F] ml-1">*</span>
-          </label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleGenerateDescription}
-            isLoading={generatingDescription}
-            disabled={!formData.name || generatingDescription || isLoading}
-            className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm"
-          >
-            {generatingDescription ? 'Generating...' : '✨ Generate with AI'}
-          </Button>
-        </div>
+        <label className="block text-xs sm:text-sm font-semibold text-[#000000]">
+          Description
+          <span className="text-[#F9629F] ml-1">*</span>
+        </label>
         <Textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
           required
-          placeholder="Enter product description or click 'Generate with AI' to auto-generate"
+          placeholder="Enter product description"
           rows={3}
           className="bg-white border-2 border-gray-200 focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all resize-none text-[#000000] placeholder:text-gray-400 text-sm sm:text-base min-h-[72px] sm:min-h-0"
         />
@@ -596,7 +549,7 @@ export default function ProductForm({ product, onSuccess }: ProductFormProps) {
 
         <div className="space-y-1 sm:space-y-2">
           <Input
-            label="Stock Quantity"
+            label="In-stock"
             name="stock"
             type="number"
             min="0"

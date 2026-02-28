@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
+import { getNextProductCode } from '@/lib/productCode';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -71,7 +72,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description, price, category, images, coverImage, stock, featured, attributes, isFlashSale, flashSaleDiscount, flashSaleDiscountType } = body;
+    const { name, description, price, category, productCode, images, coverImage, stock, featured, attributes, isFlashSale, flashSaleDiscount, flashSaleDiscountType } = body;
 
     const product = await Product.findById(id);
 
@@ -87,6 +88,15 @@ export async function PUT(
     if (description) product.description = description;
     if (price !== undefined) product.price = parseFloat(price);
     if (category) product.category = category;
+    if (productCode !== undefined) {
+      const trimmed = productCode?.trim() || undefined;
+      if (trimmed) {
+        product.productCode = trimmed;
+      } else if (!product.productCode) {
+        // Auto-generate when product has no code and none was provided
+        product.productCode = await getNextProductCode(product.category);
+      }
+    }
     
     // Handle images and coverImage
     if (images !== undefined) {

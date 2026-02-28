@@ -31,6 +31,7 @@ export default function HomePageContent({ forceShowSearch = false, productLinkPr
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { products, isLoading: productsLoading } = useProducts({
@@ -49,6 +50,7 @@ export default function HomePageContent({ forceShowSearch = false, productLinkPr
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        setCategoriesLoading(true);
         const response = await fetch('/api/products/categories');
         const data = await response.json();
         if (data.categories) {
@@ -56,6 +58,8 @@ export default function HomePageContent({ forceShowSearch = false, productLinkPr
         }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
+      } finally {
+        setCategoriesLoading(false);
       }
     };
     fetchCategories();
@@ -185,10 +189,47 @@ export default function HomePageContent({ forceShowSearch = false, productLinkPr
         </div>
       </motion.section>
 
-      {/* Popular Categories */}
-      {categories.length > 0 && (
+      {/* Curated Selections - with loading state */}
+      {categoriesLoading ? (
+        <div className="bg-white py-8 lg:py-12">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-2xl lg:text-3xl font-serif text-[#000000] mb-2"
+            >
+              Curated Selections
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="text-sm text-gray-500 mb-6 lg:mb-8 flex items-center gap-2"
+            >
+              <span className="inline-block w-4 h-4 border-2 border-[#F9629F]/40 border-t-[#F9629F] rounded-full animate-spin" />
+              Loading selections…
+            </motion.p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0.6 }}
+                  animate={{ opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.08 }}
+                  className="rounded-lg border-2 border-gray-100 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100/50"
+                >
+                  <div className="aspect-[4/3] sm:aspect-[3/2] bg-gray-100/80" />
+                  <div className="p-3">
+                    <div className="h-4 bg-gray-200/80 rounded w-3/4 mx-auto" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : categories.length > 0 ? (
         <PopularCategories categories={categories} products={products} />
-      )}
+      ) : null}
 
       {/* Search Section */}
       {showSearch && (

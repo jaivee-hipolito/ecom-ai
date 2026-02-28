@@ -33,6 +33,7 @@ export function useProducts(options: UseProductsOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     total: 0,
+    totalUniqueNames: 0,
     page: 1,
     limit: 12,
     totalPages: 0,
@@ -85,6 +86,7 @@ export function useProducts(options: UseProductsOptions = {}) {
         setProducts(data.products);
         setPagination({
           total: data.total,
+          totalUniqueNames: data.totalUniqueNames ?? data.total,
           page: data.page,
           limit: data.limit,
           totalPages: data.totalPages,
@@ -133,6 +135,7 @@ export function useProducts(options: UseProductsOptions = {}) {
       setProducts(data.products);
       setPagination({
         total: data.total,
+        totalUniqueNames: data.totalUniqueNames ?? data.total,
         page: data.page,
         limit: data.limit,
         totalPages: data.totalPages,

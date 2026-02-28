@@ -122,9 +122,32 @@ export default function BNPLInstallments({ price }: BNPLInstallmentsProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-700">
-                  Exclusive Interac Price: <span className="font-bold text-gray-900">{formatCurrency(interacPrice)}</span>
+                  Pay <span className="font-bold text-gray-900">{formatCurrency(interacPrice)}</span> only with Interac
                 </p>
               </div>
+            </div>
+          </motion.div>
+        );
+      })()}
+
+      {/* In-Store Layaway Plan - only for products $200+ */}
+      {price >= 200 && (() => {
+        const installmentAmount = price / 8;
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+            className="flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden"
+          >
+            <div className="w-1.5 bg-[#F9629F] flex-shrink-0" />
+            <div className="p-4 flex-1 min-w-0">
+              <p className="font-semibold text-gray-900 text-sm" style={{ fontFamily: 'Georgia, serif' }}>
+                In-Store Layaway Plan
+              </p>
+              <p className="text-sm text-gray-700 mt-0.5" style={{ fontFamily: 'Georgia, serif' }}>
+                8 interest-free payments of <span className="font-bold text-gray-900">{formatCurrency(installmentAmount)}</span>
+              </p>
             </div>
           </motion.div>
         );

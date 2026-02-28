@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
 
-    // Sort and limit
+    // Sort by views highest to lowest, then by createdAt for stable order
     pipeline.push(
       {
         $sort: { viewsCount: -1, createdAt: -1 },

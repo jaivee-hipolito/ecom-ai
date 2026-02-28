@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import { getStripe } from '@/lib/stripe';
 import Order from '@/models/Order';
 import { requireAuth } from '@/lib/auth';
+import { deductStockForOrder } from '@/lib/orderStock';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -46,6 +47,16 @@ export async function POST(request: NextRequest) {
 
       // Update order payment status based on payment intent status
       if (paymentIntent.status === 'succeeded') {
+        const wasPaid = order.paymentStatus === 'paid';
+        const alreadyDeducted = (order as any).stockDeducted === true;
+        if (!wasPaid && !alreadyDeducted) {
+          try {
+            await deductStockForOrder(order.items || []);
+            (order as any).stockDeducted = true;
+          } catch (e) {
+            console.error('[verify] Failed to deduct stock:', e);
+          }
+        }
         order.paymentStatus = 'paid';
         order.paymentId = paymentIntentId;
         await order.save();
@@ -61,8 +72,17 @@ export async function POST(request: NextRequest) {
       });
 
       if (order) {
-        // Update order payment status based on payment intent status
         if (paymentIntent.status === 'succeeded') {
+          const wasPaid = order.paymentStatus === 'paid';
+          const alreadyDeducted = (order as any).stockDeducted === true;
+          if (!wasPaid && !alreadyDeducted) {
+            try {
+              await deductStockForOrder(order.items || []);
+              (order as any).stockDeducted = true;
+            } catch (e) {
+              console.error('[verify] Failed to deduct stock:', e);
+            }
+          }
           order.paymentStatus = 'paid';
           await order.save();
         } else if (paymentIntent.status === 'canceled') {

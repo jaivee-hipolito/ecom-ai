@@ -411,7 +411,18 @@ export default function CheckoutForm() {
                   {paymentError}
                 </div>
               )}
-              {isCreatingIntent && !clientSecret && (
+              {!STRIPE_CONFIG.publishableKey && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+                  <p className="font-semibold mb-1">Stripe payment is not configured</p>
+                  <p className="text-sm mb-3">
+                    Add <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> (and <code className="bg-amber-100 px-1 rounded">STRIPE_SECRET_KEY</code> on the server) to <code className="bg-amber-100 px-1 rounded">.env.local</code>, then restart the dev server.
+                  </p>
+                  <p className="text-xs text-amber-700">
+                    Get keys from the Stripe Dashboard → Developers → API keys.
+                  </p>
+                </div>
+              )}
+              {STRIPE_CONFIG.publishableKey && isCreatingIntent && !clientSecret && (
                 <div className="flex items-center justify-center py-12">
                   <Loading />
                 </div>

@@ -8,9 +8,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import ColorSwatch from '@/components/products/ColorSwatch';
+import RemoveFromCartModal from '@/components/cart/RemoveFromCartModal';
 import { motion } from 'framer-motion';
 import { FiMinus, FiPlus, FiTrash2, FiX, FiCheck } from 'react-icons/fi';
 import { formatCurrency } from '@/utils/currency';
+import { getSizeAndColorFromAttributes } from '@/lib/orderItemAttributes';
 
 interface CartItemProps {
   item: ICartItem;
@@ -23,6 +25,8 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
   const [quantity, setQuantity] = useState(item.quantity);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   // Handle null or invalid product
   if (!item.product) {
@@ -61,16 +65,23 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
     }
   };
 
-  const handleRemove = async () => {
-    if (!confirm('Remove this item from cart?')) {
-      return;
-    }
+  const openRemoveModal = () => {
+    setRemoveError(null);
+    setShowRemoveModal(true);
+  };
 
+  const handleRemoveConfirm = async () => {
     try {
       setIsRemoving(true);
+      setRemoveError(null);
+      setShowRemoveModal(false);
+      const exitDurationMs = 220;
+      await new Promise((r) => setTimeout(r, exitDurationMs));
       await removeFromCart(productId);
     } catch (error: any) {
-      alert(error.message || 'Failed to remove item');
+      setRemoveError(error.message || 'Failed to remove item. Please try again.');
+      setShowRemoveModal(true);
+    } finally {
       setIsRemoving(false);
     }
   };
@@ -203,48 +214,69 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
               )}
             </div>
             
-            {/* Product Attributes */}
-            {product.attributes && Object.keys(product.attributes).length > 0 && (
+            {/* Product details: from selectedAttributes only (size, color, and any others) */}
+            {(() => {
+              const selectedAttrs = (item.selectedAttributes || {}) as Record<string, unknown>;
+              const { size: sizeVal, color: colorVal } = getSizeAndColorFromAttributes(selectedAttrs);
+              const label = (key: string) =>
+                key
+                  .replace(/_/g, ' ')
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/\s+/g, ' ')
+                  .trim()
+                  .split(' ')
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                  .join(' ');
+              const isColorKey = (k: string) => k.toLowerCase() === 'color' || k.toLowerCase() === 'colour';
+              const otherEntries = Object.entries(selectedAttrs).filter(
+                ([k, v]) => v != null && v !== '' && !k.toLowerCase().includes('size') && !isColorKey(k)
+              );
+              const hasAny = sizeVal || colorVal || otherEntries.length > 0;
+              if (!hasAny) return null;
+              return (
               <div className="mt-3 pt-3 border-t border-gray-100">
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(product.attributes).slice(0, 3).map(([key, value]) => {
-                    if (value === null || value === undefined || value === '') {
-                      return null;
-                    }
-
-                    const label = key
-                      .replace(/([A-Z])/g, ' $1')
-                      .replace(/^./, (str) => str.toUpperCase())
-                      .trim();
-
-                    // Handle color attributes
-                    if (
-                      (key.toLowerCase().includes('color') ||
-                        key.toLowerCase().includes('colour')) &&
-                      typeof value === 'string'
-                    ) {
-                      if (!value.includes(',')) {
-                        return (
-                          <div key={key} className="flex items-center gap-1.5">
-                            <span className="text-xs font-medium text-gray-600">{label}:</span>
-                            <ColorSwatch color={value} size="sm" />
-                            <span className="text-xs text-gray-700 capitalize">{value}</span>
-                          </div>
-                        );
-                      }
-                    }
-
-                    // Default display
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Selected options
+                </p>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                  {sizeVal && (
+                    <div className="flex items-center gap-2 min-w-0">
+                      <dt className="text-xs text-gray-500 shrink-0">Size</dt>
+                      <dd className="text-xs text-gray-800 font-medium truncate">{sizeVal}</dd>
+                    </div>
+                  )}
+                  {colorVal && (
+                    <div className="flex items-center gap-2">
+                      <dt className="text-xs text-gray-500 shrink-0">Color</dt>
+                      <dd className="flex items-center gap-1.5 min-w-0">
+                        <ColorSwatch color={colorVal} size="sm" />
+                        <span className="text-xs text-gray-700 truncate capitalize">{colorVal}</span>
+                      </dd>
+                    </div>
+                  )}
+                  {otherEntries.slice(0, 6).map(([key, value]) => {
+                    const displayVal = Array.isArray(value) ? (value.length === 1 ? value[0] : value.join(', ')) : value;
+                    const isColor = isColorKey(key) && typeof displayVal === 'string' && !String(displayVal).includes(',');
                     return (
-                      <div key={key} className="flex items-center gap-1.5">
-                        <span className="text-xs font-medium text-gray-600">{label}:</span>
-                        <span className="text-xs text-gray-700">{String(value)}</span>
+                      <div key={key} className={`flex items-center gap-2 ${isColor ? '' : 'min-w-0'}`}>
+                        <dt className="text-xs text-gray-500 shrink-0">{label(key)}</dt>
+                        <dd className={isColor ? 'flex items-center gap-1.5 min-w-0' : 'text-xs text-gray-800 font-medium truncate'}>
+                          {isColor ? (
+                            <>
+                              <ColorSwatch color={String(displayVal)} size="sm" />
+                              <span className="text-xs text-gray-700 truncate capitalize">{String(displayVal)}</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-gray-800 font-medium truncate">{String(displayVal)}</span>
+                          )}
+                        </dd>
                       </div>
                     );
                   })}
-                </div>
+                </dl>
               </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Quantity & Actions */}
@@ -295,7 +327,7 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
             <motion.button
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
-              onClick={handleRemove}
+              onClick={openRemoveModal}
               disabled={isLoading || isRemoving}
               className="p-2 sm:p-3 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all duration-300 disabled:opacity-50 shadow-sm self-center xs:self-auto"
               aria-label="Remove item"
@@ -305,6 +337,15 @@ export default function CartItem({ item, isSelected = true, onToggleSelect }: Ca
           </div>
         </div>
       </div>
+
+      <RemoveFromCartModal
+        isOpen={showRemoveModal}
+        onClose={() => !isRemoving && setShowRemoveModal(false)}
+        onConfirm={handleRemoveConfirm}
+        productName={product.name || 'This item'}
+        isLoading={isRemoving}
+        error={removeError}
+      />
     </motion.div>
   );
 }

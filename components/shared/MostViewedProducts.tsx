@@ -28,7 +28,7 @@ export default function MostViewedProducts({ initialProducts = [], productLinkPr
   const [products, setProducts] = useState<IProduct[]>(initialProducts);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch most viewed products on mount
+  // Always fetch most viewed from API so we get correct order (highest to lowest views)
   useEffect(() => {
     const fetchMostViewed = async () => {
       setIsLoading(true);
@@ -38,7 +38,6 @@ export default function MostViewedProducts({ initialProducts = [], productLinkPr
         if (data.products && data.products.length > 0) {
           setProducts(data.products);
         } else if (initialProducts.length > 0) {
-          // Fallback to initial products if API returns empty
           setProducts(initialProducts.slice(0, 8));
         }
       } catch (error) {
@@ -51,12 +50,8 @@ export default function MostViewedProducts({ initialProducts = [], productLinkPr
       }
     };
 
-    if (initialProducts.length === 0) {
-      fetchMostViewed();
-    } else {
-      setProducts(initialProducts.slice(0, 8));
-    }
-  }, [initialProducts]);
+    fetchMostViewed();
+  }, []);
 
   // Handle Quick View
   const handleQuickView = (e: React.MouseEvent, productId: string) => {
@@ -111,7 +106,8 @@ export default function MostViewedProducts({ initialProducts = [], productLinkPr
     };
   };
 
-  const displayProducts = products.length > 0 ? products : initialProducts.slice(0, 8);
+  const rawList = products.length > 0 ? products : initialProducts.slice(0, 8);
+  const displayProducts = [...rawList].sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
 
   if (displayProducts.length === 0 && !isLoading) {
     return null;

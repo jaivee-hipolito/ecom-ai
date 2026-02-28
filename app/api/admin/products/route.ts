@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
 import { ProductFilters, PaginationParams, ProductListResponse } from '@/types/product';
+import { getNextProductCode } from '@/lib/productCode';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -33,7 +34,9 @@ export async function GET(request: NextRequest) {
     const isFlashSale = searchParams.get('isFlashSale') === 'true' ? true : searchParams.get('isFlashSale') === 'false' ? false : undefined;
     const search = searchParams.get('search') || undefined;
 
-    // Build filter query
+    const skip = (page - 1) * limit;
+
+    // Build filter. Stock is deducted on pay and restored on cancel/refund, so product.stock = available inventory.
     const filter: any = {};
     if (category) filter.category = category;
     if (minPrice !== undefined || maxPrice !== undefined) {
@@ -41,45 +44,31 @@ export async function GET(request: NextRequest) {
       if (minPrice !== undefined) filter.price.$gte = minPrice;
       if (maxPrice !== undefined) filter.price.$lte = maxPrice;
     }
-    // Handle stock filters
+    if (featured !== undefined) filter.featured = featured;
+    if (isFlashSale !== undefined) {
+      if (isFlashSale === true) filter.isFlashSale = true;
+      else filter.isFlashSale = { $ne: true };
+    }
+    if (search) {
+      const searchTrimmed = search.trim();
+      filter.$or = [
+        { name: { $regex: searchTrimmed, $options: 'i' } },
+        { description: { $regex: searchTrimmed, $options: 'i' } },
+        { productCode: { $regex: searchTrimmed, $options: 'i' } },
+      ];
+    }
     if (stockStatus) {
-      // Stock status filters take priority
-      if (stockStatus === 'out-of-stock') {
-        filter.stock = 0;
-      } else if (stockStatus === 'in-stock') {
-        filter.stock = { $gt: 0 };
-      } else if (stockStatus === 'low-stock') {
-        filter.stock = { $gte: 0, $lt: 10 };
-      }
+      if (stockStatus === 'out-of-stock') filter.stock = 0;
+      else if (stockStatus === 'in-stock') filter.stock = { $gt: 0 };
+      else if (stockStatus === 'low-stock') filter.stock = { $gte: 0, $lt: 10 };
     } else if (minStock !== undefined || maxStock !== undefined) {
-      // Min/Max stock filters
       filter.stock = {};
       if (minStock !== undefined) filter.stock.$gte = minStock;
       if (maxStock !== undefined) filter.stock.$lte = maxStock;
     }
-    if (featured !== undefined) filter.featured = featured;
-    if (isFlashSale !== undefined) {
-      if (isFlashSale === true) {
-        // Flash Sale: must be explicitly true
-        filter.isFlashSale = true;
-      } else {
-        // Not Flash Sale: match anything that's not true (false, null, undefined, or doesn't exist)
-        filter.isFlashSale = { $ne: true };
-      }
-    }
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-      ];
-    }
 
-    // Calculate pagination
-    const skip = (page - 1) * limit;
     const total = await Product.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
-
-    // Fetch products
     const products = await Product.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -87,9 +76,10 @@ export async function GET(request: NextRequest) {
       .lean();
 
     const response: ProductListResponse = {
-      products: products.map((p) => ({
+      products: products.map((p: any) => ({
         ...p,
         _id: p._id.toString(),
+        availableStock: p.stock ?? 0,
       })),
       total,
       page,
@@ -119,7 +109,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { name, description, price, category, images, coverImage, stock, featured, attributes, isFlashSale, flashSaleDiscount, flashSaleDiscountType } = body;
+    const { name, description, price, category, productCode, images, coverImage, stock, featured, attributes, isFlashSale, flashSaleDiscount, flashSaleDiscountType } = body;
 
     // Validation
     if (!name || !description || !price || !category) {
@@ -142,20 +132,27 @@ export async function POST(request: NextRequest) {
       ? coverImage 
       : imageArray[0] || '';
 
-        const product = await Product.create({
-          name,
-          description,
-          price: parseFloat(price),
-          category,
-          images: imageArray,
-          coverImage: finalCoverImage,
-          stock: parseInt(stock) || 0,
-          featured: featured || false,
-          isFlashSale: isFlashSale || false,
-          flashSaleDiscount: isFlashSale ? (flashSaleDiscount || 0) : 0,
-          flashSaleDiscountType: isFlashSale ? (flashSaleDiscountType || 'percentage') : 'percentage',
-          attributes: attributes || {},
-        });
+    // Auto-generate product code (PREFIX-00001) when not provided
+    let finalProductCode = productCode?.trim() || undefined;
+    if (!finalProductCode) {
+      finalProductCode = await getNextProductCode(category);
+    }
+
+    const product = await Product.create({
+      name,
+      description,
+      price: parseFloat(price),
+      category,
+      productCode: finalProductCode,
+      images: imageArray,
+      coverImage: finalCoverImage,
+      stock: parseInt(stock) || 0,
+      featured: featured || false,
+      isFlashSale: isFlashSale || false,
+      flashSaleDiscount: isFlashSale ? (flashSaleDiscount || 0) : 0,
+      flashSaleDiscountType: isFlashSale ? (flashSaleDiscountType || 'percentage') : 'percentage',
+      attributes: attributes || {},
+    });
 
     return NextResponse.json(
       {

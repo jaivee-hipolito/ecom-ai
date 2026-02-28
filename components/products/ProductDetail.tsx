@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCartAnimation } from '@/contexts/CartAnimationContext';
 import Image from 'next/image';
 import ColorSwatch from './ColorSwatch';
-import { findMatchingVariant } from '@/utils/productGrouping';
+import { findMatchingVariant, getAttributeValue } from '@/utils/productGrouping';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiChevronLeft, FiChevronRight, FiMaximize2 } from 'react-icons/fi';
 import BNPLInstallments from './BNPLInstallments';
@@ -142,7 +142,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
       
       // Find variants that match the priority attribute (e.g., color)
       const partialMatches = variantList.filter((v) => {
-        const attrValue = v.attributes[priorityKey];
+        const attrValue = getAttributeValue(v.attributes, priorityKey);
         if (attrValue === null || attrValue === undefined) return false;
         
         // Normalize for comparison
@@ -163,8 +163,18 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
         return normalizeValue(attrValue) === normalizedSelected;
       });
       
-      // If we found partial matches, use the first one
       if (partialMatches.length > 0) {
+        const countMatches = (v: typeof variantList[0]) => {
+          return Object.entries(selectedAttributes).filter(([k, val]) => {
+            const attrVal = getAttributeValue(v.attributes, k);
+            if (attrVal == null) return false;
+            const n = (x: any) => String(x).toLowerCase().trim();
+            if (Array.isArray(attrVal)) return attrVal.some((x) => n(x) === n(val));
+            if (typeof attrVal === 'string' && attrVal.includes(',')) return attrVal.split(',').map((x) => n(x.trim())).includes(n(val));
+            return n(attrVal) === n(val);
+          }).length;
+        };
+        partialMatches.sort((a, b) => countMatches(b) - countMatches(a));
         match = partialMatches[0];
       }
     }
@@ -423,42 +433,32 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
   }, [availableStock, currentAvailableStock, currentCartQuantity, maxCanAdd, quantity, canAddRequestedQuantity, isOutOfStock, stockLimitReached, isAddingToCart, cartLoading, displayProduct._id]);
 
   const handleAddToCart = async () => {
-    console.log('handleAddToCart called');
-    
     if (!isAuthenticated) {
-      console.log('Not authenticated, redirecting to login');
       router.push('/login');
       return;
     }
 
-    const productId = displayProduct._id;
-    console.log('Product ID:', productId, 'Type:', typeof productId);
-
+    const productId = product._id ? String(product._id) : undefined;
     if (!productId) {
-      console.error('Product ID is missing');
       alert('Product ID is missing. Please refresh the page.');
       return;
     }
 
     if (isOutOfStock) {
-      console.log('Product is out of stock');
       alert('This product is out of stock');
       return;
     }
 
     if (quantity > currentAvailableStock) {
-      console.log('Quantity exceeds available stock');
       alert('Insufficient stock available');
       return;
     }
 
     if (!canAddRequestedQuantity) {
-      console.log('Stock limit reached');
       alert(`Stock limit reached. You can add up to ${maxCanAdd} more item(s).`);
       return;
     }
 
-    // Get button position for animation
     const buttonRect = addToCartButtonRef.current?.getBoundingClientRect();
     const startPosition = buttonRect
       ? {
@@ -467,7 +467,6 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
         }
       : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-    // Get product image URL
     const productImage =
       displayProduct.images && displayProduct.images.length > 0
         ? typeof displayProduct.images[0] === 'string'
@@ -475,14 +474,27 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
           : (displayProduct.images[0] as any)?.url || displayProduct.images[0]
         : undefined;
 
-    // Trigger animation
     triggerAnimation(startPosition, productImage);
 
+    const SPEC_ONLY_ATTR_KEYS = new Set(['Made_of', 'Origin', 'Classification', 'With?', 'made_of', 'origin', 'classification', 'with?']);
+    const selectableAttrs = hasVariants && Object.keys(selectedAttributes).length > 0
+      ? Object.fromEntries(
+          Object.entries(selectedAttributes).filter(([key]) => !SPEC_ONLY_ATTR_KEYS.has(key))
+        )
+      : undefined;
+    const attrsToSend = selectableAttrs && Object.keys(selectableAttrs).length > 0 ? selectableAttrs : undefined;
+    console.log('🛒 Adding to cart:', {
+      productId,
+      quantity,
+      selectedAttributes: attrsToSend,
+      hasVariants,
+      allSelectedAttributes: selectedAttributes,
+      filteredKeys: attrsToSend ? Object.keys(attrsToSend) : [],
+    });
+
     try {
-      console.log('Calling addToCart with:', { productId, quantity });
       setIsAddingToCart(true);
-      await addToCart(String(productId), quantity);
-      console.log('Product added to cart successfully');
+      await addToCart(productId, quantity, attrsToSend);
     } catch (error: any) {
       console.error('Error adding to cart:', error);
       alert(error.message || 'Failed to add to cart');
@@ -735,6 +747,13 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
               </div>
               {/* BNPL Installment Options */}
               <BNPLInstallments price={displayPrice} />
+              {/* Product Code (category-based, e.g. RING-00001) */}
+              {product.productCode && (
+                <p className="mt-3 text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">Product Code:</span>{' '}
+                  <span className="font-mono font-medium text-[#1a1a1a]">{product.productCode}</span>
+                </p>
+              )}
             </div>
 
             {/* Description */}
@@ -749,9 +768,23 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
 
             {/* Variant Selection - Show if product has 2+ variants (exclude spec-only attrs shown in Product Specifications) */}
             {hasVariants && Object.keys(allAttributes).length > 0 && (() => {
-              const SPEC_ONLY_ATTR_KEYS = new Set(['Made_of', 'Origin', 'Size(inch)', 'Classification', 'With?', 'made_of', 'origin', 'size(inch)', 'classification', 'with?']);
+              const SPEC_ONLY_ATTR_KEYS = new Set(['Made_of', 'Origin', 'Classification', 'With?', 'made_of', 'origin', 'classification', 'with?']);
               const selectableAttributes = Object.entries(allAttributes).filter(([key]) => !SPEC_ONLY_ATTR_KEYS.has(key));
               if (selectableAttributes.length === 0) return null;
+
+              const variantMatchesOtherAttrs = (variant: { attributes: Record<string, any> }, attrKeysToMatch: string[]) => {
+                return attrKeysToMatch.every((k) => {
+                  const selected = selectedAttributes[k];
+                  if (selected === undefined || selected === null) return true;
+                  const attrValue = variant.attributes[k];
+                  if (attrValue === null || attrValue === undefined) return false;
+                  const norm = (v: any) => String(v).toLowerCase().trim();
+                  if (Array.isArray(attrValue)) return attrValue.some((v) => norm(v) === norm(selected));
+                  if (typeof attrValue === 'string' && attrValue.includes(',')) return attrValue.split(',').map((v) => norm(v.trim())).includes(norm(selected));
+                  return norm(attrValue) === norm(selected);
+                });
+              };
+
               return (
               <div className="border-b border-gray-200 pb-4">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">
@@ -759,7 +792,19 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                 </h2>
                 <div className="space-y-4">
                   {selectableAttributes.map(([key, values]) => {
-                    const attributeValues = Array.from(values);
+                    const otherKeys = selectableAttributes.map(([k]) => k).filter((k) => k !== key);
+                    const variantsForThisAttr = otherKeys.length === 0
+                      ? variantList
+                      : variantList.filter((v) => variantMatchesOtherAttrs(v, otherKeys));
+                    const availableValuesSet = new Set<string | number | boolean>();
+                    variantsForThisAttr.forEach((v) => {
+                      const val = v.attributes?.[key];
+                      if (val === null || val === undefined) return;
+                      if (Array.isArray(val)) val.forEach((x) => availableValuesSet.add(x));
+                      else if (typeof val === 'string' && val.includes(',')) val.split(',').map((x) => x.trim()).filter(Boolean).forEach((x) => availableValuesSet.add(x));
+                      else availableValuesSet.add(val);
+                    });
+                    const attributeValues = Array.from(availableValuesSet);
                     const label = key
                       .replace(/([A-Z])/g, ' $1')
                       .replace(/^./, (str) => str.toUpperCase())
@@ -835,6 +880,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                 <ProductAttributes
                   attributes={product.attributes}
                   categoryAttributes={product.categoryAttributes}
+                  productCode={product.productCode}
                 />
               </div>
             )}
@@ -844,6 +890,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                 <ProductAttributes
                   attributes={{ ...(product.attributes || {}), ...selectedVariant.attributes }}
                   categoryAttributes={product.categoryAttributes}
+                  productCode={product.productCode}
                 />
               </div>
             )}

@@ -7,6 +7,8 @@ export interface IOrderItem {
   quantity: number;
   price: number;
   image?: string;
+  /** Attributes the customer selected (e.g. { "size(inch)": "7", "color": "black" }). Single source for size, color, and others. */
+  selectedAttributes?: Record<string, unknown>;
 }
 
 export interface IOrderHistoryEntry {

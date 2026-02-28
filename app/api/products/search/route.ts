@@ -17,16 +17,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ products: [] });
     }
 
+    const trimmed = query.trim();
     const products = await Product.find({
       $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } },
-        { category: { $regex: query, $options: 'i' } },
+        { name: { $regex: trimmed, $options: 'i' } },
+        { description: { $regex: trimmed, $options: 'i' } },
+        { category: { $regex: trimmed, $options: 'i' } },
+        // Product code: exact match (case-insensitive) so "TJ-1001" finds the product
+        ...(trimmed.length > 0 ? [{ productCode: { $regex: `^${trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }] : []),
       ],
       stock: { $gt: 0 }, // Only show products in stock
     })
       .limit(limit)
-      .select('name price images coverImage category')
+      .select('name price images coverImage category productCode')
       .lean();
 
     return NextResponse.json({

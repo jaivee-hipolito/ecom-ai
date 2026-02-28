@@ -74,6 +74,7 @@ function NavbarContent() {
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const [showSearchBox, setShowSearchBox] = useState(false);
+  const [showLogoModal, setShowLogoModal] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const shopDropdownRef = useRef<HTMLDivElement>(null);
@@ -82,6 +83,19 @@ function NavbarContent() {
   const { results: searchResults, isLoading: isSearching } = useProductSearch(searchInput);
 
   const isActive = (path: string) => pathname === path;
+
+  useEffect(() => {
+    if (!showLogoModal) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowLogoModal(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [showLogoModal]);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
@@ -172,7 +186,7 @@ function NavbarContent() {
       >
       <div ref={searchBoxRef} className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Menu Bar - Hamburger | Logo | Search & Cart */}
-          <div className="grid grid-cols-3 items-center h-20 lg:h-24 py-2 relative">
+          <div className="grid grid-cols-3 items-center h-24 lg:h-28 xl:h-32 py-2 relative">
             {/* Left Section - Hamburger Menu (z-20 so it stays clickable above center logo on widescreen) */}
             <div className="relative z-20 flex justify-start">
               <motion.button
@@ -185,25 +199,27 @@ function NavbarContent() {
               </motion.button>
             </div>
 
-            {/* Center Section - Brand Logo ONLY (w-fit so link doesn't overlap hamburger) */}
+            {/* Center Section - Brand Logo (click opens brand modal) */}
             <div className="flex justify-center z-10 w-full min-w-0">
-              <Link href="/" className="inline-block max-w-full">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                  className="relative"
-                >
-                  <Image
-                    src="/teezee-logo.png"
-                    alt="Teezee - Adorn Yourself With The Radiance Of 18K Gold"
-                    width={200}
-                    height={85}
-                    className="h-16 lg:h-20 w-auto object-contain"
-                    priority
-                    suppressHydrationWarning
-                  />
-                </motion.div>
-              </Link>
+              <motion.button
+                type="button"
+                onClick={() => setShowLogoModal(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+                className="relative h-20 w-20 lg:h-24 lg:w-24 xl:h-28 xl:w-28 rounded-full overflow-hidden flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#F9629F]/40 focus:ring-offset-2"
+                aria-label="View Teezee brand"
+              >
+                <Image
+                  src="/teezee-logo.png"
+                  alt="Teezee - Adorn Yourself With The Radiance Of 18K Gold"
+                  width={256}
+                  height={256}
+                  className="h-full w-full object-cover"
+                  priority
+                  suppressHydrationWarning
+                />
+              </motion.button>
             </div>
 
             {/* Right Section - Search & Cart */}
@@ -516,9 +532,91 @@ className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
         </AnimatePresence>
       </div>
     </nav>
+
+      {/* Brand logo modal - professional quick view */}
+      <AnimatePresence>
+        {showLogoModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+              onClick={() => setShowLogoModal(false)}
+              aria-hidden="true"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', duration: 0.35, bounce: 0.2 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-full max-w-md px-4"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="brand-modal-title"
+            >
+              <div
+                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200/80"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6 sm:p-8 text-center">
+                  <div className="relative w-64 h-64 sm:w-80 sm:h-80 mx-auto rounded-full overflow-hidden border-2 border-[#F9629F]/20 shadow-lg mb-5">
+                    <Image
+                      src="/teezee-logo.png"
+                      alt="Teezee"
+                      width={640}
+                      height={640}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <h2 id="brand-modal-title" className="text-2xl sm:text-3xl font-serif font-bold text-[#1a1a1a] mb-1">
+                    Teezee
+                  </h2>
+                  <p className="text-sm sm:text-base text-[#6b5b3a] font-medium mb-1">
+                    Adorn yourself with the radiance of the gold
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-6">
+                    Your destination for exquisite jewelry
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      onClick={() => {
+                        setShowLogoModal(false);
+                        router.push('/');
+                      }}
+                      className="bg-gradient-to-r from-[#F9629F] to-[#FC9BC2] text-white hover:opacity-95 shadow-md flex items-center justify-center text-center w-full sm:w-auto"
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        Explore <FiArrowRight className="w-4 h-4" />
+                      </span>
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => setShowLogoModal(false)}
+                      className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 font-medium text-sm transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLogoModal(false)}
+                  className="absolute top-3 right-3 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                  aria-label="Close"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Spacer so content starts below the fixed nav */}
       <div
-        className="flex-shrink-0 h-20 lg:h-24"
+        className="flex-shrink-0 h-24 lg:h-28 xl:h-32"
         aria-hidden="true"
       />
     </>

@@ -29,34 +29,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const { default: User } = await import('@/models/User');
         const bcrypt = await import('bcryptjs');
 
-        await connectDB();
+        const mongoose = await connectDB();
+        const email = (credentials.email as string).trim().toLowerCase();
+        const password = (credentials.password as string).trim().normalize('NFC');
 
-        const user = await User.findOne({
-          email: credentials.email,
-        }).select('+password');
-
-        if (!user || !user.password) {
+        // Same collection + sort as set-local-password.mjs; normalize password so form and script match
+        const db = mongoose.connection.db;
+        if (!db) throw new Error('Database not connected');
+        const rawUser = await db.collection('users').findOne(
+          { email },
+          { sort: { _id: 1 } }
+        );
+        if (!rawUser || !rawUser.password) {
           throw new Error('Invalid email or password');
         }
 
-        const isPasswordValid = await bcrypt.default.compare(
-          credentials.password as string,
-          user.password
-        );
-
+        const storedHash = String(rawUser.password);
+        const isPasswordValid = await bcrypt.default.compare(password, storedHash);
         if (!isPasswordValid) {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('[auth] Password length received:', password.length, '— must match script.');
+          }
           throw new Error('Invalid email or password');
         }
 
         return {
-          id: user._id.toString(),
-          name: `${user.firstName} ${user.lastName}`,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          contactNumber: user.contactNumber,
-          email: user.email,
-          role: user.role,
-          image: user.image || '',
+          id: String(rawUser._id),
+          name: [rawUser.firstName, rawUser.lastName].filter(Boolean).join(' ') || (rawUser.name as string) || 'User',
+          firstName: rawUser.firstName ?? '',
+          lastName: rawUser.lastName ?? '',
+          contactNumber: rawUser.contactNumber ?? '',
+          email: rawUser.email,
+          role: rawUser.role ?? 'customer',
+          image: rawUser.image ?? '',
         };
       },
     }),

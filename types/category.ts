@@ -1,9 +1,9 @@
 export interface CategoryAttribute {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'textarea' | 'select' | 'boolean' | 'date';
+  type: 'text' | 'number' | 'textarea' | 'select' | 'multiselect' | 'boolean' | 'date';
   required?: boolean;
-  options?: string[]; // For select type
+  options?: string[]; // For select and multiselect types
   placeholder?: string;
   validation?: {
     min?: number;

@@ -11,6 +11,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import { Order, IOrderHistoryEntry } from '@/types/order';
 import { FiClock, FiUser } from 'react-icons/fi';
+import { getSizeAndColorFromAttributes } from '@/lib/orderItemAttributes';
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
@@ -255,6 +256,32 @@ export default function AdminOrderDetailPage() {
                     <p className="text-sm text-gray-600">
                       Quantity: {item.quantity} × {formatCurrency(item.price)}
                     </p>
+                    {(() => {
+                      const attrs = (item.selectedAttributes || {}) as Record<string, unknown>;
+                      const { size: sizeStr, color: colorStr } = getSizeAndColorFromAttributes(attrs);
+                      const otherEntries = Object.entries(attrs).filter(
+                        ([k, v]) => v != null && v !== '' && !k.toLowerCase().includes('size') && k.toLowerCase() !== 'color' && k.toLowerCase() !== 'colour'
+                      );
+                      const label = (key: string) => key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim().split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                      const items: { label: string; value: string }[] = [
+                        ...(sizeStr ? [{ label: 'Size', value: sizeStr }] : []),
+                        ...(colorStr ? [{ label: 'Color', value: colorStr }] : []),
+                        ...otherEntries.map(([k, v]) => ({ label: label(k), value: String(Array.isArray(v) ? v[0] : v) })),
+                      ];
+                      if (items.length === 0) return null;
+                      return (
+                        <div className="mt-2 pt-2 border-t border-gray-100">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                            {items.map(({ label: l, value }) => (
+                              <span key={l} className="text-gray-700">
+                                <span className="text-gray-500">{l}:</span>{' '}
+                                <span className="font-medium text-gray-900">{value}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">

@@ -8,7 +8,7 @@ import { IProduct } from '@/types/product';
 interface CartContextType {
   cart: ICart | null;
   isLoading: boolean;
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  addToCart: (productId: string, quantity?: number, selectedAttributes?: Record<string, unknown>) => Promise<void>;
   updateCartItem: (productId: string, quantity: number) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -54,17 +54,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [fetchCart]);
 
   const addToCart = useCallback(
-    async (productId: string, quantity: number = 1) => {
+    async (productId: string, quantity: number = 1, selectedAttributes?: Record<string, unknown>) => {
       if (!isAuthenticated) {
         throw new Error('Please login to add items to cart');
       }
 
       try {
         setIsLoading(true);
+        const body: { productId: string; quantity: number; selectedAttributes?: Record<string, unknown> } = {
+          productId,
+          quantity,
+        };
+        if (selectedAttributes && Object.keys(selectedAttributes).length > 0) {
+          body.selectedAttributes = selectedAttributes;
+        }
         const response = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, quantity }),
+          body: JSON.stringify(body),
         });
 
         if (!response.ok) {

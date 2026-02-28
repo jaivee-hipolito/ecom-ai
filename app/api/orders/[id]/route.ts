@@ -86,8 +86,8 @@ export async function GET(
           updatedAt: order.updatedAt?.toISOString(),
           items: order.items.map((item: any) => ({
             ...item,
-            // Preserve the image field from the order item, or use product image as fallback
-            image: item.image || (item.product && typeof item.product === 'object' 
+            selectedAttributes: item.selectedAttributes ?? undefined,
+            image: item.image || (item.product && typeof item.product === 'object'
               ? (item.product.coverImage || item.product.images?.[0] || '')
               : ''),
             product: item.product
@@ -97,6 +97,7 @@ export async function GET(
                     name: item.product.name,
                     coverImage: item.product.coverImage || item.product.images?.[0] || '',
                     images: item.product.images || [],
+                    attributes: item.product.attributes || undefined,
                   }
                 : item.product.toString()
               : item.product,

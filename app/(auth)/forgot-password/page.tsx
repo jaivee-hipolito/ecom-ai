@@ -23,15 +23,15 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center px-12 py-16 text-white">
-          {/* Logo */}
+          {/* Logo - circular */}
           <div className="mb-12">
-            <div className="mb-6">
+            <div className="mb-6 w-24 h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden flex-shrink-0">
               <Image
                 src="/teezee-logo.png"
                 alt="Teezee - Adorn Yourself With The Radiance Of 18K Gold"
                 width={280}
-                height={120}
-                className="w-auto h-20 lg:h-24 object-contain"
+                height={280}
+                className="w-full h-full object-cover"
                 priority
                 suppressHydrationWarning
               />

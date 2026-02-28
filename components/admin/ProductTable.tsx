@@ -449,7 +449,7 @@ export default function ProductTable({
                   {!hiddenFilters.includes('minStock') && (
                     <input
                       type="number"
-                      placeholder="Min Stock"
+                      placeholder="Min available"
                       min="0"
                       value={filters.minStock || ''}
                       onChange={(e) => handleFilterChange('minStock', e.target.value)}
@@ -460,7 +460,7 @@ export default function ProductTable({
                   {!hiddenFilters.includes('maxStock') && (
                     <input
                       type="number"
-                      placeholder="Max Stock"
+                      placeholder="Max available"
                       min="0"
                       value={filters.maxStock || ''}
                       onChange={(e) => handleFilterChange('maxStock', e.target.value)}
@@ -475,9 +475,9 @@ export default function ProductTable({
                       className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border-2 border-gray-200 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 focus:outline-none focus:border-[#F9629F] focus:ring-2 focus:ring-[#F9629F]/20 transition-all"
                     >
                       <option value="">All Stock Status</option>
-                      <option value="in-stock">In Stock</option>
-                      <option value="out-of-stock">Out of Stock</option>
-                      <option value="low-stock">Low Stock (&lt; 10)</option>
+                      <option value="in-stock">In stock (available &gt; 0)</option>
+                      <option value="out-of-stock">Out of stock (0 available)</option>
+                      <option value="low-stock">Low stock (&lt; 10 available)</option>
                     </select>
                   )}
 
@@ -706,9 +706,16 @@ export default function ProductTable({
                       {product.name}
                     </h4>
                     <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                      <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-[#F9629F]/10 text-[#F9629F] rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold">
-                        {getCategoryName(product.category)}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-[#F9629F]/10 text-[#F9629F] rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold">
+                          {getCategoryName(product.category)}
+                        </span>
+                        {product.productCode && (
+                          <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-100 text-gray-700 rounded-md sm:rounded-lg text-xs font-mono font-medium">
+                            {product.productCode}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-baseline gap-1.5 sm:gap-2">
                         {product.isFlashSale && hasDiscount ? (
                           <>
@@ -727,19 +734,24 @@ export default function ProductTable({
                       </div>
                     </div>
 
-                    {/* Stock Info */}
-                    <div className="flex items-center mb-2 sm:mb-3 md:mb-4">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <span className={`text-xs sm:text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                        </span>
-                      </div>
-                    </div>
+                    {/* Stock Info: show available to customers when API provides it */}
+                    {(() => {
+                      const available = product.availableStock ?? product.stock;
+                      return (
+                        <div className="flex items-center mb-2 sm:mb-3 md:mb-4">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${available > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className={`text-xs sm:text-sm font-medium ${available > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {available > 0 ? `${available} in stock` : 'Out of stock'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Actions */}
                     <div className="flex gap-1.5 sm:gap-2">
-                      <Link href={`/products/${product._id}`} className="flex-1 min-w-0 cursor-pointer">
+                      <Link href={`/admin/products/${product._id}`} className="flex-1 min-w-0 cursor-pointer">
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
