@@ -20,6 +20,10 @@ export interface IUser {
   phoneVerificationCodeSentAt?: Date;
   resetPasswordToken?: string;
   resetPasswordTokenExpires?: Date;
+  /** Failed login attempts; account locks when this reaches lockout threshold (e.g. 3). */
+  failedLoginAttempts?: number;
+  /** When true, login is denied until an admin unlocks the account. */
+  isLocked?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -21,47 +21,68 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please provide email and password');
+          return null;
         }
 
-        // Lazy load MongoDB only when authorize is called (not at module evaluation)
         const { default: connectDB } = await import('@/lib/mongodb');
         const { default: User } = await import('@/models/User');
         const bcrypt = await import('bcryptjs');
 
-        const mongoose = await connectDB();
+        await connectDB();
         const email = (credentials.email as string).trim().toLowerCase();
         const password = (credentials.password as string).trim().normalize('NFC');
 
-        // Same collection + sort as set-local-password.mjs; normalize password so form and script match
-        const db = mongoose.connection.db;
-        if (!db) throw new Error('Database not connected');
-        const rawUser = await db.collection('users').findOne(
-          { email },
-          { sort: { _id: 1 } }
-        );
-        if (!rawUser || !rawUser.password) {
-          throw new Error('Invalid email or password');
+        const user = await User.findOne({ email }).select('+password').sort({ _id: 1 }).lean();
+        if (!user || !user.password) {
+          return null;
         }
 
-        const storedHash = String(rawUser.password);
+        if (user.isLocked) {
+          return null;
+        }
+
+        const storedHash = String(user.password);
         const isPasswordValid = await bcrypt.default.compare(password, storedHash);
         if (!isPasswordValid) {
           if (process.env.NODE_ENV === 'development') {
             console.error('[auth] Password length received:', password.length, '— must match script.');
           }
-          throw new Error('Invalid email or password');
+          await User.findOneAndUpdate(
+            { _id: user._id },
+            [
+              {
+                $set: {
+                  failedLoginAttempts: { $add: [{ $ifNull: ['$failedLoginAttempts', 0] }, 1] },
+                  isLocked: {
+                    $cond: [
+                      { $gte: [{ $add: [{ $ifNull: ['$failedLoginAttempts', 0] }, 1] }, 3] },
+                      true,
+                      '$isLocked',
+                    ],
+                  },
+                },
+              },
+            ],
+            { updatePipeline: true }
+          );
+          return null;
         }
 
+        // Successful login: reset failed attempts
+        await User.updateOne(
+          { _id: user._id },
+          { $set: { failedLoginAttempts: 0 } }
+        );
+
         return {
-          id: String(rawUser._id),
-          name: [rawUser.firstName, rawUser.lastName].filter(Boolean).join(' ') || (rawUser.name as string) || 'User',
-          firstName: rawUser.firstName ?? '',
-          lastName: rawUser.lastName ?? '',
-          contactNumber: rawUser.contactNumber ?? '',
-          email: rawUser.email,
-          role: rawUser.role ?? 'customer',
-          image: rawUser.image ?? '',
+          id: String(user._id),
+          name: [user.firstName, user.lastName].filter(Boolean).join(' ') || (user.name as string) || 'User',
+          firstName: user.firstName ?? '',
+          lastName: user.lastName ?? '',
+          contactNumber: user.contactNumber ?? '',
+          email: user.email,
+          role: user.role ?? 'customer',
+          image: user.image ?? '',
         };
       },
     }),
@@ -178,4 +199,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true, // Required for NextAuth v5/Auth.js
   basePath: '/api/auth', // Explicitly set the base path
+  logger: {
+    error(code, ...message) {
+      const codeStr = typeof code === 'string' ? code : (code as Error)?.message ?? String(code);
+      const full = [codeStr, ...message].join(' ');
+      if (/CredentialsSignin|AccessDenied/i.test(full)) return;
+      console.error('[auth][error]', code, ...message);
+    },
+    warn(code, ...message) {
+      console.warn('[auth][warn]', code, ...message);
+    },
+    debug(code, ...message) {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[auth][debug]', code, ...message);
+      }
+    },
+  },
 });

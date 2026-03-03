@@ -45,10 +45,12 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Update user password and clear reset token
+    // Update user password, clear reset token, and unlock account so user can log in
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordTokenExpires = undefined;
+    user.failedLoginAttempts = 0;
+    user.isLocked = false;
     await user.save();
 
     return NextResponse.json(

@@ -21,16 +21,13 @@ export async function GET(
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
     }
 
-    console.log('Fetching product with ID:', productId);
-
     const product = await Product.findById(productId).lean();
 
     if (!product) {
-      console.log('Product not found for ID:', productId);
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    // Fetch all variants (products with the same name)
+    // Fetch all variants (products with the same name) - exact match as before
     const variants = await Product.find({ name: product.name })
       .select('_id attributes stock price images coverImage')
       .lean();

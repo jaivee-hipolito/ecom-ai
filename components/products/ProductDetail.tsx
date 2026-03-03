@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCartAnimation } from '@/contexts/CartAnimationContext';
 import Image from 'next/image';
 import ColorSwatch from './ColorSwatch';
-import { findMatchingVariant, getAttributeValue } from '@/utils/productGrouping';
+import { findMatchingVariant, getAttributeValue, normalizeAttrKey } from '@/utils/productGrouping';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiChevronLeft, FiChevronRight, FiMaximize2 } from 'react-icons/fi';
 import BNPLInstallments from './BNPLInstallments';
@@ -241,30 +241,33 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
     flashSaleDiscount = 0;
   }
 
-  // Collect all unique attribute values from variants
-  const allAttributes = useMemo(() => {
-    if (!hasVariants || !product.variants) return {};
+  // Collect all unique attribute values from variants (normalize keys so "Color" and "colour" merge)
+  const { allAttributes, attributeDisplayLabels } = useMemo(() => {
+    if (!hasVariants || !product.variants) return { allAttributes: {}, attributeDisplayLabels: {} as Record<string, string> };
     const attrs: Record<string, Set<string | number | boolean>> = {};
+    const displayLabels: Record<string, string> = {};
     product.variants.forEach((variant) => {
       if (variant.attributes) {
         Object.entries(variant.attributes).forEach(([key, value]) => {
-          if (!attrs[key]) {
-            attrs[key] = new Set();
+          const normalizedKey = normalizeAttrKey(key);
+          if (!attrs[normalizedKey]) {
+            attrs[normalizedKey] = new Set();
+            displayLabels[normalizedKey] = key;
           }
           if (Array.isArray(value)) {
-            value.forEach((v) => attrs[key].add(v));
+            value.forEach((v) => attrs[normalizedKey].add(v));
           } else if (typeof value === 'string' && value.includes(',')) {
             value.split(',').forEach((v) => {
               const trimmed = v.trim();
-              if (trimmed) attrs[key].add(trimmed);
+              if (trimmed) attrs[normalizedKey].add(trimmed);
             });
           } else if (value !== null && value !== undefined && value !== '') {
-            attrs[key].add(value);
+            attrs[normalizedKey].add(value);
           }
         });
       }
     });
-    return attrs;
+    return { allAttributes: attrs, attributeDisplayLabels: displayLabels };
   }, [hasVariants, product.variants]);
 
   // Check if image is a placeholder
@@ -297,12 +300,15 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
     const urlAttributes: Record<string, any> = {};
     let hasUrlAttributes = false;
     
-    // Read all URL parameters that match product attributes
+    // Read all URL parameters that match product attributes (use normalized keys so Color/colour merge)
     searchParams.forEach((value, key) => {
-      // Check if this key exists in any variant's attributes
-      const attributeExists = variantList.some(v => v.attributes && key in v.attributes);
+      const nKey = normalizeAttrKey(key);
+      const attributeExists = variantList.some(v => {
+        const val = getAttributeValue(v.attributes || {}, nKey);
+        return val !== undefined && val !== null;
+      });
       if (attributeExists) {
-        urlAttributes[key] = value;
+        urlAttributes[nKey] = value;
         hasUrlAttributes = true;
       }
     });
@@ -318,8 +324,8 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
     if (!hasVariants || Object.keys(allAttributes).length === 0 || variantList.length === 0) return;
     
     // Check if URL has attribute parameters - if so, skip auto-select
-    const hasUrlAttributes = searchParams && Array.from(searchParams.keys()).some(key => 
-      variantList.some(v => v.attributes && key in v.attributes)
+    const hasUrlAttributes = searchParams && Array.from(searchParams.keys()).some(paramKey => 
+      variantList.some(v => getAttributeValue(v.attributes || {}, normalizeAttrKey(paramKey)) != null)
     );
     
     // Only auto-select if no attributes are currently selected and no URL attributes
@@ -332,7 +338,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
         for (const value of attributeValues) {
           // Check if there's a variant with this attribute value that has stock
           const variantWithValue = variantList.find((v) => {
-            const attrValue = v.attributes[key];
+            const attrValue = getAttributeValue(v.attributes, key);
             if (Array.isArray(attrValue)) return attrValue.includes(value);
             if (typeof attrValue === 'string' && attrValue.includes(',')) {
               return attrValue.split(',').map((v) => v.trim()).includes(String(value).trim());
@@ -776,7 +782,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                 return attrKeysToMatch.every((k) => {
                   const selected = selectedAttributes[k];
                   if (selected === undefined || selected === null) return true;
-                  const attrValue = variant.attributes[k];
+                  const attrValue = getAttributeValue(variant.attributes, k);
                   if (attrValue === null || attrValue === undefined) return false;
                   const norm = (v: any) => String(v).toLowerCase().trim();
                   if (Array.isArray(attrValue)) return attrValue.some((v) => norm(v) === norm(selected));
@@ -798,14 +804,14 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                       : variantList.filter((v) => variantMatchesOtherAttrs(v, otherKeys));
                     const availableValuesSet = new Set<string | number | boolean>();
                     variantsForThisAttr.forEach((v) => {
-                      const val = v.attributes?.[key];
+                      const val = getAttributeValue(v.attributes || {}, key);
                       if (val === null || val === undefined) return;
                       if (Array.isArray(val)) val.forEach((x) => availableValuesSet.add(x));
                       else if (typeof val === 'string' && val.includes(',')) val.split(',').map((x) => x.trim()).filter(Boolean).forEach((x) => availableValuesSet.add(x));
                       else availableValuesSet.add(val);
                     });
                     const attributeValues = Array.from(availableValuesSet);
-                    const label = key
+                    const label = (attributeDisplayLabels[key] || key)
                       .replace(/([A-Z])/g, ' $1')
                       .replace(/^./, (str) => str.toUpperCase())
                       .trim();
@@ -819,7 +825,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                           {attributeValues.map((value) => {
                             const isSelected = selectedAttributes[key] === value;
                             const variantWithValue = variantList.find((v) => {
-                              const attrValue = v.attributes[key];
+                              const attrValue = getAttributeValue(v.attributes, key);
                               if (Array.isArray(attrValue)) return attrValue.includes(value);
                               if (typeof attrValue === 'string' && attrValue.includes(',')) {
                                 return attrValue.split(',').map((v) => v.trim()).includes(String(value).trim());

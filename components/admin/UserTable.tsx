@@ -19,6 +19,8 @@ import {
   FiTrash2,
   FiX,
   FiAlertTriangle,
+  FiLock,
+  FiUnlock,
 } from 'react-icons/fi';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -55,6 +57,8 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
     show: false,
   });
   const [deleting, setDeleting] = useState(false);
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
+  const [lockingId, setLockingId] = useState<string | null>(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -183,6 +187,44 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
 
   const handleDeleteCancel = () => {
     setDeleteConfirm({ user: null, show: false });
+  };
+
+  const handleUnlock = async (user: User, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user._id) return;
+    setUnlockingId(user._id);
+    setError('');
+    try {
+      const response = await fetch(`/api/admin/users/${user._id}/unlock`, { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to unlock account');
+      await fetchUsers();
+      if (onUserChange) onUserChange();
+    } catch (err: any) {
+      setError(err.message || 'Failed to unlock account');
+    } finally {
+      setUnlockingId(null);
+    }
+  };
+
+  const handleLock = async (user: User, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user._id) return;
+    setLockingId(user._id);
+    setError('');
+    try {
+      const response = await fetch(`/api/admin/users/${user._id}/lock`, { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to lock account');
+      await fetchUsers();
+      if (onUserChange) onUserChange();
+    } catch (err: any) {
+      setError(err.message || 'Failed to lock account');
+    } finally {
+      setLockingId(null);
+    }
   };
 
   if (loading && users.length === 0) {
@@ -392,9 +434,17 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
                                   ? `${user.firstName} ${user.lastName}`
                                   : user.email || 'No Name'}
                               </h3>
-                              <div className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-gradient-to-r ${getRoleColor(user.role || 'customer')} text-white text-xs font-semibold`}>
-                                {getRoleIcon(user.role || 'customer')}
-                                {user.role === 'admin' ? 'Admin' : 'Customer'}
+                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <div className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-gradient-to-r ${getRoleColor(user.role || 'customer')} text-white text-xs font-semibold`}>
+                                  {getRoleIcon(user.role || 'customer')}
+                                  {user.role === 'admin' ? 'Admin' : 'Customer'}
+                                </div>
+                                {user.isLocked && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-xs font-semibold border border-amber-300">
+                                    <FiLock className="w-3 h-3" />
+                                    Locked
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -445,6 +495,37 @@ export default function UserTable({ onUserChange }: UserTableProps = {}) {
                               <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#F9629F] group-hover:translate-x-1 transition-all flex-shrink-0" />
                             </motion.div>
                             </Link>
+                            {user.isLocked ? (
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={(e) => handleUnlock(user, e)}
+                                disabled={unlockingId === user._id}
+                                className="w-full flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 rounded-lg border-2 border-amber-200 hover:border-amber-300 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {unlockingId === user._id ? (
+                                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <FiUnlock className="w-3 h-3 sm:w-4 sm:h-4 text-amber-700" />
+                                )}
+                                <span className="text-xs sm:text-sm font-semibold text-amber-700">Unlock Account</span>
+                              </motion.button>
+                            ) : (
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={(e) => handleLock(user, e)}
+                                disabled={lockingId === user._id}
+                                className="w-full flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-slate-50 to-gray-100 hover:from-slate-100 hover:to-gray-200 rounded-lg border-2 border-slate-300 hover:border-slate-400 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {lockingId === user._id ? (
+                                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <FiLock className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600" />
+                                )}
+                                <span className="text-xs sm:text-sm font-semibold text-slate-700">Lock Account</span>
+                              </motion.button>
+                            )}
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}

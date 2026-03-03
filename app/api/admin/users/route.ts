@@ -65,6 +65,8 @@ export async function GET(request: NextRequest) {
       users: users.map((u) => ({
         ...u,
         _id: u._id.toString(),
+        isLocked: !!u.isLocked,
+        failedLoginAttempts: u.failedLoginAttempts ?? 0,
         createdAt: u.createdAt?.toISOString(),
         updatedAt: u.updatedAt?.toISOString(),
       })),

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheckCircle, FiXCircle, FiInfo, FiAlertCircle, FiFileText, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useState } from 'react';
 
-const FACEBOOK_URL = 'https://www.facebook.com/TeezeeFacebookPage/';
+const FACEBOOK_URL = process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://www.facebook.com/';
 
 interface ProductAttributesProps {
   attributes: Record<string, any>;
@@ -363,7 +363,7 @@ export default function ProductAttributes({
                               <a href="mailto:teezeejewelry.official@gmail.com" className="text-[#F9629F] hover:underline">teezeejewelry.official@gmail.com</a>
                             </li>
                             <li>
-                              <Link href="https://www.facebook.com/TeezeeFacebookPage/" target="_blank" rel="noopener noreferrer" className="text-[#F9629F] hover:underline">
+                              <Link href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="text-[#F9629F] hover:underline">
                                 Our Official Facebook Page
                               </Link>
                             </li>

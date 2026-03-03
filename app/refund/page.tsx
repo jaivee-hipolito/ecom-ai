@@ -153,7 +153,7 @@ export default function RefundPolicyPage() {
                 <a href="mailto:teezeejewelry.official@gmail.com" className="font-semibold text-[#F9629F] hover:text-[#FC9BC2] transition-colors">teezeejewelry.official@gmail.com</a>
                 {' '}or through our official{' '}
                 <a
-                  href="https://www.facebook.com/TeezeeFacebookPage/"
+                  href={process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://www.facebook.com/'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-semibold text-[#F9629F] hover:text-[#FC9BC2] underline transition-colors"

@@ -5,7 +5,10 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShoppingBag, FiPackage, FiAlertCircle, FiClock, FiX } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShoppingBag, FiPackage, FiAlertCircle, FiClock, FiX, FiShieldOff, FiLogIn } from 'react-icons/fi';
+
+const ACCOUNT_LOCKED_MESSAGE = 'Account locked. Contact an administrator.';
+const INVALID_CREDENTIALS_MESSAGE = 'The email or password you entered is incorrect. Please check your details and try again, or use "Forgot password" to reset.';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
@@ -81,20 +84,38 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        // Map NextAuth error codes to user-friendly messages
         let errorMessage = result.error;
-        
-        // Handle NextAuth error codes
-        if (result.error === 'Configuration' || result.error === 'CredentialsSignin') {
-          errorMessage = 'Incorrect email or password';
-        } else if (result.error === 'AccessDenied') {
-          errorMessage = 'Access denied. Please contact support.';
+        if (result.error?.toLowerCase().includes('locked')) {
+          errorMessage = ACCOUNT_LOCKED_MESSAGE;
+        } else if (
+          result.error === 'CredentialsSignin' ||
+          result.error === 'AccessDenied' ||
+          result.error === 'Configuration'
+        ) {
+          try {
+            const res = await fetch('/api/auth/login-failure-reason', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: formData.email }),
+            });
+            const data = await res.json();
+            errorMessage =
+              data.reason === 'locked'
+                ? ACCOUNT_LOCKED_MESSAGE
+                : result.error === 'AccessDenied'
+                  ? 'Access denied. Please contact support.'
+                  : INVALID_CREDENTIALS_MESSAGE;
+          } catch {
+            errorMessage =
+              result.error === 'AccessDenied'
+                ? 'Access denied. Please contact support.'
+                : INVALID_CREDENTIALS_MESSAGE;
+          }
         } else if (result.error === 'Verification') {
           errorMessage = 'Verification failed. Please try again.';
-        } else if (result.error.toLowerCase().includes('invalid') || result.error.toLowerCase().includes('incorrect')) {
-          errorMessage = 'Incorrect email or password';
+        } else if (result.error?.toLowerCase().includes('invalid') || result.error?.toLowerCase().includes('incorrect')) {
+          errorMessage = INVALID_CREDENTIALS_MESSAGE;
         }
-        
         setError(errorMessage);
         setIsLoading(false);
       } else {
@@ -215,13 +236,55 @@ export default function LoginForm() {
           <AnimatePresence>
             {error && (
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="w-full"
               >
-                <Alert variant="error" className="bg-red-500/20 border-red-500/50 text-red-100">
-                  {error}
-                </Alert>
+                {error === ACCOUNT_LOCKED_MESSAGE ? (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-amber-400/40 bg-amber-500/15 backdrop-blur-sm p-4 sm:p-5 text-left shadow-lg shadow-amber-900/10"
+                  >
+                    <div className="flex gap-3 sm:gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-amber-500/25 flex items-center justify-center">
+                        <FiShieldOff className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" aria-hidden />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm sm:text-base font-semibold text-amber-100 mb-1">
+                          Account temporarily locked
+                        </h3>
+                        <p className="text-xs sm:text-sm text-amber-200/90 leading-relaxed">
+                          This account has been locked due to multiple failed login attempts. To restore access, please contact support or an administrator.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : error === INVALID_CREDENTIALS_MESSAGE ? (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-slate-400/40 bg-slate-500/15 backdrop-blur-sm p-4 sm:p-5 text-left shadow-lg shadow-slate-900/10"
+                  >
+                    <div className="flex gap-3 sm:gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-500/25 flex items-center justify-center">
+                        <FiLogIn className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" aria-hidden />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm sm:text-base font-semibold text-slate-100 mb-1">
+                          Sign-in didn’t work
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed">
+                          The email or password you entered isn’t correct. Please check and try again, or use Forgot password to reset.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Alert variant="error" className="bg-red-500/20 border-red-500/50 text-red-100">
+                    {error}
+                  </Alert>
+                )}
               </motion.div>
             )}
             {infoMessage && (

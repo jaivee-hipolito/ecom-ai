@@ -151,7 +151,7 @@ export default function AboutPage() {
                   <span>teezeejewelry.official@gmail.com</span>
                 </a>
                 <a
-                  href="https://www.facebook.com/TeezeeFacebookPage/"
+                  href={process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://www.facebook.com/'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-700 hover:text-[#F9629F] transition-colors"

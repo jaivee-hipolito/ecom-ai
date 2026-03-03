@@ -62,25 +62,24 @@ export function groupProductsByName(products: IProduct[]): GroupedProduct[] {
     };
     grouped.variants.push(variant);
 
-    // Collect all attribute values
+    // Collect all attribute values (normalize keys so "Color" and "colour" merge)
     if (product.attributes) {
       Object.entries(product.attributes).forEach(([key, value]) => {
-        if (!grouped.allAttributes[key]) {
-          grouped.allAttributes[key] = new Set();
+        const nKey = normalizeAttrKey(key);
+        if (!grouped.allAttributes[nKey]) {
+          grouped.allAttributes[nKey] = new Set();
         }
-        
         // Handle different value types
         if (Array.isArray(value)) {
-          value.forEach((v) => grouped.allAttributes[key].add(v));
+          value.forEach((v) => grouped.allAttributes[nKey].add(v));
         } else if (value !== null && value !== undefined && value !== '') {
-          // Handle comma-separated values (like colors)
           if (typeof value === 'string' && value.includes(',')) {
             value.split(',').forEach((v) => {
               const trimmed = v.trim();
-              if (trimmed) grouped.allAttributes[key].add(trimmed);
+              if (trimmed) grouped.allAttributes[nKey].add(trimmed);
             });
           } else {
-            grouped.allAttributes[key].add(value);
+            grouped.allAttributes[nKey].add(value);
           }
         }
       });
@@ -91,11 +90,13 @@ export function groupProductsByName(products: IProduct[]): GroupedProduct[] {
 }
 
 /**
- * Normalize attribute key for flexible matching (e.g. "Size(inch)" and "size_inch" match)
+ * Normalize attribute key for flexible matching (e.g. "Size(inch)" and "size_inch" match).
+ * "Color" and "colour" both normalize to "color" so variants show under one attribute.
  */
 export function normalizeAttrKey(key: string): string {
   return key
     .toLowerCase()
+    .replace(/\bcolour\b/g, 'color')
     .replace(/\s+/g, '_')
     .replace(/[()]/g, '_')
     .replace(/_+/g, '_')

@@ -28,10 +28,11 @@ yarn-error.log*
 .env*.local
 !.env.example
 
-# database backups (do not push - may expose DB structure/data)
+# database backups (do not push - expose DB structure/data)
 /backups/
+backups/
 
-# scripts (local tooling - do not push)
+# scripts - backup/restore and DB tooling (do not push)
 /scripts/
 
 # vercel

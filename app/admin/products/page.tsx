@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProductTable from '@/components/admin/ProductTable';
 import Link from 'next/link';
-import { FiPackage, FiPlus, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
+import { FiPackage, FiPlus, FiTrendingUp, FiDollarSign, FiHash } from 'react-icons/fi';
 
 interface ProductStats {
   totalProducts: number;
@@ -13,12 +14,15 @@ interface ProductStats {
 }
 
 export default function AdminProductsPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<ProductStats>({
     totalProducts: 0,
     featuredProducts: 0,
     totalRevenue: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
+  const [assigningCodes, setAssigningCodes] = useState(false);
+  const [assignMessage, setAssignMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchStats();
@@ -52,6 +56,30 @@ export default function AdminProductsPage() {
     }).format(amount);
   };
 
+  const handleAssignProductCodes = async () => {
+    setAssigningCodes(true);
+    setAssignMessage(null);
+    try {
+      const res = await fetch('/api/admin/products/assign-product-codes', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to assign product codes');
+      setAssignMessage({
+        type: 'success',
+        text: data.updated === 0
+          ? 'All products already have product codes.'
+          : `Assigned product codes to ${data.updated} product(s).`,
+      });
+      if (data.updated > 0) {
+        router.refresh();
+        fetchStats();
+      }
+    } catch (err: any) {
+      setAssignMessage({ type: 'error', text: err.message || 'Failed to assign product codes' });
+    } finally {
+      setAssigningCodes(false);
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-5 md:space-y-6 w-full max-w-full">
       {/* Header Section */}
@@ -72,15 +100,40 @@ export default function AdminProductsPage() {
                 Manage your product catalog, inventory, and pricing
               </p>
             </div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-shrink-0">
-              <Link href="/admin/products/create" className="cursor-pointer">
-                <button className="w-full sm:w-auto px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#ffa509] to-[#F9629F] text-[#000000] font-bold rounded-lg sm:rounded-xl hover:shadow-lg shadow-[#F9629F]/30 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base cursor-pointer">
-                  <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Add Product
-                </button>
-              </Link>
-            </motion.div>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-shrink-0">
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleAssignProductCodes}
+                disabled={assigningCodes}
+                className="px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 border border-white/30 text-white font-semibold rounded-lg hover:bg-white/20 transition-all flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {assigningCodes ? (
+                  <span className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <FiHash className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                )}
+                Assign product codes
+              </motion.button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link href="/admin/products/create" className="cursor-pointer">
+                  <button className="w-full sm:w-auto px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#ffa509] to-[#F9629F] text-[#000000] font-bold rounded-lg sm:rounded-xl hover:shadow-lg shadow-[#F9629F]/30 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base cursor-pointer">
+                    <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Add Product
+                  </button>
+                </Link>
+              </motion.div>
+            </div>
           </div>
+          {assignMessage && (
+            <div
+              className={`mt-3 px-3 py-2 rounded-lg text-sm ${assignMessage.type === 'success' ? 'bg-green-500/20 text-green-200 border border-green-400/40' : 'bg-red-500/20 text-red-200 border border-red-400/40'}`}
+              role="alert"
+            >
+              {assignMessage.text}
+            </div>
+          )}
         </div>
       </motion.div>
 

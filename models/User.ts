@@ -107,6 +107,15 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       select: false,
     },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
