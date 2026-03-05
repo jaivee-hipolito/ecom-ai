@@ -62,24 +62,37 @@ export function groupProductsByName(products: IProduct[]): GroupedProduct[] {
     };
     grouped.variants.push(variant);
 
-    // Collect all attribute values (normalize keys so "Color" and "colour" merge)
+    // Collect all attribute values (normalize keys so "Color" and "colour" merge).
+    // Normalize string values so "Yellow Gold" and "Yellow gold" count as one (fixes duplicate color count).
     if (product.attributes) {
       Object.entries(product.attributes).forEach(([key, value]) => {
         const nKey = normalizeAttrKey(key);
         if (!grouped.allAttributes[nKey]) {
           grouped.allAttributes[nKey] = new Set();
         }
-        // Handle different value types
+        const addOne = (v: string | number | boolean) => {
+          const normalized = typeof v === 'string' ? (v.trim().toLowerCase() || v) : v;
+          grouped.allAttributes[nKey].add(normalized);
+        };
         if (Array.isArray(value)) {
-          value.forEach((v) => grouped.allAttributes[nKey].add(v));
+          value.forEach((v) => addOne(v as string | number | boolean));
         } else if (value !== null && value !== undefined && value !== '') {
           if (typeof value === 'string' && value.includes(',')) {
-            value.split(',').forEach((v) => {
-              const trimmed = v.trim();
-              if (trimmed) grouped.allAttributes[nKey].add(trimmed);
-            });
+            // Don't split when comma is inside parentheses (e.g. "Tricolor(Yellow, White and Rose Gold)" = one option)
+            const open = value.indexOf('(');
+            const close = value.indexOf(')');
+            const firstComma = value.indexOf(',');
+            const commaInsideParens = open !== -1 && close !== -1 && firstComma > open && firstComma < close;
+            if (commaInsideParens) {
+              addOne(value);
+            } else {
+              value.split(',').forEach((v) => {
+                const trimmed = v.trim();
+                if (trimmed) addOne(trimmed);
+              });
+            }
           } else {
-            grouped.allAttributes[nKey].add(value);
+            addOne(value as string | number | boolean);
           }
         }
       });
@@ -106,6 +119,14 @@ export function normalizeAttrKey(key: string): string {
 /** Strip to letters/numbers only for loose match (e.g. "Size(inch)" and "size_inch" -> "sizeinch") */
 function normalizeAttrKeyStrict(key: string): string {
   return key.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/** Normalize attribute value for deduplication (e.g. "Yellow Gold" and "Yellow gold" -> one entry) */
+export function normalizeAttrValue(value: unknown): string | number | boolean {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value.trim().toLowerCase();
+  if (typeof value === 'number' || typeof value === 'boolean') return value;
+  return String(value).trim().toLowerCase();
 }
 
 /**

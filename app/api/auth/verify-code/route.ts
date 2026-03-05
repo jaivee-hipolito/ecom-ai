@@ -3,11 +3,20 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { requireAuth } from '@/lib/auth';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 // Force Node.js runtime for MongoDB/Mongoose compatibility
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const { allowed, resetIn } = checkRateLimit(ip, 'verify-code');
+  if (!allowed) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(resetIn / 1000)) } }
+    );
+  }
   try {
     const body = await request.json();
     const { email, phoneNumber, type } = body; // type: 'email' or 'phone'

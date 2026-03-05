@@ -257,10 +257,18 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
           if (Array.isArray(value)) {
             value.forEach((v) => attrs[normalizedKey].add(v));
           } else if (typeof value === 'string' && value.includes(',')) {
-            value.split(',').forEach((v) => {
-              const trimmed = v.trim();
-              if (trimmed) attrs[normalizedKey].add(trimmed);
-            });
+            const open = value.indexOf('(');
+            const close = value.indexOf(')');
+            const firstComma = value.indexOf(',');
+            const commaInsideParens = open !== -1 && close !== -1 && firstComma > open && firstComma < close;
+            if (commaInsideParens) {
+              attrs[normalizedKey].add(value);
+            } else {
+              value.split(',').forEach((v) => {
+                const trimmed = v.trim();
+                if (trimmed) attrs[normalizedKey].add(trimmed);
+              });
+            }
           } else if (value !== null && value !== undefined && value !== '') {
             attrs[normalizedKey].add(value);
           }
@@ -336,14 +344,20 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
         // Find the first available value (variant with stock > 0)
         const attributeValues = Array.from(values);
         for (const value of attributeValues) {
-          // Check if there's a variant with this attribute value that has stock
+          const norm = (x: any) => String(x).trim().toLowerCase();
           const variantWithValue = variantList.find((v) => {
             const attrValue = getAttributeValue(v.attributes, key);
-            if (Array.isArray(attrValue)) return attrValue.includes(value);
+            if (attrValue === null || attrValue === undefined) return false;
+            if (Array.isArray(attrValue)) return attrValue.some((av) => norm(av) === norm(value));
             if (typeof attrValue === 'string' && attrValue.includes(',')) {
-              return attrValue.split(',').map((v) => v.trim()).includes(String(value).trim());
+              const open = attrValue.indexOf('(');
+              const close = attrValue.indexOf(')');
+              const firstComma = attrValue.indexOf(',');
+              const commaInsideParens = open !== -1 && close !== -1 && firstComma > open && firstComma < close;
+              if (commaInsideParens) return norm(attrValue) === norm(value);
+              return attrValue.split(',').map((x) => x.trim()).some((x) => norm(x) === norm(value));
             }
-            return attrValue === value;
+            return norm(attrValue) === norm(value);
           });
           
           // Select the first available variant (stock > 0) or first value if no stock check needed
@@ -777,6 +791,7 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
               const SPEC_ONLY_ATTR_KEYS = new Set(['Made_of', 'Origin', 'Classification', 'With?', 'made_of', 'origin', 'classification', 'with?']);
               const selectableAttributes = Object.entries(allAttributes).filter(([key]) => !SPEC_ONLY_ATTR_KEYS.has(key));
               if (selectableAttributes.length === 0) return null;
+              if (selectableAttributes.every(([, values]) => values.size <= 1)) return null;
 
               const variantMatchesOtherAttrs = (variant: { attributes: Record<string, any> }, attrKeysToMatch: string[]) => {
                 return attrKeysToMatch.every((k) => {
@@ -786,7 +801,14 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                   if (attrValue === null || attrValue === undefined) return false;
                   const norm = (v: any) => String(v).toLowerCase().trim();
                   if (Array.isArray(attrValue)) return attrValue.some((v) => norm(v) === norm(selected));
-                  if (typeof attrValue === 'string' && attrValue.includes(',')) return attrValue.split(',').map((v) => norm(v.trim())).includes(norm(selected));
+                  if (typeof attrValue === 'string' && attrValue.includes(',')) {
+                    const open = attrValue.indexOf('(');
+                    const close = attrValue.indexOf(')');
+                    const firstComma = attrValue.indexOf(',');
+                    const commaInsideParens = open !== -1 && close !== -1 && firstComma > open && firstComma < close;
+                    if (commaInsideParens) return norm(attrValue) === norm(selected);
+                    return attrValue.split(',').map((v) => norm(v.trim())).includes(norm(selected));
+                  }
                   return norm(attrValue) === norm(selected);
                 });
               };
@@ -799,7 +821,10 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                 <div className="space-y-4">
                   {selectableAttributes.map(([key, values]) => {
                     const otherKeys = selectableAttributes.map(([k]) => k).filter((k) => k !== key);
-                    const variantsForThisAttr = otherKeys.length === 0
+                    const isColorAttr = key.toLowerCase().includes('color') || key.toLowerCase().includes('colour');
+                    // For Color: show all options from all variants so both Two tone and Tricolor (etc.) always appear.
+                    // For Size and others: filter by selected attributes so e.g. size shows only 16-18cm when Two tone is selected.
+                    const variantsForThisAttr = (otherKeys.length === 0 || isColorAttr)
                       ? variantList
                       : variantList.filter((v) => variantMatchesOtherAttrs(v, otherKeys));
                     const availableValuesSet = new Set<string | number | boolean>();
@@ -807,10 +832,19 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                       const val = getAttributeValue(v.attributes || {}, key);
                       if (val === null || val === undefined) return;
                       if (Array.isArray(val)) val.forEach((x) => availableValuesSet.add(x));
-                      else if (typeof val === 'string' && val.includes(',')) val.split(',').map((x) => x.trim()).filter(Boolean).forEach((x) => availableValuesSet.add(x));
-                      else availableValuesSet.add(val);
+                      else if (typeof val === 'string' && val.includes(',')) {
+                        const open = val.indexOf('(');
+                        const close = val.indexOf(')');
+                        const firstComma = val.indexOf(',');
+                        const commaInsideParens = open !== -1 && close !== -1 && firstComma > open && firstComma < close;
+                        if (commaInsideParens) availableValuesSet.add(val);
+                        else val.split(',').map((x) => x.trim()).filter(Boolean).forEach((x) => availableValuesSet.add(x));
+                      } else availableValuesSet.add(val);
                     });
                     const attributeValues = Array.from(availableValuesSet);
+                    // Only show attributes that have more than one option (customer must choose). Single-value attrs are in Product Specifications.
+                    if (attributeValues.length <= 1) return null;
+
                     const label = (attributeDisplayLabels[key] || key)
                       .replace(/([A-Z])/g, ' $1')
                       .replace(/^./, (str) => str.toUpperCase())
@@ -826,11 +860,17 @@ export default function ProductDetail({ product, isFlashSale: propFlashSale, hid
                             const isSelected = selectedAttributes[key] === value;
                             const variantWithValue = variantList.find((v) => {
                               const attrValue = getAttributeValue(v.attributes, key);
-                              if (Array.isArray(attrValue)) return attrValue.includes(value);
+                              const norm = (x: any) => String(x).trim().toLowerCase();
+                              if (Array.isArray(attrValue)) return attrValue.some((av) => norm(av) === norm(value));
                               if (typeof attrValue === 'string' && attrValue.includes(',')) {
-                                return attrValue.split(',').map((v) => v.trim()).includes(String(value).trim());
+                                const open = attrValue.indexOf('(');
+                                const close = attrValue.indexOf(')');
+                                const firstComma = attrValue.indexOf(',');
+                                const commaInsideParens = open !== -1 && close !== -1 && firstComma > open && firstComma < close;
+                                if (commaInsideParens) return norm(attrValue) === norm(value);
+                                return attrValue.split(',').map((x) => x.trim()).some((x) => norm(x) === norm(value));
                               }
-                              return attrValue === value;
+                              return norm(attrValue) === norm(value);
                             });
                             const isAvailable = (variantWithValue?.stock ?? 0) > 0;
 

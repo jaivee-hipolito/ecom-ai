@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GroupedProduct, findMatchingVariant } from '@/utils/productGrouping';
+import { GroupedProduct, findMatchingVariant, getAttributeValue, normalizeAttrValue } from '@/utils/productGrouping';
 import ProductImage from './ProductImage';
 import ColorSwatch from './ColorSwatch';
 import Button from '@/components/ui/Button';
@@ -374,12 +374,13 @@ export default function GroupedProductCard({ groupedProduct, showAttributes = tr
                     {attributeValues.map((value) => {
                       const isSelected = selectedAttributes[key] === value;
                       const variantWithValue = groupedProduct.variants.find((v) => {
-                        const attrValue = v.attributes[key];
-                        if (Array.isArray(attrValue)) return attrValue.includes(value);
+                        const attrValue = getAttributeValue(v.attributes, key);
+                        if (attrValue === null || attrValue === undefined) return false;
+                        if (Array.isArray(attrValue)) return attrValue.some((av) => normalizeAttrValue(av) === value);
                         if (typeof attrValue === 'string' && attrValue.includes(',')) {
-                          return attrValue.split(',').map((v) => v.trim()).includes(String(value).trim());
+                          return attrValue.split(',').map((x) => normalizeAttrValue(x.trim())).includes(value);
                         }
-                        return attrValue === value;
+                        return normalizeAttrValue(attrValue) === value;
                       });
                       const isAvailable = (variantWithValue?.stock ?? 0) > 0;
 

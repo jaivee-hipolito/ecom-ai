@@ -38,10 +38,18 @@ export default function ProductAttributes({
     return null;
   }
 
-  // Create a map of attribute definitions for quick lookup
+  // Create a map of attribute definitions for quick lookup (by exact name)
   const attributeMap = new Map(
     categoryAttributes.map((attr) => [attr.name, attr])
   );
+
+  /** Base key for matching: e.g. "Size(inch)" and "Size(cm)" both -> "size" so category updates show correct label/value */
+  const getAttributeBaseKey = (key: string): string => {
+    const k = key.trim();
+    const open = k.indexOf('(');
+    const base = (open !== -1 ? k.slice(0, open) : k).trim();
+    return base.toLowerCase().replace(/\s+/g, '_');
+  };
 
   // Helper function to check if a value is valid (not null, undefined, or empty)
   const isValidValue = (value: any): boolean => {
@@ -61,8 +69,34 @@ export default function ProductAttributes({
     return isValidValue(value);
   });
 
-  // If no valid attributes, don't render the component
-  if (validAttributes.length === 0) {
+  // When category attributes exist, use them as source of truth for labels and match product attrs by base (e.g. Size(inch) -> Size(cm))
+  const specDisplayList: Array<{ label: string; value: any; productKey: string }> =
+    categoryAttributes.length > 0
+      ? categoryAttributes
+          .map((catAttr) => {
+            const base = getAttributeBaseKey(catAttr.name);
+            const productEntry = validAttributes.find(([key]) => getAttributeBaseKey(key) === base);
+            if (!productEntry) return null;
+            const [productKey, value] = productEntry;
+            let displayValue = value;
+            if (typeof value === 'string' && catAttr.name.toLowerCase().includes('(cm)') && /^\d+\s*cm$/i.test(value.trim())) {
+              displayValue = value.trim().replace(/\s*cm$/i, '');
+            }
+            return {
+              label: catAttr.label || catAttr.name,
+              value: displayValue,
+              productKey,
+            };
+          })
+          .filter((x): x is { label: string; value: any; productKey: string } => x != null)
+      : validAttributes.map(([key, value]) => ({
+          label: (attributeMap.get(key)?.label || key).replace(/([A-Z])/g, ' $1').trim(),
+          value,
+          productKey: key,
+        }));
+
+  // If no valid attributes and no spec display list, don't render the component
+  if (validAttributes.length === 0 && specDisplayList.length === 0) {
     return null;
   }
 
@@ -203,26 +237,21 @@ export default function ProductAttributes({
         </motion.p>
       </div>
 
-      {/* Specifications List - Vertical, Left-Aligned */}
+      {/* Specifications List - Vertical, Left-Aligned (uses category labels when available, e.g. Size(cm) after category update) */}
       <div className="space-y-3 mb-8">
-        {validAttributes.map(([key, value], index) => {
-          const attrDef = attributeMap.get(key);
-          const label = attrDef?.label || key.replace(/([A-Z])/g, ' $1').trim();
-
-          return (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + index * 0.05 }}
-              className="text-base leading-relaxed"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-            >
-              <span className="font-bold text-[#1a1a1a]">{label}:</span>
-              <span className="text-[#1a1a1a] ml-1">{formatValueForSpec(key, value)}</span>
-            </motion.div>
-          );
-        })}
+        {specDisplayList.map(({ label, value, productKey }, index) => (
+          <motion.div
+            key={productKey}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + index * 0.05 }}
+            className="text-base leading-relaxed"
+            style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+          >
+            <span className="font-bold text-[#1a1a1a]">{label}:</span>
+            <span className="text-[#1a1a1a] ml-1">{formatValueForSpec(productKey, value)}</span>
+          </motion.div>
+        ))}
       </div>
 
       {/* Important Information Section - Accordion Style */}

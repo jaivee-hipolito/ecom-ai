@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const total = await Product.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
     const products = await Product.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();

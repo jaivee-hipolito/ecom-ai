@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiSearch, 
@@ -60,11 +61,27 @@ export default function ProductTable({
   hiddenFilters = [],
   filtersDefaultHidden = false,
 }: ProductTableProps) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const getFiltersFromUrl = () => ({
+    search: searchParams.get('search') ?? initialFilters?.search ?? '',
+    category: searchParams.get('category') ?? initialFilters?.category ?? '',
+    minPrice: searchParams.get('minPrice') ?? initialFilters?.minPrice ?? '',
+    maxPrice: searchParams.get('maxPrice') ?? initialFilters?.maxPrice ?? '',
+    minStock: searchParams.get('minStock') ?? initialFilters?.minStock ?? '',
+    maxStock: searchParams.get('maxStock') ?? initialFilters?.maxStock ?? '',
+    stockStatus: searchParams.get('stockStatus') ?? initialFilters?.stockStatus ?? '',
+    featured: searchParams.get('featured') ?? initialFilters?.featured ?? '',
+    isFlashSale: searchParams.get('isFlashSale') ?? '',
+  });
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => Math.max(1, parseInt(searchParams.get('page') || '1', 10)));
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [limit] = useState(10);
@@ -91,21 +108,11 @@ export default function ProductTable({
     currentIndex: 0,
   });
 
-  // Filters
-  const [filters, setFilters] = useState({
-    search: initialFilters?.search || '',
-    category: initialFilters?.category || '',
-    minPrice: initialFilters?.minPrice || '',
-    maxPrice: initialFilters?.maxPrice || '',
-    minStock: initialFilters?.minStock || '',
-    maxStock: initialFilters?.maxStock || '',
-    stockStatus: initialFilters?.stockStatus || '',
-    featured: initialFilters?.featured || '',
-    isFlashSale: '',
-  });
+  // Filters: init from URL so they remain when navigating back (e.g. after editing a product)
+  const [filters, setFilters] = useState(getFiltersFromUrl);
 
   // Separate state for search input (for immediate UI updates)
-  const [searchInput, setSearchInput] = useState(initialFilters?.search || '');
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('search') ?? initialFilters?.search ?? '');
 
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -121,6 +128,27 @@ export default function ProductTable({
   useEffect(() => {
     setSearchInput(filters.search);
   }, [filters.search]);
+
+  // Persist filters and page in URL so they remain when navigating away and back (e.g. after editing a product)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.search) params.set('search', filters.search);
+    if (filters.category) params.set('category', filters.category);
+    if (filters.minPrice) params.set('minPrice', filters.minPrice);
+    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
+    if (filters.minStock) params.set('minStock', filters.minStock);
+    if (filters.maxStock) params.set('maxStock', filters.maxStock);
+    if (filters.stockStatus) params.set('stockStatus', filters.stockStatus);
+    if (filters.featured) params.set('featured', filters.featured);
+    if (filters.isFlashSale) params.set('isFlashSale', filters.isFlashSale);
+    if (page > 1) params.set('page', String(page));
+    const newQuery = params.toString();
+    const currentQuery = searchParams.toString();
+    if (newQuery !== currentQuery) {
+      const url = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(url, { scroll: false });
+    }
+  }, [pathname, filters, page, router, searchParams]);
 
   // Cleanup debounce timer on unmount
   useEffect(() => {

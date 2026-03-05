@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/shared/Navbar';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
@@ -15,23 +15,23 @@ import Link from 'next/link';
 
 function ProductDetailContent() {
   const params = useParams();
+  const router = useRouter();
   const productId = params?.id as string;
   const { product, isLoading, error } = useProduct(productId || null);
   const { isAuthenticated, isAdmin, isLoading: authLoading } = useAuth();
 
-  // Debug logging
+  // Logged-in admins should see the admin product page, not the customer one
   useEffect(() => {
-    if (productId) {
-      console.log('ProductDetailPage - Product ID:', productId);
-    } else {
-      console.warn('ProductDetailPage - No product ID found in params');
+    if (authLoading || !productId) return;
+    if (isAdmin) {
+      router.replace(`/admin/products/${productId}`);
     }
-  }, [productId]);
+  }, [authLoading, isAdmin, productId, router]);
 
   const showSidebar = isAuthenticated;
   const Sidebar = isAdmin ? AdminSidebar : DashboardSidebar;
 
-  if (authLoading) {
+  if (authLoading || isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
         {showSidebar && <Sidebar />}
