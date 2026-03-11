@@ -26,6 +26,15 @@ export interface IOrderCoupon {
   discountAmount?: number;
 }
 
+/** One tracking event from carrier (e.g. Canada Post) */
+export interface ITrackingEvent {
+  date: string;       // ISO date or YYYY-MM-DD
+  time?: string;     // HH:mm:ss
+  description: string;
+  location?: string;
+  province?: string;
+}
+
 export interface IOrder {
   _id?: string;
   user: string; // User ID
@@ -40,6 +49,16 @@ export interface IOrder {
   shippingAddress: ShippingAddress;
   paymentMethod: string;
   paymentId?: string;
+  /** Carrier tracking number (e.g. Canada Post PIN) */
+  trackingNumber?: string;
+  /** Carrier name, e.g. "Canada Post" */
+  carrier?: string;
+  /** Last known delivery status from carrier (e.g. "In transit", "Delivered") */
+  trackingStatus?: string;
+  /** When tracking was last fetched from carrier */
+  trackingUpdatedAt?: Date;
+  /** Tracking events from carrier (newest first for display) */
+  trackingEvents?: ITrackingEvent[];
   history?: IOrderHistoryEntry[];
   createdAt?: Date;
   updatedAt?: Date;

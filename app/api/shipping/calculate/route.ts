@@ -4,12 +4,11 @@ import { ShippingAddress } from '@/types/address';
 // Force Node.js runtime
 export const runtime = 'nodejs';
 
-// Store location: Regina Avenue, Victoria, British Columbia, Canada
+// Store location: Regina Avenue, Victoria, BC (free shipping within 15km)
 const STORE_LOCATION = {
-  address: 'Regina Avenue, Victoria, British Columbia, Canada',
-  // Approximate coordinates for Regina Avenue, Victoria, BC
-  lat: 48.4284,
-  lng: -123.3656,
+  address: 'Regina Avenue, Victoria, BC, Canada',
+  lat: 48.428,
+  lng: -123.3645,
 };
 
 /**
@@ -78,20 +77,22 @@ async function geocodeAddress(address: ShippingAddress): Promise<{ lat: number; 
   }
 }
 
-const SHIPPING_BASE_FEE = 3; // Flat fee added to shipping (except Victoria area)
+const SHIPPING_BASE_FEE = 3; // Flat fee added to shipping (except within free radius)
+
+/** Free shipping radius in km from store (Regina Avenue, Victoria, BC) */
+const FREE_SHIPPING_RADIUS_KM = 15;
 
 /**
- * Calculate shipping fee based on distance
- * Pricing structure:
- * - $0 for Victoria area (within 10km) – no base fee
- * - $8 for 10-25km ($5 + $3)
- * - $13 for 25-50km ($10 + $3)
- * - $18 for 50-100km ($15 + $3)
- * - $23 for 100km+ ($20 + $3)
+ * Calculate shipping fee based on distance from Regina Avenue, Victoria, BC.
+ * - $0 within 15km
+ * - $8 for 15–25km
+ * - $13 for 25–50km
+ * - $18 for 50–100km
+ * - $23 for 100km+
  */
 function calculateShippingFee(distanceKm: number): number {
-  if (distanceKm <= 10) {
-    return 0; // Free shipping within Victoria area
+  if (distanceKm <= FREE_SHIPPING_RADIUS_KM) {
+    return 0; // Free shipping within 15km of store
   }
   let base = 0;
   if (distanceKm <= 25) base = 5;
@@ -125,8 +126,7 @@ export async function POST(request: NextRequest) {
     const customerLocation = await geocodeAddress(shippingAddress);
 
     if (!customerLocation) {
-      // Fallback: If geocoding fails, check if it's in Victoria area
-      // If city is Victoria and state is BC, assume free shipping
+      // Fallback: if city is Victoria and state is BC, assume within free radius
       if (
         shippingAddress.city.toLowerCase().includes('victoria') &&
         (shippingAddress.state.toLowerCase().includes('bc') ||
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           distance: 0,
           shippingFee: 0,
-          message: 'Free shipping within Victoria area',
+          message: `Free shipping within ${FREE_SHIPPING_RADIUS_KM}km of Regina Avenue, Victoria`,
         });
       }
 
@@ -166,8 +166,8 @@ export async function POST(request: NextRequest) {
         lat: customerLocation.lat,
         lng: customerLocation.lng,
       },
-      message: distance <= 10 
-        ? 'Free shipping within Victoria area' 
+      message: distance <= FREE_SHIPPING_RADIUS_KM
+        ? `Free shipping within ${FREE_SHIPPING_RADIUS_KM}km of Regina Avenue, Victoria`
         : `Shipping calculated based on ${Math.round(distance * 10) / 10}km distance`,
     });
   } catch (error: any) {

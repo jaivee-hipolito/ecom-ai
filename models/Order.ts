@@ -43,6 +43,16 @@ export interface IOrder extends Document {
   };
   paymentMethod: string;
   paymentId?: string;
+  /** Carrier tracking number (e.g. Canada Post PIN). When set, triggers tracking display and optional sync. */
+  trackingNumber?: string;
+  /** Carrier name, e.g. "Canada Post". */
+  carrier?: string;
+  /** Last known delivery status from carrier. */
+  trackingStatus?: string;
+  /** When tracking was last fetched from carrier. */
+  trackingUpdatedAt?: Date;
+  /** Tracking events from carrier (e.g. Canada Post). */
+  trackingEvents?: Array<{ date: string; time?: string; description: string; location?: string; province?: string }>;
   /** Set when inventory has been deducted for this order (paid). Prevents double deduction. */
   stockDeducted?: boolean;
   /** Set when inventory has been restored for this order (refund/cancel). Prevents double restore. */
@@ -133,6 +143,22 @@ const OrderSchema = new Schema<IOrder>(
     paymentId: {
       type: String,
       default: '',
+    },
+    trackingNumber: { type: String, default: '' },
+    carrier: { type: String, default: 'Canada Post' },
+    trackingStatus: { type: String, default: '' },
+    trackingUpdatedAt: { type: Date, default: null },
+    trackingEvents: {
+      type: [
+        {
+          date: String,
+          time: String,
+          description: String,
+          location: String,
+          province: String,
+        },
+      ],
+      default: undefined,
     },
     stockDeducted: {
       type: Boolean,

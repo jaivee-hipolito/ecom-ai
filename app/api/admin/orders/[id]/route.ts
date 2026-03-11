@@ -6,6 +6,7 @@ import UsedCoupon from '@/models/UsedCoupon';
 import UsedVerificationDiscount from '@/models/UsedVerificationDiscount';
 import { requireAdmin } from '@/lib/auth';
 import { restoreStockForOrder } from '@/lib/orderStock';
+import { getCanadaPostTracking } from '@/lib/canadaPost';
 
 // Force Node.js runtime for MongoDB
 export const runtime = 'nodejs';
@@ -129,7 +130,7 @@ export async function PUT(
 
     const { id: orderId } = await params;
     const body = await request.json();
-    const { status, paymentStatus, comment } = body; // UI sends "comment", we save as "note"
+    const { status, paymentStatus, comment, trackingNumber: bodyTrackingNumber, carrier: bodyCarrier } = body; // UI sends "comment", we save as "note"
 
     if (!orderId) {
       return NextResponse.json(
@@ -149,7 +150,43 @@ export async function PUT(
       );
     }
 
-    if (status && status !== (existingOrder as any).status) {
+    const existing = existingOrder as any;
+    const hasTrackingUpdate = bodyTrackingNumber !== undefined && String(bodyTrackingNumber || '').trim() !== '';
+
+    if (hasTrackingUpdate) {
+      const pin = String(bodyTrackingNumber || '').trim().replace(/\s/g, '');
+      const carrier = (bodyCarrier && String(bodyCarrier).trim()) || 'Canada Post';
+      let trackingStatus = '';
+      let trackingEvents: Array<{ date: string; time?: string; description: string; location?: string; province?: string }> = [];
+      if (carrier.toLowerCase().includes('canada post')) {
+        const result = await getCanadaPostTracking(pin);
+        if (result.error) {
+          trackingStatus = result.error;
+        } else {
+          trackingStatus = result.latestStatus || 'Tracking available';
+          trackingEvents = result.events || [];
+          if (result.delivered && existing.status !== 'delivered') {
+            updateData.status = 'delivered';
+            changes.push({ field: 'status', from: existing.status || 'pending', to: 'delivered' });
+          }
+        }
+      } else {
+        trackingStatus = 'Tracking number added (manual)';
+      }
+      updateData.trackingNumber = pin;
+      updateData.carrier = carrier;
+      updateData.trackingStatus = trackingStatus;
+      updateData.trackingUpdatedAt = new Date();
+      updateData.trackingEvents = trackingEvents;
+      const prevPin = existing.trackingNumber || '';
+      changes.push({ field: 'tracking', from: prevPin || '—', to: pin });
+      if (['pending', 'processing'].includes(existing.status) && !updateData.status) {
+        updateData.status = 'shipped';
+        changes.push({ field: 'status', from: existing.status || 'pending', to: 'shipped' });
+      }
+    }
+
+    if (status && status !== existing.status && !updateData.status) {
       const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
       if (!validStatuses.includes(status)) {
         return NextResponse.json(
@@ -160,12 +197,12 @@ export async function PUT(
       updateData.status = status;
       changes.push({
         field: 'status',
-        from: (existingOrder as any).status || 'pending',
+        from: existing.status || 'pending',
         to: status,
       });
     }
 
-    if (paymentStatus && paymentStatus !== (existingOrder as any).paymentStatus) {
+    if (paymentStatus && paymentStatus !== existing.paymentStatus) {
       const validPaymentStatuses = ['pending', 'paid', 'failed', 'refunded'];
       if (!validPaymentStatuses.includes(paymentStatus)) {
         return NextResponse.json(
@@ -176,7 +213,7 @@ export async function PUT(
       updateData.paymentStatus = paymentStatus;
       changes.push({
         field: 'paymentStatus',
-        from: (existingOrder as any).paymentStatus || 'pending',
+        from: existing.paymentStatus || 'pending',
         to: paymentStatus,
       });
     }
@@ -191,7 +228,7 @@ export async function PUT(
     const commentTrimmed = typeof comment === 'string' ? comment.trim() : '';
     if (!commentTrimmed) {
       return NextResponse.json(
-        { error: 'Comment is required when updating order status' },
+        { error: 'Comment is required when updating order' },
         { status: 400 }
       );
     }
@@ -229,12 +266,12 @@ export async function PUT(
       );
     }
 
-    const wasPaid = (existingOrder as any).paymentStatus === 'paid';
-    const hadStockDeducted = (existingOrder as any).stockDeducted === true || (existingOrder as any).stockDeducted === undefined;
-    const notYetRestored = (existingOrder as any).stockRestored !== true;
+    const wasPaid = existing.paymentStatus === 'paid';
+    const hadStockDeducted = existing.stockDeducted === true || existing.stockDeducted === undefined;
+    const notYetRestored = existing.stockRestored !== true;
     if (wasPaid && hadStockDeducted && notYetRestored && (status === 'cancelled' || paymentStatus === 'refunded')) {
       try {
-        await restoreStockForOrder((existingOrder as any).items || []);
+        await restoreStockForOrder(existing.items || []);
         await Order.updateOne(
           { _id: new mongoose.Types.ObjectId(orderId) },
           { $set: { stockRestored: true } }

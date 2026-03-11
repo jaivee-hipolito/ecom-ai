@@ -32,8 +32,13 @@ yarn-error.log*
 /backups/
 backups/
 
-# scripts - backup/restore and DB tooling (do not push)
+# scripts - backup/restore and DB tooling (do not push - expose DB structure)
 /scripts/
+**/backup*.sh
+**/restore*.sh
+**/dump*.sh
+**/*-backup*
+**/*-restore*
 
 # vercel
 .vercel

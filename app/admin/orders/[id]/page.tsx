@@ -9,8 +9,8 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
-import { Order, IOrderHistoryEntry } from '@/types/order';
-import { FiClock, FiUser } from 'react-icons/fi';
+import { Order, IOrderHistoryEntry, ITrackingEvent } from '@/types/order';
+import { FiClock, FiUser, FiTruck, FiRefreshCw } from 'react-icons/fi';
 import { getSizeAndColorFromAttributes } from '@/lib/orderItemAttributes';
 
 export default function AdminOrderDetailPage() {
@@ -25,6 +25,10 @@ export default function AdminOrderDetailPage() {
   const [status, setStatus] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
   const [comment, setComment] = useState('');
+  const [trackingInput, setTrackingInput] = useState('');
+  const [carrier, setCarrier] = useState('Canada Post');
+  const [refreshTrackingLoading, setRefreshTrackingLoading] = useState(false);
+  const [createLabelLoading, setCreateLabelLoading] = useState(false);
 
   useEffect(() => {
     if (orderId) {
@@ -64,16 +68,22 @@ export default function AdminOrderDetailPage() {
       setError('');
       setSuccessMessage('');
 
+      const payload: Record<string, unknown> = {
+        comment: comment.trim(),
+      };
+      if (status !== order?.status) payload.status = status;
+      if (paymentStatus !== order?.paymentStatus) payload.paymentStatus = paymentStatus;
+      const addingTracking = trackingInput.trim() && !order?.trackingNumber;
+      if (addingTracking) {
+        payload.trackingNumber = trackingInput.trim();
+        payload.carrier = carrier || 'Canada Post';
+      }
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status: status !== order?.status ? status : undefined,
-          paymentStatus: paymentStatus !== order?.paymentStatus ? paymentStatus : undefined,
-          comment: comment.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -85,6 +95,7 @@ export default function AdminOrderDetailPage() {
       setOrder(data.order);
       setSuccessMessage('Order updated successfully!');
       setComment('');
+      if (addingTracking) setTrackingInput('');
 
       setTimeout(() => {
         setSuccessMessage('');
@@ -187,7 +198,9 @@ export default function AdminOrderDetailPage() {
     return null;
   }
 
-  const hasChanges = status !== order.status || paymentStatus !== order.paymentStatus;
+  const hasStatusChanges = status !== order.status || paymentStatus !== order.paymentStatus;
+  const addingTracking = trackingInput.trim().length > 0 && !order.trackingNumber;
+  const hasChanges = hasStatusChanges || addingTracking;
   const canUpdate = hasChanges && comment.trim().length > 0;
 
   return (
@@ -416,6 +429,87 @@ export default function AdminOrderDetailPage() {
                   ]}
                 />
               </div>
+                  {/* Create Canada Post label (one-click) when no tracking yet — domestic Canada only */}
+              {!order.trackingNumber && (() => {
+                const isCanada = (order.shippingAddress?.country || '').toUpperCase() === 'CA' || (order.shippingAddress?.country || '').toLowerCase() === 'canada';
+                return (
+                <div className="p-4 rounded-lg bg-[#FDE8F0]/40 border border-[#F9629F]/30">
+                  <p className="text-sm font-medium text-gray-800 mb-2">Create shipping label</p>
+                  {!isCanada ? (
+                    <p className="text-xs text-amber-700 mb-3">
+                      Label creation is supported for Canadian addresses only. Use “Or add tracking number manually” below for other carriers or international.
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-600 mb-3">
+                      Create a Canada Post label for this order. Tracking will be saved and the order marked as shipped.
+                    </p>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={async () => {
+                      setCreateLabelLoading(true);
+                      setError('');
+                      try {
+                        const res = await fetch(`/api/admin/orders/${orderId}/create-label`, { method: 'POST' });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'Failed to create label');
+                        if (data.labelPdfBase64) {
+                          const blob = new Blob([Uint8Array.from(atob(data.labelPdfBase64), (c) => c.charCodeAt(0))], { type: 'application/pdf' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `label-order-${orderId?.slice(-8)}.pdf`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }
+                        await fetchOrder();
+                        setSuccessMessage('Label created and tracking saved.');
+                        setTimeout(() => setSuccessMessage(''), 4000);
+                      } catch (e: any) {
+                        setError(e.message || 'Failed to create label');
+                      } finally {
+                        setCreateLabelLoading(false);
+                      }
+                    }}
+                    disabled={createLabelLoading || !isCanada}
+                    className="w-full"
+                  >
+                    {createLabelLoading ? 'Creating label…' : 'Create Canada Post label'}
+                  </Button>
+                </div>
+                );
+              })()}
+              {/* Manual tracking number (e.g. other carrier or existing PIN) */}
+              {!order.trackingNumber && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Or add tracking number manually
+                    </label>
+                    <input
+                      type="text"
+                      value={trackingInput}
+                      onChange={(e) => setTrackingInput(e.target.value)}
+                      placeholder="e.g. Canada Post PIN or other carrier"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-[#F9629F] focus:ring-1 focus:ring-[#F9629F]/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Carrier
+                    </label>
+                    <Select
+                      value={carrier}
+                      onChange={(e) => setCarrier(e.target.value)}
+                      options={[
+                        { value: 'Canada Post', label: 'Canada Post' },
+                        { value: 'Other', label: 'Other' },
+                      ]}
+                    />
+                  </div>
+                </>
+              )}
               {hasChanges && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -424,7 +518,7 @@ export default function AdminOrderDetailPage() {
                   <Textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Explain why the status is being changed..."
+                    placeholder={addingTracking ? "e.g. Canada Post label created and shipped." : "Explain why the status is being changed..."}
                     rows={3}
                     required
                     className="border-gray-300 focus:border-[#F9629F] focus:ring-[#F9629F]/20"
@@ -439,11 +533,84 @@ export default function AdminOrderDetailPage() {
                   disabled={!canUpdate}
                   className="w-full"
                 >
-                  Update Order
+                  {addingTracking && !hasStatusChanges ? 'Add tracking' : hasStatusChanges && !addingTracking ? 'Update order' : 'Update order & tracking'}
                 </Button>
               )}
             </div>
           </div>
+
+          {/* Package tracking: display when order has tracking */}
+          {(order.trackingNumber || order.trackingStatus) && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <FiTruck className="w-5 h-5 text-[#F9629F]" />
+                Package tracking
+              </h2>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-600">Carrier</p>
+                  <p className="font-medium text-gray-900">{order.carrier || 'Canada Post'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Tracking number</p>
+                  <p className="font-mono text-sm font-medium text-gray-900 break-all">{order.trackingNumber}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Status</p>
+                  <p className="font-medium text-gray-900">{order.trackingStatus || '—'}</p>
+                </div>
+                {order.trackingUpdatedAt && (
+                  <div>
+                    <p className="text-sm text-gray-600">Last updated</p>
+                    <p className="text-sm text-gray-900">{formatDate(order.trackingUpdatedAt)}</p>
+                  </div>
+                )}
+                {(order.trackingEvents?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Events</p>
+                    <ul className="space-y-2 max-h-48 overflow-y-auto border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                      {([...(order.trackingEvents || [])].reverse() as ITrackingEvent[]).map((ev, i) => (
+                        <li key={i} className="text-sm">
+                          <span className="font-medium text-gray-900">{ev.description}</span>
+                          <span className="text-gray-500 block">
+                            {ev.date}{ev.time ? ` ${ev.time}` : ''}
+                            {(ev.location || ev.province) && ` · ${[ev.location, ev.province].filter(Boolean).join(', ')}`}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {order.carrier?.toLowerCase().includes('canada post') && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      setRefreshTrackingLoading(true);
+                      setError('');
+                      try {
+                        const res = await fetch(`/api/admin/orders/${orderId}/refresh-tracking`, { method: 'POST' });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'Refresh failed');
+                        await fetchOrder();
+                        setSuccessMessage('Tracking refreshed.');
+                        setTimeout(() => setSuccessMessage(''), 3000);
+                      } catch (e: any) {
+                        setError(e.message || 'Failed to refresh tracking');
+                      } finally {
+                        setRefreshTrackingLoading(false);
+                      }
+                    }}
+                    disabled={refreshTrackingLoading}
+                    className="w-full"
+                  >
+                    <FiRefreshCw className={`w-4 h-4 mr-2 inline ${refreshTrackingLoading ? 'animate-spin' : ''}`} />
+                    Refresh from Canada Post
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Order Information */}
           <div className="bg-white rounded-lg shadow p-6">

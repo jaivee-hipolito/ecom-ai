@@ -8,7 +8,7 @@ import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiP
 import Loading from '@/components/ui/Loading';
 import Badge from '@/components/ui/Badge';
 import ProductImage from '@/components/products/ProductImage';
-import { IOrder } from '@/types/order';
+import { IOrder, ITrackingEvent } from '@/types/order';
 import { IProduct } from '@/types/product';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
@@ -207,6 +207,58 @@ export default function OrderDetailPage() {
         >
           <OrderTracking status={order.status} />
         </motion.div>
+
+        {/* Package tracking (carrier + PIN) */}
+        {(order.trackingNumber || order.trackingStatus) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8 bg-white rounded-xl shadow-lg p-6"
+          >
+            <h2 className="text-xl font-bold text-[#1a1a1a] mb-4 flex items-center gap-2">
+              <FiTruck className="w-6 h-6 text-[#FC9BC2]" />
+              Package tracking
+            </h2>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-gray-600">Carrier</p>
+                <p className="font-medium text-[#1a1a1a]">{order.carrier || 'Canada Post'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Tracking number</p>
+                <p className="font-mono text-sm font-medium text-[#1a1a1a] break-all">{order.trackingNumber}</p>
+              </div>
+              {order.trackingStatus && (
+                <div>
+                  <p className="text-sm text-gray-600">Status</p>
+                  <p className="font-medium text-[#1a1a1a]">{order.trackingStatus}</p>
+                </div>
+              )}
+              {order.trackingUpdatedAt && (
+                <p className="text-xs text-gray-500">
+                  Last updated: {formatDate(order.trackingUpdatedAt)}
+                </p>
+              )}
+              {(order.trackingEvents?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Activity</p>
+                  <ul className="space-y-2 max-h-48 overflow-y-auto border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                    {([...(order.trackingEvents || [])].reverse() as ITrackingEvent[]).map((ev, i) => (
+                      <li key={i} className="text-sm">
+                        <span className="font-medium text-[#1a1a1a]">{ev.description}</span>
+                        <span className="text-gray-500 block">
+                          {ev.date}{ev.time ? ` ${ev.time}` : ''}
+                          {(ev.location || ev.province) && ` · ${[ev.location, ev.province].filter(Boolean).join(', ')}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}

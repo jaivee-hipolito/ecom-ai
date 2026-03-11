@@ -312,6 +312,17 @@ export default function DashboardOrdersPage() {
                 })}
               </div>
 
+              {(order.trackingNumber || order.trackingStatus) && (
+                <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <p className="text-sm font-medium text-gray-700">Package tracking</p>
+                  <p className="text-sm text-gray-900 mt-0.5">
+                    {order.carrier || 'Canada Post'} · {order.trackingNumber}
+                  </p>
+                  {order.trackingStatus && (
+                    <p className="text-sm text-gray-600 mt-0.5">{order.trackingStatus}</p>
+                  )}
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-200">
                 <div className="mb-4 sm:mb-0">
                   <p className="text-sm text-gray-600">Shipping Address:</p>
